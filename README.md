@@ -8,7 +8,7 @@ A comprehensive student portal system for managing assignments, submissions, and
 - **Backend:** Node.js + Express (Port 5000)
 - **Flask API:** Python Flask for Google Docs processing (Port 5001)
 - **Database:** PostgreSQL with Prisma ORM
-- **Authentication:** GitHub OAuth
+- **Authentication:** GitHub OAuth  --CURRENTLY NOT WORKING IN PRODUCTION
 
 ## 🛠️ Prerequisites
 
@@ -32,11 +32,8 @@ cd Student_Portal-CLEAN
 
 ```bash
 # Install PostgreSQL and create database
-createdb autograder
+createdb student_portal
 
-# Or use Docker:
-docker run --name postgres-dev -e POSTGRES_PASSWORD=1234 -e POSTGRES_DB=autograder -p 5433:5432 -d postgres
-```
 
 ### 3. Backend Setup (Node.js)
 
@@ -50,7 +47,7 @@ cp .env.example .env
 
 **Edit `server/.env`:**
 ```bash
-DATABASE_URL="postgresql://postgres:1234@localhost:5433/autograder?schema=public"
+DATABASE_URL="postgresql://postgres:1234@localhost:5433/student_portal?schema=public"
 PORT=5000
 SESSION_SECRET="your-32-character-random-string-here"
 GITHUB_CLIENT_ID="your-github-oauth-client-id"
@@ -60,7 +57,7 @@ GITHUB_CLIENT_SECRET="your-github-oauth-client-secret"
 **Run database migrations:**
 ```bash
 npx prisma generate
-npx prisma db push
+npx prisma migrate dev --name init
 ```
 
 ### 4. Frontend Setup (React)
@@ -96,7 +93,7 @@ FLASK_DEBUG=True
 GOOGLE_SCOPES=https://www.googleapis.com/auth/documents.readonly
 ```
 
-### 6. GitHub OAuth Setup
+### 6. GitHub OAuth Setup --CURRENTLY NOT WORKING IN PRODUCTION
 
 1. Go to GitHub → Settings → Developer settings → OAuth Apps
 2. Create new OAuth App with:
@@ -146,11 +143,9 @@ sudo systemctl enable postgresql
 sudo -u postgres psql
 CREATE USER postgres WITH PASSWORD '1234';
 CREATE DATABASE autograder OWNER postgres;
-GRANT ALL PRIVILEGES ON DATABASE autograder TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE student_portal TO postgres;
 \q
 
-# Option 2: Use Docker for PostgreSQL
-docker run --name postgres-dev -e POSTGRES_PASSWORD=1234 -e POSTGRES_DB=autograder -p 5433:5432 -d postgres:13
 
 ## On linux, run ./start.sh and windows start.bat
 
@@ -235,7 +230,7 @@ curl http://localhost:5001/test
 ### Recommended Deployment Stack:
 - **Frontend:** Netlify
 - **Backend:** Railway
-- **Flask API:** Render
+- **Flask API:** Railway
 - **Database:** Railway PostgreSQL
 
 ### Environment Setup for Production:
@@ -254,14 +249,6 @@ curl http://localhost:5001/test
 
 ## 🛠️ Common Issues
 
-### Database Connection Failed
-```bash
-# Check PostgreSQL is running:
-pg_isready -h localhost -p 5433
-
-# Reset database:
-npx prisma db reset
-```
 
 ### GitHub OAuth Not Working
 - Check callback URL matches GitHub app settings
@@ -295,14 +282,3 @@ npx prisma db reset
 - `POST /check-doc` - Verify Google Doc completion
 - `GET /check-doc-title` - Validate document title
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
