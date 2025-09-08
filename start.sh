@@ -19,9 +19,6 @@ check_port() {
     fi
 }
 
-# Start PostgreSQL (if using Docker)
-echo "📊 Starting PostgreSQL database..."
-docker start postgres-dev 2>/dev/null || echo "PostgreSQL already running or not using Docker"
 
 # Check ports
 check_port 5000 || echo "Backend port 5000 in use"
@@ -31,13 +28,14 @@ check_port 5001 || echo "Flask API port 5001 in use"
 # Start Node.js Backend
 echo "🌐 Starting Node.js backend server..."
 cd server
-npm run dev &
+npx nodemon app.js &
 BACKEND_PID=$!
 cd ..
 
 # Wait for backend to start
 sleep 3
 
+echo "-----------------------------------------"
 # Start React Frontend  
 echo "⚛️ Starting React frontend..."
 cd client
@@ -46,15 +44,34 @@ FRONTEND_PID=$!
 cd ..
 
 # Wait for frontend to start
-sleep 3
+sleep 5
 
+echo "-----------------------------------------"
 # Start Flask API
 echo "🐍 Starting Flask API..."
 cd scripts/google-docs
-python docs_api.py &
+
+# Create virtual environment if it doesn't exist
+if [ ! -d "venv" ]; then
+    python3 -m venv venv
+fi
+
+# Activate virtual environment
+source venv/bin/activate
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+#start Flask API
+python3 docs_api.py &
 FLASK_PID=$!
+
+# Deactivate virtual environment and return to root
+deactivate
 cd ../..
 
+echo "-----------------------------------------"
 echo
 echo "✅ All services are starting up!"
 echo

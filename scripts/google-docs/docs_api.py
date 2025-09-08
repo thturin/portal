@@ -7,32 +7,32 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import os
 from dotenv import load_dotenv
+load_dotenv(dotenv_path='../../server/.env')
 
-# Load environment variables
-load_dotenv()
+
 
 app = Flask(__name__)
 
 
 #initial issue was stack trace is not showing in railyway log
 # configure logging to stdout so Gunicorn / Railway capture it
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s %(message)s",
-    stream=sys.stdout,
-)
-app.logger.setLevel(logging.INFO)
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format="%(asctime)s %(levelname)s %(name)s %(message)s",
+#     stream=sys.stdout,
+# )
+# app.logger.setLevel(logging.INFO)
 
 
 # Environment variables
 #SERVICE_ACCOUNT_FILE = os.getenv('SERVICE_ACCOUNT_FILE', '../../credentials/doc_reader_service_account.json')
+
+#production contains google_scopes
 GOOGLE_SCOPES = os.getenv('GOOGLE_SCOPES')
 if GOOGLE_SCOPES:
     GOOGLE_SCOPES = [scope.strip() for scope in GOOGLE_SCOPES.split(',')]
-else:
+else: 
     GOOGLE_SCOPES = ['https://www.googleapis.com/auth/documents.readonly']
-
-#print("Looking for service account file at:", os.path.abspath(SERVICE_ACCOUNT_FILE))
 
 #GOOGLE_SERVICE_ACCOUNT_JSON -> VARIABLE ON RAILWAY
 #SERVICE_ACCOUNT_JSON -> LOCAL ENVIRONMENT VARIABLE
@@ -50,11 +50,11 @@ def get_google_credentials():
             raise
     else:
         print("Using google crednetials from file (development)")
-        SERVICE_ACCOUNT_FILE=os.getenv('SERVICE_ACCOUNT_FILE')
-        if not os.path.exists(SERVICE_ACCOUNT_FILE):
-            raise FileNotFoundError(f"Service account file not found: {SERVICE_ACCOUNT_FILE}")
+        GOOGLE_SERVICE_ACCOUNT_FILE=os.getenv('GOOGLE_SERVICE_ACCOUNT_FILE')
+        if not os.path.exists(GOOGLE_SERVICE_ACCOUNT_FILE):
+            raise FileNotFoundError(f"Service account file not found: {GOOGLE_SERVICE_ACCOUNT_FILE}")
         return service_account.Credentials.from_service_account_file(
-            SERVICE_ACCOUNT_FILE,
+            GOOGLE_SERVICE_ACCOUNT_FILE,
             scopes=GOOGLE_SCOPES
         )
             
@@ -92,7 +92,7 @@ def extract_text(element):
 def check_doc_title():
     try:
         print("in check_doc_title()")
-        app.logger.exception("in the try of check-doc-title")
+        #app.logger.exception("in the try of check-doc-title")
         document_id = request.args.get('documentId')
         assignment_name = request.args.get('assignmentName')
 
@@ -100,6 +100,7 @@ def check_doc_title():
             return jsonify({'error': 'Document ID and assignment name are required'}), 400
 
         docs_service = get_docs_service()
+        print('get_docs_service() was successful')
         doc = docs_service.documents().get(documentId=document_id).execute()
         doc_title = doc.get('title', '')
         
@@ -115,7 +116,7 @@ def check_doc_title():
             'isCorrectDoc': is_correct_doc
         })
     except Exception as e:
-        app.logger.exception("exception in check-doc-title")
+        #app.logger.exception("exception in check-doc-title")
         print("exception in /check-doc-titl:",traceback.format_exc())
         return jsonify({'error': str(e)}), 500
     
@@ -216,4 +217,5 @@ if os.getenv('FLASK_ENV')=='development':
             port=port,
             host='0.0.0.0'  # Allow external connections for deployment
         )
+
 
