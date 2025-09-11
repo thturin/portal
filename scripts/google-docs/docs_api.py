@@ -90,6 +90,7 @@ def extract_text(element):
 
 @app.route('/check-doc-title', methods=['GET'])
 def check_doc_title():
+    print('hello hello do we even get to here???')
     try:
         print("in check_doc_title()")
         #app.logger.exception("in the try of check-doc-title")
