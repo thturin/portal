@@ -13,6 +13,7 @@ router.get('/check-doc-title', async(req,res)=>{
             }
         
             //call python flask API
+            console.log(`PYTHON ROUTES -->>>${process.env.FLASK_API_URL}/check-doc-title?documentId=${documentId}&assignmentName=${assignmentName}`);
             const response = await fetch (`${process.env.FLASK_API_URL}/check-doc-title?documentId=${documentId}&assignmentName=${assignmentName}`,{
                 method:'GET',
                 headers: {

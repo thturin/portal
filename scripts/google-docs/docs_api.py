@@ -143,7 +143,8 @@ def check_document():
         # Define placeholders
         placeholders = [
             "[Your Answer Here]",
-            "[Enter your response]", 
+            "[Enter your response]",
+            "[enter your response]", 
             "[Paste your code here]",
             "[Your Name Here]",
         ]

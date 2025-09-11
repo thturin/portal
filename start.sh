@@ -27,10 +27,11 @@ check_port 5001 || echo "Flask API port 5001 in use"
 
 # Start Node.js Backend
 echo "🌐 Starting Node.js backend server..."
-cd server
-npx nodemon app.js &
+(
+    cd server
+    npx nodemon app.js 
+)&
 BACKEND_PID=$!
-cd ..
 
 # Wait for backend to start
 sleep 3
@@ -38,10 +39,11 @@ sleep 3
 echo "-----------------------------------------"
 # Start React Frontend  
 echo "⚛️ Starting React frontend..."
-cd client
-npm start &
+(
+    cd client
+    npm start
+)&
 FRONTEND_PID=$!
-cd ..
 
 # Wait for frontend to start
 sleep 5
@@ -49,22 +51,24 @@ sleep 5
 echo "-----------------------------------------"
 # Start Flask API
 echo "🐍 Starting Flask API..."
-cd scripts/google-docs
+(
+    cd scripts/google-docs
 
-# Create virtual environment if it doesn't exist
-if [ ! -d "venv" ]; then
-    python3 -m venv venv
-fi
+    # Create virtual environment if it doesn't exist
+    if [ ! -d "venv" ]; then
+        python3 -m venv venv
+    fi
 
-# Activate virtual environment
-source venv/bin/activate
+    # Activate virtual environment
+    source venv/bin/activate
 
-# Install dependencies
-pip install --upgrade pip
-pip install -r requirements.txt
+    # Install dependencies
+    pip install --upgrade pip
+    pip install -r requirements.txt
 
-#start Flask API
-python3 docs_api.py &
+    #start Flask API
+    python3 docs_api.py
+)&
 FLASK_PID=$!
 
 # Deactivate virtual environment and return to root
