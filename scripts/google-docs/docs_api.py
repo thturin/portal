@@ -14,14 +14,14 @@ load_dotenv(dotenv_path='../../server/.env')
 app = Flask(__name__)
 
 
-#initial issue was stack trace is not showing in railyway log
+# initial issue was stack trace is not showing in railyway log
 # configure logging to stdout so Gunicorn / Railway capture it
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format="%(asctime)s %(levelname)s %(name)s %(message)s",
-#     stream=sys.stdout,
-# )
-# app.logger.setLevel(logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    stream=sys.stdout,
+)
+app.logger.setLevel(logging.INFO)
 
 
 # Environment variables
@@ -91,6 +91,7 @@ def extract_text(element):
 @app.route('/check-doc-title', methods=['GET'])
 def check_doc_title():
     print('hello hello do we even get to here???')
+    app.logger.exception("hello are we even getting here?")
     try:
         print("in check_doc_title()")
         #app.logger.exception("in the try of check-doc-title")
