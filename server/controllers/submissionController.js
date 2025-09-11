@@ -123,6 +123,7 @@ const scoreSubmission = async (url, path, assignmentTitle, submissionType,submit
 
                 //CALL PYTHON ROUTE /CHECK-DOC-TITLE 
                 try{
+                    console.log(`LOOK HERE--->${process.env.SERVER_URL}/python/check-doc-title?documentId=${documentId}&assignmentName=${encodeURIComponent(assignmentTitle)}`);
                     const titleResponse = await axios.get(`${process.env.SERVER_URL}/python/check-doc-title?documentId=${documentId}&assignmentName=${encodeURIComponent(assignmentTitle)}`);
                     const {isCorrectDoc, docTitle} = titleResponse.data;
                     if(!isCorrectDoc){

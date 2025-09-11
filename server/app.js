@@ -178,6 +178,7 @@ app.get('/health-debug', (req, res) => {
             status: 'Railway Backend Running',
             environment: {
                 CLIENT_URL: process.env.CLIENT_URL,
+                SERVER_url: process.env.SERVER_URL,
                 NODE_ENV: process.env.NODE_ENV,
                 PORT: process.env.PORT,
                 SESSION_SECRET: process.env.SESSION_SECRET ? 'SET' : 'MISSING',
