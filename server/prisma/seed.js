@@ -1,5 +1,8 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const {parse }= require('csv-parse/sync');
+const fs = require('fs');
+const path = require('path');
 
 async function main() {
   console.log('🗑️ Cleaning database...');
@@ -17,24 +20,11 @@ async function main() {
   // Create 2 sections
   const section1 = await prisma.section.create({
     data: {
-      name: 'AP Comp A 81',
-      sectionId: '81'
+      name: 'AP Computer Science A 89',
+      sectionId: '89'
     }
   });
   
-  const section2 = await prisma.section.create({
-    data: {
-      name: 'AP Comp A 83', 
-      sectionId: '83'
-    }
-  });
-
-  const section3 = await prisma.section.create({
-    data: {
-      name: 'DE 63', 
-      sectionId: '63'
-    }
-  });
   
   console.log('✅ Sections created');
   
@@ -43,7 +33,8 @@ async function main() {
     data: {
       schoolId: null,
       email: 'tatiana.turin@gmail.com',
-      name: 'Admin TTEST',
+      username: 'ad',
+      name: 'Admin TEST',
       role: 'admin',
       githubUsername: null,
       githubId: null,
@@ -51,21 +42,58 @@ async function main() {
       password: '123'
     }
   });
-  
-  // Create student user
+
+  // Create student test user
   const studentUser = await prisma.user.create({
     data: {
-      schoolId: '87654321',
-      email: 'tturin@schools.nyc.gov', 
+      schoolId: null,
+      email: '',
+      username: 'stud',
       name: 'Student TEST',
       role: 'student',
       githubUsername: null,
       githubId: null,
-      sectionId: section1.id, // Assign to Period 1
+      sectionId: null, // Admin doesn't belong to a section
       password: '123'
     }
   });
   
+  console.log('✅ Admin created');
+
+  //read csv file 
+  const csvPath = path.resolve('/home/tatiana-turin/Documents/APCSA/classroom_roster.csv');
+  const csvData = fs.readFileSync(csvPath, 'utf8');
+  const records = parse(csvData,{
+    columns:true,
+    skip_empty_lines:true,
+    trim: true
+  });
+
+  for(const row of records){
+    const rawName = row.name.replace(/"/g, '');
+    let name = rawName;
+    let first; let last;
+    if(rawName.includes(',')){
+       [last,first] = rawName.split(',').map(s=> s.trim());
+      name = `${first} ${last}`;
+      console.log();
+    }
+
+    await prisma.user.create({
+      data:{
+        firstName:first,
+        lastName:last,
+        name,
+        username:row.username,
+        password:row.password,
+        githubUsername:row.github_username || null,
+        githubId: row.github_id? row.github_id.toString() : null,
+        role: 'student',
+        sectionId: section1.id
+  
+      }
+    });
+  }
   console.log('✅ Users created');
 
 }

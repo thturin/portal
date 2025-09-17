@@ -26,7 +26,7 @@ router.get('/check-doc-title', async(req,res)=>{
             const data = await response.json();
             res.json(data); //respond with data 
     }catch(err){
-            console.error('Error calling python docs title API', err.message);
+            console.error('Error calling python docs title API [PYTHON ROUTES]', err.message);
             res.status(500).json({
                 error: 'Failed to check document title'
             })

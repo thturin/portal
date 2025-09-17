@@ -16,15 +16,19 @@ datasource db {
 model User{
   id              Int           @id @default(autoincrement())
   schoolId        String?       @unique
-  email           String        @unique
-  name            String
+  email           String?       @unique
+  username        String?       @unique
+  password        String?  
+  firstName       String?
+  lastName        String?
+  name            String?
   githubId        String?       @unique
   githubUsername  String?       @unique
   submission      Submission[]
   role            String 
   sectionId       Int?
   section         Section? @relation("SectionStudents", fields: [sectionId], references: [id])
-  password        String?       
+       
 }
 
 model Submission {
