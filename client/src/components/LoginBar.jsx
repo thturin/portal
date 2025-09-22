@@ -30,8 +30,8 @@ const LoginBar = ({onLogin}) =>{
     const handleGithubLogin= async (e)=>{
         e.preventDefault(); //I think this was the problem of http://localhost:5000/api/auth/me not authorizing???
         setError('');
-        if(!email){
-            setError('Please enter your email');
+        if(!userName){
+            setError('Please enter your username');
             return;
         }
 
@@ -41,11 +41,11 @@ const LoginBar = ({onLogin}) =>{
         }else{
             ///check password
             try{
-                const res = await axios.post(process.env.REACT_APP_API_URL+'/login', {email, password});
+                const res = await axios.post(process.env.REACT_APP_API_URL+'/login', {email, userName, password});
                 if(res.data && res.data.user){
                     //basic login 
                     onLogin(res.data.user);
-                    setUserName(res.data.user.name);
+                    //setUserName(res.data.user.name);
                     setSuccess(true);
                     //if login is successful... there exists a response and a user found in db
                     //PASS THE EMAIL AS A STATE PARAM VIA URL TO PASSPORT STRATEGY      
@@ -96,10 +96,10 @@ const LoginBar = ({onLogin}) =>{
                     Student Portal Login
                 </h2>
                 <input 
-                    type="email"
-                    placeholder="yourname@nycstudents.net"
-                    value={email}
-                    onChange={e => setEmail(e.target.value.trim())} //change useState of email
+                    type="username"
+                    placeholder="your username"
+                    value={userName}
+                    onChange={e => setUserName(e.target.value.trim())} //change useState of email
                     required
                     style={{
                         padding: '0.75rem 1rem',
