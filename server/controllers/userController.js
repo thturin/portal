@@ -32,7 +32,7 @@ const getAllUsers = async(req,res) =>{
 }
 
 const loginUser = async (req, res)=>{
-    const {email, userName, password} = req.body;
+    const {userName, password} = req.body;
     const user = await prisma.user.findUnique({where: {username:userName}});
     if(user && user.password === password){
         res.json({user}); //send the user back to api 

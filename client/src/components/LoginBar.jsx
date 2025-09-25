@@ -41,7 +41,7 @@ const LoginBar = ({onLogin}) =>{
         }else{
             ///check password
             try{
-                const res = await axios.post(process.env.REACT_APP_API_URL+'/login', {email, userName, password});
+                const res = await axios.post(process.env.REACT_APP_API_URL+'/login', { userName, password});
                 if(res.data && res.data.user){
                     //basic login 
                     onLogin(res.data.user);
