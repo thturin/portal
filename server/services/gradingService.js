@@ -38,6 +38,12 @@ async function gradeJavaSubmission(clonePath){
             console.log('=== GRADLE EXECUTION COMPLETE ===');           
             if (err) {
                 console.error('Not all test cases passed or there was a system error');
+                const testResultsDir = path.join(clonePath, 'build', 'test-results', 'test');
+                if (fs.existsSync(testResultsDir)) {
+                console.log('Test results directory contents:', fs.readdirSync(testResultsDir));
+                } else {
+                console.log('Test results directory does not exist:', testResultsDir);
+                }
 
                 //if you want to print the error message uncomment below
                 //console.error(err.message);
