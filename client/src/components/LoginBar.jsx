@@ -3,7 +3,7 @@ import { useState } from 'react';
 axios.defaults.withCredentials = true;
 
 const LoginBar = ({onLogin}) =>{
-    const [email, setEmail] = useState('');
+    //const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     //the states below are needed to track the logged in user and render it in the parent component via onLogin
     const [success, setSuccess] = useState(false);
