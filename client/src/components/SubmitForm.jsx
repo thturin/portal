@@ -115,14 +115,8 @@ const SubmitForm = ({onNewSubmission, user, submissions})=>{
                     const verifyRes = await axios.post(`${apiUrl}/verify-github-ownership`,{
                         url:url,
                         githubUsername: user.githubUsername
-                    });
-
-                    if(!verifyRes.data.success){
-                        setVerificationFeedback(verifyRes.data.output);
-                        return;
-                    }else{
-                        setVerificationFeedback(verifyRes.data.output);
-                    }
+                    });            
+                    setVerificationFeedback(verifyRes.data.output);
                 }catch(err){
                     console.error('/verify-github-ownership failure', err);
                     setError('Failed to verify github user')

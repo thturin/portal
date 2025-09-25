@@ -32,22 +32,28 @@ const verifyGithubOwnership = async (req, res)=>{
                 output: '❌ No GitHub account linked. Please link your GitHub account first.'
             });
         } // Extract username from GitHub URL
-        const githubUrlPattern = /github\.com\/([^\/]+)/;
-        const match = url.match(githubUrlPattern);
-        
-        if(!match){ //could not find a username in the url
+
+        //https://github.com/APCSA-Turin/u1p1-calculator-thturin
+        const repoNameMatch = url.match(/github\.com\/APCSA-Turin\/([^\/]+)/);
+        if(!repoNameMatch){
             return res.status(400).json({
                 success:false,
-                output: '❌ Invalid GitHub URL format'
+                output:"'❌ You do not belong to the github classroom APCSA-Turin'"
             });
         }
-        const urlUsername = match[1];
+        
+        const repoName = repoNameMatch[1]; // e.g., 'u1p1-calculator-thturin'
+        console.log(repoName);
+        // Extract GitHub username from repo name (after last '-')
+        const repoParts = repoName.split('-');
+        const urlUsername = repoParts[repoParts.length - 1]; // e.g., 'thturin'
         const isOwner = githubUsername.toLowerCase() === urlUsername.toLowerCase();
-        res.json({
+        return res.json({
             success:isOwner,
-            output: isOwner? `✅ You are the owner of this repository (${urlUsername})` : 
-                `❌ Repository belongs to ${urlUsername}, but you are ${githubUsername}`
-        });
+            output:  isOwner ? `✅ You are the owner of this repository (${urlUsername})`
+        : `❌ Repository belongs to ${urlUsername}, but you are ${githubUsername}`
+        })
+   
     }catch(err){
         console.error('Error verifying github username',err);
         res.status(500).json({
@@ -176,18 +182,24 @@ const scoreSubmission = async (url, path, assignmentTitle, submissionType,submit
                 try{
                     ///DETEREMINE IF TITLE IN GITHUB URL MATCHES ASSIGNMENT NAME 
                     //Example : U1T1-printlnVsPrint --> [U1T1]
-                    const assignmentPrefix = assignmentTitle ? assignmentTitle.substring(0, 4) : '';
+                    console.log('LOOK HERE',assignmentTitle);
+                    //assignmentPrefix === U1P1 or U10P40
+                    const assignmentPrefixMatch = assignmentTitle.match(/U\d+P\d+/);
+                    const assignmentPrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
+                    //const assignmentPrefix = assignmentTitle ? assignmentTitle.substring(0, 4) : '';
                     if(assignmentPrefix ===''){
                         return {
                             score:0,
-                            output: `❌ Repository name  does not match assignment`
+                            output: `❌ Assignment Prefix is empty `
                         }; 
                     } 
                     const urlParts = url.split('/');
-                    if(!urlParts[urlParts.length-1].includes(assignmentPrefix)){
+                    const repoNameLower = urlParts[urlParts.length-1].toLowerCase();
+                    const assignmentNameLower = assignmentPrefix.toLowerCase();
+                    if(!repoNameLower.includes(assignmentNameLower)){
                         return {
                             score:0,
-                            output: `❌ Repository name ${urlParts[urlParts.length-1]} does not match assignment prefix ${assignmentPrefix}`
+                            output: `❌ Repository name ${repoNameLower} does not match assignment prefix ${assignmentPrefixLower}`
                         };
                     }
                     await cloneRepo(url,path); //returns a promise since cloneRepo is async function
