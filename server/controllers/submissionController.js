@@ -46,13 +46,15 @@ const verifyGithubOwnership = async (req, res)=>{
         console.log(repoName);
         // Extract GitHub username from repo name (after last '-')
         const repoParts = repoName.split('-');
-        const urlUsername = repoParts[repoParts.length - 1]; // e.g., 'thturin'
+        let urlUsername = repoParts[repoParts.length - 1]; // e.g., 'thturin.git'
+        urlUsername = urlUsername.includes('.git') ? urlUsername.substring(0,urlUsername.length-4) : urlUsername;
+        console.log(urlUsername);
         const isOwner = githubUsername.toLowerCase() === urlUsername.toLowerCase();
         return res.json({
             success:isOwner,
             output:  isOwner ? `✅ You are the owner of this repository (${urlUsername})`
         : `❌ Repository belongs to ${urlUsername}, but you are ${githubUsername}`
-        })
+        });
    
     }catch(err){
         console.error('Error verifying github username',err);
@@ -90,27 +92,27 @@ const verifyDocOwnership = async (req,res)=>{
 // | 6+ days late  | -25% max (hard cap) |
 // | 14+ days late | Please see me       |
 
-    const calculateLateScore = (submissionDate, dueDateString, score)=>{
-        //const submissionDate = parseISO(submissionDateString);
-        const dueDate = parseISO(dueDateString);
-        const diffTime = submissionDate-dueDate;
-        const diffDays = Math.ceil(diffTime/(1000*60*60*24)); 
-        if (diffDays > 0 && score!==0){ //if submission is late and not a 0 
-            //1 day late 
-            if(diffDays===1){
-                return score * .9;
-            }else if(diffDays>=2 && diffDays<=3){
-                return score * .85
-            }else if(diffDays>=4 && diffDays<=5){
-                return score * .8;
-            }else if(diffDays>5){
-                return score * .75;
-            }
-        }else{ // negative difference, submission is on time/early
-            //this will return on time 100% and submissions that are 0's 
-            return score;
-        } 
-    };
+const calculateLateScore = (submissionDate, dueDateString, score)=>{
+    //const submissionDate = parseISO(submissionDateString);
+    const dueDate = parseISO(dueDateString);
+    const diffTime = submissionDate-dueDate;
+    const diffDays = Math.ceil(diffTime/(1000*60*60*24)); 
+    if (diffDays > 0 && score!==0){ //if submission is late and not a 0 
+        //1 day late 
+        if(diffDays===1){
+            return score * .9;
+        }else if(diffDays>=2 && diffDays<=3){
+            return score * .85
+        }else if(diffDays>=4 && diffDays<=5){
+            return score * .8;
+        }else if(diffDays>5){
+            return score * .75;
+        }
+    }else{ // negative difference, submission is on time/early
+        //this will return on time 100% and submissions that are 0's 
+        return score;
+    } 
+};
 
 const scoreSubmission = async (url, path, assignmentTitle, submissionType,submittedAt,dueDate)=>{ //clone student's repo pasted into submission portal
         //confirm that both the submission type and url verify that it is a googledoc
@@ -186,7 +188,6 @@ const scoreSubmission = async (url, path, assignmentTitle, submissionType,submit
                     //assignmentPrefix === U1P1 or U10P40
                     const assignmentPrefixMatch = assignmentTitle.match(/U\d+P\d+/);
                     const assignmentPrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
-                    //const assignmentPrefix = assignmentTitle ? assignmentTitle.substring(0, 4) : '';
                     if(assignmentPrefix ===''){
                         return {
                             score:0,

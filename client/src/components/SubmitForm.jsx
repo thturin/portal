@@ -117,6 +117,7 @@ const SubmitForm = ({onNewSubmission, user, submissions})=>{
                         githubUsername: user.githubUsername
                     });            
                     setVerificationFeedback(verifyRes.data.output);
+                    if(!verifyRes.data.success) return; //if promise is successfull but verification failed, return
                 }catch(err){
                     console.error('/verify-github-ownership failure', err);
                     setError('Failed to verify github user')
