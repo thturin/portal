@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 const axios = require('axios');
 require('dotenv').config();
 
-
+let assignmentPrefix;
 
 const verifyGithubOwnership = async (req, res)=>{
     try{
@@ -43,10 +43,16 @@ const verifyGithubOwnership = async (req, res)=>{
         }
         
         const repoName = repoNameMatch[1]; // e.g., 'u1p1-calculator-thturin'
-        console.log(repoName);
-        // Extract GitHub username from repo name (after last '-')
-        const repoParts = repoName.split('-');
-        let urlUsername = repoParts[repoParts.length - 1]; // e.g., 'thturin.git'
+        // console.log(repoName);
+        // // Extract GitHub username from repo name (after last '-')
+        // const repoParts = repoName.split('-');
+        //if username contains '-'... find prefix first u1p1-calculator
+        const assignmentPrefixMatch = repoName.match(/u\d+p\d+/i); //case insensitive
+        assignmentPrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
+        const titleAfterPrefix = repoName.substring(assignmentPrefix.length+1); //calculator-thturin.git
+        let urlUsername = titleAfterPrefix.split('-'); //[calculator,thturin.git]
+        urlUsername.shift(); //remove first item (calculator)
+        urlUsername = urlUsername.join('-');
         urlUsername = urlUsername.includes('.git') ? urlUsername.substring(0,urlUsername.length-4) : urlUsername;
         console.log(urlUsername);
         const isOwner = githubUsername.toLowerCase() === urlUsername.toLowerCase();
@@ -184,23 +190,18 @@ const scoreSubmission = async (url, path, assignmentTitle, submissionType,submit
                 try{
                     ///DETEREMINE IF TITLE IN GITHUB URL MATCHES ASSIGNMENT NAME 
                     //Example : U1T1-printlnVsPrint --> [U1T1]
-                    console.log('LOOK HERE',assignmentTitle);
-                    //assignmentPrefix === U1P1 or U10P40
-                    const assignmentPrefixMatch = assignmentTitle.match(/U\d+P\d+/);
-                    const assignmentPrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
+                    const assignmentPrefixMatch = assignmentTitle.match(/u\d+p\d+/i);
+                    const assignmentTitlePrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
                     if(assignmentPrefix ===''){
                         return {
                             score:0,
                             output: `❌ Assignment Prefix is empty `
                         }; 
                     } 
-                    const urlParts = url.split('/');
-                    const repoNameLower = urlParts[urlParts.length-1].toLowerCase();
-                    const assignmentNameLower = assignmentPrefix.toLowerCase();
-                    if(!repoNameLower.includes(assignmentNameLower)){
+                    if(assignmentPrefix.toLowerCase()!==assignmentTitlePrefix.toLowerCase()){
                         return {
                             score:0,
-                            output: `❌ Repository name ${repoNameLower} does not match assignment prefix ${assignmentPrefixLower}`
+                            output: `❌ Repository name prefix ${assignmentTitlePrefix} does not match assignment prefix ${assignmentPrefix}`
                         };
                     }
                     await cloneRepo(url,path); //returns a promise since cloneRepo is async function
