@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import AdminDashboard from './components/AdminDashboard.jsx';
 import LoginBar from './components/LoginBar.jsx';
-import LogoutButton from './components/LogoutButton';
 import UserDashboard from './components/UserDashboard.jsx';
 
 function App() {
@@ -40,17 +39,14 @@ function App() {
   
   return (
     <div className="App">
-      <h1>🗳️SUBMISSION PORTAL🗳️</h1>
+      <h1>🗳️ASSIGNMENT CENTER🗳️</h1>
       {user && <h2>{user.section?.name}</h2>}
-
-      {user && <LogoutButton onLogout ={handleLogout}/>}
 
       {!user && (
         <div>
           <h2>LOG IN</h2>
           <LoginBar onLogin={handleLogin} />
         </div>
-
       )}
 
       {user && user.role ==='student' && (

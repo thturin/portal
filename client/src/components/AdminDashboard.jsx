@@ -2,7 +2,6 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import CreateAssignmentForm from './CreateAssignment';
 import EditAssignmentForm from './EditAssignment';
-import LogoutButton from './LogoutButton';
 
 const AdminDashboard = ({user, onLogout}) =>{
     const [assignments, setAssignments] = useState([]);
