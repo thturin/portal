@@ -20,6 +20,7 @@ async function gradeJavaSubmission(clonePath){
             : 
             'gradle test';
         console.log('Running command:', gradleCommand);
+
         
         // Set a shorter timeout for debugging
         const timeoutId = setTimeout(() => {
