@@ -43,23 +43,26 @@ const verifyGithubOwnership = async (req, res)=>{
         }
         
         const repoName = repoNameMatch[1]; // e.g., 'u1p1-calculator-thturin'
+        //https://github.com/APCSA-Turin/u1t6-programming-challenge-calculator-thturin.git
         // console.log(repoName);
         // // Extract GitHub username from repo name (after last '-')
         // const repoParts = repoName.split('-');
         //if username contains '-'... find prefix first u1p1-calculator
-        const assignmentPrefixMatch = repoName.match(/u\d+p\d+/i); //case insensitive
+        const isOwner = repoName.includes(githubUsername);
+        const assignmentPrefixMatch = repoName.match(/u\d+[pt]\d+/i); //case insensitive
+        console.log(assignmentPrefixMatch);
         assignmentPrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
-        const titleAfterPrefix = repoName.substring(assignmentPrefix.length+1); //calculator-thturin.git
-        let urlUsername = titleAfterPrefix.split('-'); //[calculator,thturin.git]
-        urlUsername.shift(); //remove first item (calculator)
-        urlUsername = urlUsername.join('-');
-        urlUsername = urlUsername.includes('.git') ? urlUsername.substring(0,urlUsername.length-4) : urlUsername;
-        console.log(urlUsername);
-        const isOwner = githubUsername.toLowerCase() === urlUsername.toLowerCase();
+        // const titleAfterPrefix = repoName.substring(assignmentPrefix.length+1); //calculator-thturin.git
+        // let urlUsername = titleAfterPrefix.split('-'); //[calculator,thturin.git]
+        // urlUsername.shift(); //remove first item (calculator)
+        // urlUsername = urlUsername.join('-');
+        // urlUsername = urlUsername.includes('.git') ? urlUsername.substring(0,urlUsername.length-4) : urlUsername;
+        // console.log(urlUsername);
+        // const isOwner = githubUsername.toLowerCase() === urlUsername.toLowerCase();
         return res.json({
             success:isOwner,
-            output:  isOwner ? `✅ You are the owner of this repository (${urlUsername})`
-        : `❌ Repository belongs to ${urlUsername}, but you are ${githubUsername}`
+            output:  isOwner ? `✅ You are the owner of this repository (${githubUsername})`
+        : `❌ Repository does not belong to ${githubUsername}`
         });
    
     }catch(err){
@@ -190,7 +193,7 @@ const scoreSubmission = async (url, path, assignmentTitle, submissionType,submit
                 try{
                     ///DETEREMINE IF TITLE IN GITHUB URL MATCHES ASSIGNMENT NAME 
                     //Example : U1T1-printlnVsPrint --> [U1T1]
-                    const assignmentPrefixMatch = assignmentTitle.match(/u\d+p\d+/i);
+                    const assignmentPrefixMatch = assignmentTitle.match(/u\d+[pt]\d+/i);
                     const assignmentTitlePrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
                     if(assignmentPrefix ===''){
                         return {
