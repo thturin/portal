@@ -8,7 +8,7 @@ const exportAssignmentsCsv  = async(req,res) =>{
     try{
         const {assignmentId, sectionId} = req.query; //the query params from front end url 
         
-        //find submissions with the same assignmentId
+        //find submissions with the same assignmentId and users in the sectionId
         let searchCriteria = {
             assignmentId:Number(assignmentId),
             user:{ sectionId : Number(sectionId)}
@@ -36,7 +36,7 @@ const exportAssignmentsCsv  = async(req,res) =>{
 
         //console.log(`look here ->>>> ${ JSON.stringify(scoreMap, null, 2)}`);
 
-        //find the section Id from querty params
+        //find the section Id from query params
         const files = fs.readdirSync(folderPath);
         const section = await prisma.section.findUnique({
             where:{

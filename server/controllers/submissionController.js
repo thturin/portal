@@ -48,17 +48,10 @@ const verifyGithubOwnership = async (req, res)=>{
         // // Extract GitHub username from repo name (after last '-')
         // const repoParts = repoName.split('-');
         //if username contains '-'... find prefix first u1p1-calculator
-        const isOwner = repoName.includes(githubUsername);
+        const isOwner = repoName.includes(githubUsername.toLowerCase());
         const assignmentPrefixMatch = repoName.match(/u\d+[pt]\d+/i); //case insensitive
         console.log(assignmentPrefixMatch);
         assignmentPrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
-        // const titleAfterPrefix = repoName.substring(assignmentPrefix.length+1); //calculator-thturin.git
-        // let urlUsername = titleAfterPrefix.split('-'); //[calculator,thturin.git]
-        // urlUsername.shift(); //remove first item (calculator)
-        // urlUsername = urlUsername.join('-');
-        // urlUsername = urlUsername.includes('.git') ? urlUsername.substring(0,urlUsername.length-4) : urlUsername;
-        // console.log(urlUsername);
-        // const isOwner = githubUsername.toLowerCase() === urlUsername.toLowerCase();
         return res.json({
             success:isOwner,
             output:  isOwner ? `✅ You are the owner of this repository (${githubUsername})`
