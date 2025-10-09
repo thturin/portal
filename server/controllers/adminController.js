@@ -4,6 +4,87 @@ const fs = require('fs');
 const path = require('path');
 const folderPath = path.join(__dirname,'../templates');
 
+const exportAssignmentsCsvByName = async(req,res) =>{
+ try {
+        const { assignmentId, sectionId } = req.query;
+
+        // Fetch submissions and map by normalized name
+        const submissions = await prisma.submission.findMany({
+            where: {
+                assignmentId: Number(assignmentId),
+                user: { sectionId: Number(sectionId) }
+            },
+            include: { user: true, assignment: true }
+        });
+
+        const scoreMap = {};
+        submissions.forEach(sub => {
+            if (sub.user && sub.user.name) {
+                // Normalize: remove quotes, lowercase, trim
+                const normName = sub.user.name.replace(/"/g, '').trim().toLowerCase();
+                scoreMap[normName] = sub.score;
+            }
+        });
+
+        // Find the template file
+        const files = fs.readdirSync(folderPath);
+        const section = await prisma.section.findUnique({ where: { id: Number(sectionId) } });
+        let templateFile = '';
+        files.forEach(file => {
+            if (file.includes(section.sectionId)) {
+                templateFile = path.join(folderPath, file);
+            }
+        });
+        if (!templateFile) return res.status(404).send('Template File Not found');
+
+        // Read and parse CSV
+        const csvContent = fs.readFileSync(templateFile, 'utf8');
+        const records = csvParse.parse(csvContent, { relax_column_count: true });
+
+        // Find the index where student data starts (after header row)
+        const dataStartIdx = records.findIndex(row => row[1] && row[1].toLowerCase().includes('score'));
+        if (dataStartIdx === -1) return res.status(400).send('CSV format error: header not found');
+
+        // Update assignment name and date if needed
+        records.forEach(row => {
+            if (row[0] && row[0].toLowerCase().startsWith('assignment:')) {
+                row[1] = submissions[0]?.assignment?.title || '';
+            }
+            if (row[0] && row[0].toLowerCase().startsWith('date:')) {
+                row[1] = submissions[0]?.assignment?.dueDate
+                    ? formatDateMMDDYYYY(submissions[0].assignment.dueDate)
+                    : '';
+            }
+        });
+
+        // Update scores/comments by name for student rows
+        for (let i = dataStartIdx + 1; i < records.length; i++) {
+            let row = records[i];
+            if (!row[0]) continue; // skip empty rows
+            const normName = row[0].replace(/"/g, '').trim().toLowerCase();
+            if (scoreMap.hasOwnProperty(normName)) {
+                row[1] = scoreMap[normName];
+                row[2] = ''; // or any comment logic
+            } else if (row.length > 2) {
+                row[1] = 0;
+                row[2] = 'no submission';
+            }
+        }
+
+        // Convert back to CSV
+        const exportFileName = `Jupiter_Assignment_${section.name}_byname_export.csv`;
+        const exportFilePath = path.join(folderPath, exportFileName);
+        const csvString = records.map(row => row.join(',')).join('\n');
+        fs.writeFileSync(exportFilePath, csvString, 'utf8');
+
+        res.download(exportFilePath);
+    } catch (err) {
+        console.error('Error exporting assignment by name', err);
+        res.status(500).send('Error exporting assignment by name');
+    }
+
+}
+
 const exportAssignmentsCsv  = async(req,res) =>{
     try{
         const {assignmentId, sectionId} = req.query; //the query params from front end url 
@@ -123,4 +204,4 @@ function formatDateMMDDYYYY(date) { //copied and pasted
 }
 
 
-module.exports = {exportAssignmentsCsv};
+module.exports = {exportAssignmentsCsv, exportAssignmentsCsvByName};
