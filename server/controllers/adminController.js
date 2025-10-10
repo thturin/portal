@@ -87,10 +87,10 @@ const exportAssignmentsCsvByName = async (req, res) => {
             }
         }
 
-        console.log('HELLO HELLO--->>', submissions[0].assignment.title);
+        //console.log('HELLO HELLO--->>', submissions[0].assignment.title);
         // Convert back to CSV
         const exportFileName = `Jupiter_Assignment_${section.name}_${submissions[0].assignment.title}_export.csv`;
-        const exportFilePath = path.join(require('os').homedir(), 'Downloads', exportFileName);
+        //const exportFilePath = path.join(require('os').homedir(), 'Downloads', exportFileName);
         const csvString = records.map((row,i) => {
             // Add quotes to the name column if it's a student row (after header)
             if (row[0] && i > dataStartIdx) {
@@ -98,9 +98,13 @@ const exportAssignmentsCsvByName = async (req, res) => {
             }
             return row.join(',');
         }).join('\n');
-        fs.writeFileSync(exportFilePath, csvString, 'utf8');
+        //fs.writeFileSync(exportFilePath, csvString, 'utf8');
 
-        res.download(exportFilePath);
+        if(process.env)
+        //res.download(exportFilePath);
+        res.setHeader('Content-Disposition',`attachment; filename="${exportFileName}"`);
+        res.setHeader('Content-Type', 'text/csv');
+        res.send(csvString);
     } catch (err) {
         console.error('Error exporting assignment by name', err);
         res.status(500).send('Error exporting assignment by name');
