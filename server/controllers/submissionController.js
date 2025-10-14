@@ -66,8 +66,6 @@ const verifyGithubOwnership = async (req, res)=>{
     }
 };
 
-//1. VERIFY APP PERMISSION TO ACCESS GOOGLE DRIVE AND DOCS
-//2. VERIFY STUDENT USER IS OWNER OF DOC
 const verifyDocOwnership = async (req,res)=>{
     const {documentId, userEmail} = req.body;
     // first must verify YOUR service account so gives your app permission
@@ -84,15 +82,6 @@ const verifyDocOwnership = async (req,res)=>{
         console.error('Error verifying document ownership', err)
     }
 };
-
-// | Days Late     | Penalty             |
-// | ------------- | ------------------- |
-// | 0 (on time)   | No penalty          |
-// | 1 day late    | -10%                |
-// | 2–3 days late | -15%                |
-// | 4–5 days late | -20%                |
-// | 6+ days late  | -25% max (hard cap) |
-// | 14+ days late | Please see me       |
 
 const calculateLateScore = (submissionDate, dueDateString, score)=>{
     //const submissionDate = parseISO(submissionDateString);
@@ -282,6 +271,24 @@ const createSubmission = async (req,res)=>{
     }
 };
 
+const updateSubmissionGrade = async (req,res)=>{
+    try{
+        const{submissionId,score} = req.body;
+        const updatedSubmission = await prisma.submission.update({
+            where:{
+                id:Number(submissionId)
+            },
+            data: {
+                score: Number(score)
+            }
+        });
+        res.json(updatedSubmission);
+    }catch(err){
+        console.error('Error updating submission grade: ',err);
+        res.status(500).json({error:'Failed to update grade'});
+    }
+};
+
 const updateSubmission = async(req,res)=>{
     try{
         const {id} = req.params; //ID pulled from the parameters 
@@ -317,7 +324,6 @@ const updateSubmission = async(req,res)=>{
     
 };
 
-
 const getSubmission = async(req,res)=>{
     const {id} = req.params;
 
@@ -334,7 +340,6 @@ const getSubmission = async(req,res)=>{
         res.status(500).json({error: 'Server error'});
     }
 };
-
 
 const getAllSubmissions = async (req,res)=>{
     try{
@@ -362,23 +367,10 @@ module.exports = {
     verifyDocOwnership,
     createSubmission,
     getSubmission,
-    updateSubmission
+    updateSubmission,
+    updateSubmissionGrade
 };
 
 
 
 
-
-// const createSubmission = (req,res)=>{
-//     const {name,assignment, score} = req.body;
-
-//     const newSub = {
-//         id:submissions.length+1,
-//         name,
-//         assignment,
-//         score
-//     };
-
-//     //submissions.push(newSub);
-//     res.status(201).json(newSub);
-// };

@@ -4,40 +4,46 @@ import CreateAssignmentForm from './CreateAssignment';
 import EditAssignmentForm from './EditAssignment';
 import LogoutButton from './LogoutButton';
 
-const AdminDashboard = ({user, onLogout}) =>{
+const AdminDashboard = ({ user, onLogout }) => {
     const [assignments, setAssignments] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [selectedAssignmentId, setSelectedAssignmentId] = useState('');
-    const [sections,setSections] = useState([]);
-    const [selectedSection,setSelectedSection] = useState('');
+    const [sections, setSections] = useState([]);
+    const [selectedSection, setSelectedSection] = useState('');
+    const [editedScores, setEditedScores] = useState({});
+    const [hasChanges, setHasChanges] = useState(false);
 
+
+    useEffect(() => {
+        axios.get(`${process.env.REACT_APP_API_URL}/assignments`).then(res => setAssignments(res.data));
+        axios.get(`${process.env.REACT_APP_API_URL}/submissions`).then(res => setSubmissions(res.data));
+        axios.get(`${process.env.REACT_APP_API_URL}/sections`).then(res => setSections(res.data));
+    }, []);
 
     useEffect(()=>{
-        axios.get(`${process.env.REACT_APP_API_URL}/assignments`).then(res=>setAssignments(res.data));
-        axios.get(`${process.env.REACT_APP_API_URL}/submissions`).then(res=> setSubmissions(res.data));
-        axios.get(`${process.env.REACT_APP_API_URL}/sections`).then(res=>setSections(res.data));
-    },[]);
+        console.log(submissions);
+    },[submissions]);
 
     const filteredSubs = submissions.filter(
-        sub=>{
-            if(!selectedAssignmentId) return false;
-            if(!selectedSection){
-                return sub.assignmentId === Number(selectedAssignmentId); 
-            }else{
+        sub => {
+            if (!selectedAssignmentId) return false;
+            if (!selectedSection) {
+                return sub.assignmentId === Number(selectedAssignmentId);
+            } else {
                 return sub.assignmentId === Number(selectedAssignmentId) && sub.user?.sectionId === Number(selectedSection);
             }
-        } 
+        }
     );
 
     const selectedAssignmentObj = assignments.find(
-        ass=>ass.id === Number(selectedAssignmentId)
+        ass => ass.id === Number(selectedAssignmentId)
     );
 
-    return(
+    return (
         <div>
             <h2> Welcome ADMIN, {user.name}</h2>
-            <LogoutButton onLogout={onLogout}/>
-            
+            <LogoutButton onLogout={onLogout} />
+
             {/* SELECT ASSIGNMENT AND SUBMISSIONS SECTION - MOVED TO TOP */}
             <div style={{
                 maxWidth: '600px',
@@ -48,22 +54,22 @@ const AdminDashboard = ({user, onLogout}) =>{
                 backgroundColor: '#f9f9f9'
             }}>
                 <h3 style={{ textAlign: 'center', marginTop: 0 }}>Select Assignment</h3>
-                
+
                 {/* DROP DOWN MENU FOR ASSIGNMENTS */}
                 <div style={{ marginBottom: '15px' }}>
-                    <label style={{ 
-                        display: 'block', 
-                        marginBottom: '5px', 
-                        fontWeight: 'bold' 
+                    <label style={{
+                        display: 'block',
+                        marginBottom: '5px',
+                        fontWeight: 'bold'
                     }}>
                         Assignment:
                     </label>
                     <select
                         value={selectedAssignmentId}
                         onChange={e => setSelectedAssignmentId(e.target.value)}
-                        style={{ 
-                            width: '100%', 
-                            padding: '8px', 
+                        style={{
+                            width: '100%',
+                            padding: '8px',
                             border: '1px solid #ccc',
                             borderRadius: '4px',
                             fontSize: '14px'
@@ -71,28 +77,28 @@ const AdminDashboard = ({user, onLogout}) =>{
                     >
                         <option value="">Select an Assignment</option>
                         {assignments.map(ass => (
-                            <option key={ass.id} value={ass.id}> 
+                            <option key={ass.id} value={ass.id}>
                                 {ass.title}
                             </option>
                         ))}
                     </select>
                 </div>
-                
+
                 {/* DROP DOWN MENU FOR SECTION */}
                 <div style={{ marginBottom: '15px' }}>
-                    <label style={{ 
-                        display: 'block', 
-                        marginBottom: '5px', 
-                        fontWeight: 'bold' 
+                    <label style={{
+                        display: 'block',
+                        marginBottom: '5px',
+                        fontWeight: 'bold'
                     }}>
                         Section:
                     </label>
                     <select
                         value={selectedSection}
                         onChange={e => setSelectedSection(e.target.value)}
-                        style={{ 
-                            width: '100%', 
-                            padding: '8px', 
+                        style={{
+                            width: '100%',
+                            padding: '8px',
                             border: '1px solid #ccc',
                             borderRadius: '4px',
                             fontSize: '14px'
@@ -108,10 +114,10 @@ const AdminDashboard = ({user, onLogout}) =>{
                 </div>
 
                 {/* JUPITER EXPORT BUTTON */}
-                <button 
-                    disabled={!selectedAssignmentId || filteredSubs.length===0 || !selectedSection}
-                    onClick={async()=>{
-                        window.location.href = `${process.env.REACT_APP_API_URL}/admin/exportAssignment?assignmentId=${selectedAssignmentId}${selectedSection? `&sectionId=${selectedSection}`:''}`;       
+                <button
+                    disabled={!selectedAssignmentId || filteredSubs.length === 0 || !selectedSection}
+                    onClick={async () => {
+                        window.location.href = `${process.env.REACT_APP_API_URL}/admin/exportAssignment?assignmentId=${selectedAssignmentId}${selectedSection ? `&sectionId=${selectedSection}` : ''}`;
                     }}
                     style={{
                         width: '100%',
@@ -122,37 +128,37 @@ const AdminDashboard = ({user, onLogout}) =>{
                         borderRadius: '4px',
                         fontSize: '16px'
                     }}
-                > 
-                    JUPITER EXPORT 
+                >
+                    JUPITER EXPORT
                 </button>
             </div>
             {/* DISPLAY SELECTED ASSIGNMENT (DUE DATE, TITLE, TYPE ) */}
-                {selectedAssignmentObj && (
-                    <div style={{
-                        maxWidth: '600px',
-                        margin: '20px auto',
-                        padding: '20px',
-                        border: '1px solid #ddd',
-                        borderRadius: '8px',
-                        backgroundColor: '#f9f9f9'
-                    }}>
-                        <h3 style={{ textAlign: 'center', marginTop: 0 }}>Assignment Details</h3>
-                        
-                        <div style={{ marginBottom: '10px' }}>
-                            <strong>Title:</strong> {selectedAssignmentObj.title}
-                        </div>
-                        
-                        <div style={{ marginBottom: '10px' }}>
-                            <strong>Due Date:</strong> {new Date(selectedAssignmentObj.dueDate).toLocaleDateString()}
-                        </div>
-                        
-                        <div style={{ marginBottom: '10px' }}>
-                            <strong>Submission Type:</strong> {selectedAssignmentObj.type || selectedAssignmentObj.submissionType}
-                        </div>
+            {selectedAssignmentObj && (
+                <div style={{
+                    maxWidth: '600px',
+                    margin: '20px auto',
+                    padding: '20px',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    backgroundColor: '#f9f9f9'
+                }}>
+                    <h3 style={{ textAlign: 'center', marginTop: 0 }}>Assignment Details</h3>
+
+                    <div style={{ marginBottom: '10px' }}>
+                        <strong>Title:</strong> {selectedAssignmentObj.title}
                     </div>
+
+                    <div style={{ marginBottom: '10px' }}>
+                        <strong>Due Date:</strong> {new Date(selectedAssignmentObj.dueDate).toLocaleDateString()}
+                    </div>
+
+                    <div style={{ marginBottom: '10px' }}>
+                        <strong>Submission Type:</strong> {selectedAssignmentObj.type || selectedAssignmentObj.submissionType}
+                    </div>
+                </div>
             )}
 
-            {/* SUBMISSION LIST */}
+    {/* SUBMISSION LIST */}
             <div style={{
                 maxWidth: '600px',
                 margin: '20px auto',
@@ -162,9 +168,9 @@ const AdminDashboard = ({user, onLogout}) =>{
                 backgroundColor: '#f9f9f9'
             }}>
                 <h3 style={{ textAlign: 'center', marginTop: 0 }}>
-                    Submissions for Assignment: {selectedAssignmentObj? selectedAssignmentObj.title : ''}
+                    Submissions for Assignment: {selectedAssignmentObj ? selectedAssignmentObj.title : ''}
                 </h3>
-                
+
                 <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '12px' }}>
                     <thead>
                         <tr>
@@ -187,33 +193,96 @@ const AdminDashboard = ({user, onLogout}) =>{
                                     <td style={{ border: '1px solid #ccc', padding: '4px' }}>{sub.user.sectionId} {sub.user?.section?.name || ''}</td>
                                     <td style={{ border: '1px solid #ccc', padding: '4px' }}>{sub.userId}</td>
                                     <td style={{ border: '1px solid #ccc', padding: '4px' }}>{sub.user?.name ? sub.user.name : 'no user'}</td>
-                                    <td style={{ border: '1px solid #ccc', padding: '4px' }}>{sub.score}</td>
+                                    <td style={{ border: '1px solid #ccc', padding: '4px' }}>
+                                        <input
+                                            type="number"
+                                            value={editedScores[sub.id] !== undefined ? editedScores[sub.id] : sub.score}
+                                            onChange={(e) => {
+                                                setEditedScores(prev => ({
+                                                    ...prev,
+                                                    [sub.id]: Number(e.target.value)
+                                                }));
+                                                setHasChanges(true);
+                                            }}
+                                            style={{
+                                                width: '60px',
+                                                padding: '2px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '3px'
+                                            }}
+                                        />
+                                    </td>
                                 </tr>
                             ))
                         )}
                     </tbody>
                 </table>
+        {/* UPDATE BUTTON */}
+                {hasChanges && (
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'flex-end',
+                        marginTop: '10px' 
+                    }}>
+                        <button 
+                            onClick={async () => {
+                                try { 
+                                    //create a promise for each submission that is in the edited list
+                                    await Promise.all(
+                                        Object.entries(editedScores).map(([submissionId, score]) =>
+                                            axios.post(`${process.env.REACT_APP_API_URL}/submissions/update-grade`, {
+                                                submissionId: Number(submissionId),
+                                                score: Number(score)
+                                            })
+                                        )
+                                    );
+                                    setHasChanges(false); //no more changes
+                                    //update local state map the previous submissions to the editedScores 
+                                    setSubmissions(prev=>{
+                                       return prev.map(submission=>({
+                                            ...submission,
+                                            score: editedScores[submission.id] ?? submission.score //nullish returns right side if left is null
+                                        }))
+                                    })
+                                } catch (error) {
+                                    console.error('Failed to update grades:', error);
+                                }
+                            }}
+                            style={{
+                                padding: '8px 16px',
+                                backgroundColor: '#28a745',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                fontSize: '16px'
+                            }}
+                        >
+                            Update Grades
+                        </button>
+                    </div>
+                )}
+
             </div>
 
 
             <EditAssignmentForm assignment={selectedAssignmentObj} updateAssignments={
                 updatedAssignment => { //function passed in child component
                     setAssignments(
-                        oldAssignments=>
+                        oldAssignments =>
                             oldAssignments.map(
-                                assignment=> assignment.id === updatedAssignment.id? updatedAssignment : assignment
+                                assignment => assignment.id === updatedAssignment.id ? updatedAssignment : assignment
                             )
                     )
                 }
             } />
 
             {/* CREATE AND EDIT ASSIGNMENT FORMS - MOVED TO BOTTOM */}
-            <CreateAssignmentForm updateAssignments={ 
-                childData=>setAssignments(oldAssignments=>[...oldAssignments,childData])
-            }/>
-            
-            
-            
+            <CreateAssignmentForm updateAssignments={
+                childData => setAssignments(oldAssignments => [...oldAssignments, childData])
+            } />
+
+
+
             <h3>Assignments</h3>
         </div>
     );
