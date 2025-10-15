@@ -48,9 +48,9 @@ const verifyGithubOwnership = async (req, res)=>{
         // // Extract GitHub username from repo name (after last '-')
         // const repoParts = repoName.split('-');
         //if username contains '-'... find prefix first u1p1-calculator
-        const isOwner = repoName.includes(githubUsername.toLowerCase());
+        const isOwner = repoName.toLowerCase().includes(githubUsername.toLowerCase());
         const assignmentPrefixMatch = repoName.match(/u\d+[pt]\d+/i); //case insensitive
-        console.log(assignmentPrefixMatch);
+        
         assignmentPrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
         return res.json({
             success:isOwner,
