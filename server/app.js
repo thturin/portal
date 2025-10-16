@@ -6,7 +6,6 @@ const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/auth');
 const sectionRoutes = require('./routes/sectionRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-const pythonRoutes = require('./routes/pythonRoutes');
 const {PrismaClient} = require('@prisma/client');
 require('dotenv').config(); //load environment variables from .env
 
@@ -34,22 +33,6 @@ console.log('--------------------BEGIN----------------------');
 
 //REQUIRED FOR GITHUB Oauth
 const session = require('express-session');//ceaet a session
-//const FileStore = require('session-file-store')(session);
-
-//DEACTIVATED
-//const passport = require('passport');//create a passport
-//passport attaches helper methods to the request object for every incoming request
-// these middleware add methods to req are req.logout, req.login
-
-
-//CREATE A SESSION FOR USER COOKIES 
-//Railway uses a reverse proxy/load balancer
-// Internet → Railway Load Balancer (HTTPS) → Your App (HTTP)
-//            ↑ Sets X-Forwarded-Proto: https
-//vs local environment (doesn't require proxy headers)
-//Browser ←→ Direct Connection ←→ Your Express App (localhost:5000)
-
-
 app.set('trust proxy',1); // trust 
 
 const sessionOptions = {
@@ -79,87 +62,6 @@ if(process.env.NODE_ENV!=='production'){
 //app.use required middleware function session()
 app.use(session(sessionOptions));
 
-// app.use(session({
-//   secret: process.env.SESSION_SECRET,
-//   resave: false,
-//   saveUninitialized: false,
-//   rolling: true, //session refreshes after every request. 
-//   store: new FileStore({ //store the session
-//         path: './sessions',
-//         ttl: 24 * 60 * 60, // 24 hours in seconds
-//         retries: 5
-//     }),
-//     name: 'studentPortalSession',
-//   cookie:{ //COOKIE SETTINGS.  
-//     //how to set session timeout
-//     maxAge: 60*60*1000,//1 hour (in milliseconds)
-//     sameSite:process.env.NODE_ENV === 'production' ? 'none': 'lax', //or 'none' if using https,
-//     secure:process.env.NODE_ENV === 'production',// true if using https
-//     httpOnly: true, //for security purposes
-//     domain:undefined
-//   }
-// }));
-
-
-// app.use((req, res, next) => {
-//     // Only log for auth-related routes to avoid spam
-//     if (req.url.includes('/auth/') || req.url.includes('/me')|| req.url.includes('/callback')) {
-//         console.log('🔧 COMPREHENSIVE DEBUG:');
-//         console.log('-------- ENVIRONMENT VARIABLES --------');
-//         console.log('NODE_ENV:', process.env.NODE_ENV);
-//         console.log('CLIENT_URL:', process.env.CLIENT_URL);
-//         console.log('SERVER_URL:', process.env.SERVER_URL);
-//         console.log('SESSION_SECRET:', process.env.SESSION_SECRET ? 'SET' : 'MISSING');
-//         console.log('GITHUB_CLIENT_ID:', process.env.GITHUB_CLIENT_ID);
-//         console.log('GITHUB_CLIENT_SECRET:', process.env.GITHUB_CLIENT_SECRET ? 'SET' : 'MISSING');
-        
-//         console.log('-------- REQUEST INFO --------');
-//         console.log('Method:', req.method);
-//         console.log('URL:', req.url);
-//         console.log('Origin Header:', req.headers.origin || 'NO_ORIGIN');
-//         console.log('Host Header:', req.headers.host);
-//         console.log('Cookie Header:', req.headers.cookie || 'NO_COOKIES');
-//         console.log('User-Agent:', req.headers['user-agent']?.substring(0, 50));
-        
-//         console.log('-------- SESSION INFO --------');
-//         console.log('Session ID:', req.sessionID);
-//         console.log('Session exists:', !!req.session);
-//         if (req.session) {
-//             console.log('Session data:', JSON.stringify(req.session, null, 2));
-//             console.log('Session cookie settings:', req.session.cookie);
-//             console.log('Passport session:', req.session.passport);
-//         }
-        
-//         console.log('-------- AUTHENTICATION INFO --------');
-//         console.log('isAuthenticated method exists:', typeof req.isAuthenticated);
-//         console.log('isAuthenticated():', req.isAuthenticated ? req.isAuthenticated() : 'N/A');
-//         console.log('req.user:', req.user ? JSON.stringify(req.user, null, 2) : 'undefined');
-        
-//         console.log('-------- COOKIE SETTINGS --------');
-//         if (req.session && req.session.cookie) {
-//             console.log('Cookie maxAge:', req.session.cookie.maxAge);
-//             console.log('Cookie sameSite:', req.session.cookie.sameSite);
-//             console.log('Cookie secure:', req.session.cookie.secure);
-//             console.log('Cookie httpOnly:', req.session.cookie.httpOnly);
-//             console.log('Cookie domain:', req.session.cookie.domain);
-//             console.log('Cookie expires:', req.session.cookie._expires);
-//         }
-        
-//         console.log('=====================================');
-//     }
-//     next();
-// });
-
-//DEACTIVATED
-//app.use(passport.initialize());
-
-//DEACTIVATED
-//app.use(passport.session());
-
-//DEACTIVATEDD
-//require('./auth/github'); // Registers the strategy github
-
-
 app.get('/', (req, res)=>{
     res.send('Backend is running!');
     console.log(req);
@@ -173,8 +75,6 @@ app.get('/health', (req,res)=>{
     environment: process.env.NODE_ENV || 'development'
   });
 });
-
-
 
 // Add this route to see environment variables via HTTP
 app.get('/health-debug', (req, res) => {
@@ -223,7 +123,6 @@ app.use('/api/',userRoutes);//two different endpoints /users and /login
 
 app.use('/api/sections',sectionRoutes);
 app.use('/api/admin',adminRoutes);
-app.use('/api/python',pythonRoutes);
 
 const PORT = process.env.PORT || 5000;
 

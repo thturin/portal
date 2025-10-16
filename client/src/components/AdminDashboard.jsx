@@ -41,7 +41,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     return (
         <div>
             <h2> Welcome ADMIN, {user.name}</h2>
-            <LogoutButton onLogout={onLogout}/>
+            {/* <LogoutButton onLogout={onLogout}/> */}
             
             {/* SELECT ASSIGNMENT AND SUBMISSIONS SECTION - MOVED TO TOP */}
             <div style={{
