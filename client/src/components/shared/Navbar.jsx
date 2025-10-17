@@ -1,4 +1,5 @@
 import React from 'react';
+import AdminNavButtons from '../admin/AdminNavButtons';
 
 
 const Navbar = ({ user, onSelect, onLogout }) => {
@@ -12,47 +13,20 @@ const Navbar = ({ user, onSelect, onLogout }) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             borderRadius: '0 0 16px 16px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            position: 'fixed',  // Fix navbar to top
+            top: 0,            // Align to top
+            left: 0,           // Align to left
+            right: 0,          // Stretch across whole width
+            zIndex: 1000      // Ensure navbar stays on top
         }}>
-            <div style={{ fontWeight: '700', color: 'white', fontSize: '20px' }}>
-                Student Portal
-            </div>
-            <div style={{ display: 'flex', gap: '16px' }}>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                <div style={{ fontWeight: '700', color: 'white', fontSize: '20px', marginRight: '24px' }}>
+                    {isAdmin? 'Admin' : 'Student'} Portal
+                </div>
+                {/* Navigation Buttons */}
                 {isAdmin ? (
-                    <>
-                        <button
-                            style={{
-                                background: '#fff',
-                                color: '#764ba2',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '8px 20px',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                            }}
-                            onClick={() => onSelect('manage')}
-                        >
-                            Manage Assignments
-                        </button>
-                        <button
-                            style={{
-                                background: '#fff',
-                                color: '#667eea',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '8px 20px',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                            }}
-                            onClick={() => onSelect('viewSubmissions')}
-                        >
-                            View Submissions
-                        </button>
-                    </>
+                    <AdminNavButtons onSelect={onSelect} />
                 ) : (
                     <>
                         <button
@@ -87,7 +61,6 @@ const Navbar = ({ user, onSelect, onLogout }) => {
                         >
                             Work on Assignment
                         </button>
-                        {/* Late Policy Button */}
                         <button
                             style={{
                                 background: '#fff',
@@ -106,23 +79,24 @@ const Navbar = ({ user, onSelect, onLogout }) => {
                         </button>
                     </>
                 )}
-                <button
-                    style={{
-                        background: '#fff',
-                        color: '#ef4444',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '8px 20px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        fontSize: '16px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                    }}
-                    onClick={onLogout}
-                >
-                    Logout
-                </button>
             </div>
+            {/* Logout Button */}
+            <button
+                style={{
+                    background: '#fff',
+                    color: '#ef4444',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 20px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                }}
+                onClick={onLogout}
+            >
+                Logout
+            </button>
         </nav>
     );
 }

@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import { useEffect, useState } from 'react';
-import UserSubmitAssignment from './UserSubmitAssignment.jsx';
+import UserSubmitAssignment from './StudentSubmitAssignment.jsx';
 import LatePolicyInfo from './LatePolicyInfo.jsx';
-import Navbar from './Navbar.jsx';
+import Navbar from '../shared/Navbar.jsx';
 
 const UserDashboard = ({ user, onLogout }) => {
     const [submissions, setSubmissions] = useState([]);

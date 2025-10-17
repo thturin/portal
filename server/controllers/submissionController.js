@@ -66,7 +66,7 @@ const verifyGithubOwnership = async (req, res) => {
     }
 };
 
-};
+
 
 const calculateLateScore = (submissionDate, dueDateString, score) => {
     //const submissionDate = parseISO(submissionDateString);

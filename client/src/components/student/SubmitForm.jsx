@@ -1,7 +1,7 @@
 import axios from 'axios'; //<-- how frontend will communicate with app.js server
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { useEffect, useState } from 'react';
-import Spinner from './Spinner';
+import Spinner from '../shared/Spinner';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 //set global axios defaults

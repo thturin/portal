@@ -3,7 +3,6 @@ const cors = require('cors');
 const submissionRoutes = require('./routes/submissionRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const userRoutes = require('./routes/userRoutes');
-const authRoutes = require('./routes/auth');
 const sectionRoutes = require('./routes/sectionRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const {PrismaClient} = require('@prisma/client');
@@ -62,6 +61,12 @@ if(process.env.NODE_ENV!=='production'){
 //app.use required middleware function session()
 app.use(session(sessionOptions));
 
+//middleware
+app.use('/api/', (req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    next();
+});
+
 app.get('/', (req, res)=>{
     res.send('Backend is running!');
     console.log(req);
@@ -112,8 +117,7 @@ app.get('/health-debug', (req, res) => {
     }
 });
 
-
-app.use('/api/auth', authRoutes);
+console.log('Registered routes:');
 
 app.use('/api/', submissionRoutes); //call the router object in submissionRoutes (it is exported)
 
@@ -133,20 +137,3 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 
-//middleware for debugging session
-// app.use((req, res, next) => {
-//     if (req.session) {
-//         const now = new Date();
-//         const expires = new Date(req.session.cookie._expires);
-//         const timeLeft = expires - now;
-        
-//         console.log('🕐 Session Debug:', {
-//             sessionID: req.sessionID,
-//             timeLeftMinutes: Math.round(timeLeft / (1000 * 60)),
-//             expires: expires.toLocaleTimeString(),
-//             isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : 'N/A',
-//             user: req.user ? req.user.email : 'none'
-//         });
-//     }
-//     next();
-// });

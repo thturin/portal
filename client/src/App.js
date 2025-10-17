@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import './App.css';
-import AdminDashboard from './components/AdminDashboard.jsx';
-import LoginBar from './components/LoginBar.jsx';
-import UserDashboard from './components/UserDashboard.jsx';
+import AdminDashboard from './components/admin/AdminDashboard.jsx';
+import LoginBar from './components/shared/LoginBar.jsx';
+import StudentDashboard from './components/student/StudentDashboard.jsx';
 
 function App() {
   //set the current user in Parent compontnet (this app.js)
@@ -39,7 +39,6 @@ function App() {
   
   return (
     <div className="App">
-      <h1>🗳️ASSIGNMENT CENTER🗳️</h1>
       {user && <h2>{user.section?.name}</h2>}
 
       {!user && (
@@ -50,7 +49,7 @@ function App() {
       )}
 
       {user && user.role ==='student' && (
-        <UserDashboard user={user} onLogout={handleLogout} />
+        <StudentDashboard user={user} onLogout={handleLogout} />
       )}
 
       {user && user.role === 'admin' &&(

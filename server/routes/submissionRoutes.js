@@ -23,13 +23,10 @@ const ensureAuthenticated = (req,res,next)=>{
 
 //ROOT / ISS LOCALHOST:5000/API
 router.get('/submissions', getAllSubmissions); //this pathway is relative to the base path set in app.js (api/submit)
-// router.post('/',createSubmission);
 router.get('/submissions/:id',getSubmission);
 router.put('/submissions/:id',updateSubmission);
 router.post('/submissions/update-grade',updateSubmissionGrade)
-
 router.post('/submit',createSubmission);
-router.post('/verify-doc-ownership',verifyDocOwnership);
 router.post('/verify-github-ownership',verifyGithubOwnership);
 
 
