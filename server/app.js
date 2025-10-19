@@ -5,13 +5,13 @@ const assignmentRoutes = require('./routes/assignmentRoutes');
 const userRoutes = require('./routes/userRoutes');
 const sectionRoutes = require('./routes/sectionRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const authRoutes = require('./routes/authRoutes');
 const {PrismaClient} = require('@prisma/client');
 require('dotenv').config(); //load environment variables from .env
 
 
 const app = express();
 const prisma = new PrismaClient();
-
 
 //you are already using an authentication method so you ca * origin accept any 
 app.use(cors({
@@ -117,16 +117,12 @@ app.get('/health-debug', (req, res) => {
     }
 });
 
-console.log('Registered routes:');
-
 app.use('/api/', submissionRoutes); //call the router object in submissionRoutes (it is exported)
-
 app.use('/api/assignments', assignmentRoutes); //call the router object in assignmentRoutes
-
 app.use('/api/',userRoutes);//two different endpoints /users and /login
-
 app.use('/api/sections',sectionRoutes);
 app.use('/api/admin',adminRoutes);
+app.use('api/auth',authRoutes);
 
 const PORT = process.env.PORT || 5000;
 
