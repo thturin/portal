@@ -5,6 +5,7 @@ import EditAssignmentForm from './EditAssignment';
 import Navbar from '../shared/Navbar';
 import AssignmentDetails from './AssignmentDetails';
 import AssignmentMenu from './AssignmentMenu';
+import SubmissionList from './SubmissionList';
 
 const AdminDashboard = ({ user, onLogout }) => {
     const [assignments, setAssignments] = useState([]);
@@ -14,6 +15,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     const [selectedSection, setSelectedSection] = useState('');
     const [editedScores, setEditedScores] = useState({});
     const [hasChanges, setHasChanges] = useState(false);
+    const [currentTab, setCurrentTab] = useState('');
 
 
     useEffect(() => {
@@ -41,174 +43,65 @@ const AdminDashboard = ({ user, onLogout }) => {
         ass => ass.id === Number(selectedAssignmentId)
     );
 
+    const handleTabSelect = (tab) => {
+        console.log(`current tab is ${currentTab}`);
+        setCurrentTab(tab);
+    }
+
     return (
         <div>
             <Navbar user={user}
-                onSelect={(selection) => { console.log('button clicked', selection) }}
+                onSelect={handleTabSelect}
                 onLogout={onLogout}
             />
             <h2> Welcome ADMIN, {user.name}</h2>
-            {/* <LogoutButton onLogout={onLogout}/> */}
 
-            {/* SELECT ASSIGNMENT AND SUBMISSIONS SECTION - MOVED TO TOP */}
-            <AssignmentMenu
-                selectedAssignmentId={selectedAssignmentId}
-                setSelectedAssignmentId={setSelectedAssignmentId}
-                setSelectedSection={setSelectedSection}
-                assignments={assignments}
-                sections={sections}
-            />
+            {currentTab === 'view' && (
+                <>
+                    {/* SELECT ASSIGNMENT AND SUBMISSIONS SECTION - MOVED TO TOP */}
+                    <AssignmentMenu
+                        setSelectedAssignmentId={setSelectedAssignmentId}
+                        selectedAssignmentId={selectedAssignmentId}
+                        assignments={assignments}
+                        selectedSection={selectedSection}
+                        setSelectedSection={setSelectedSection}
+                        sections={sections}
+                        filteredSubsLength={filteredSubs.length}
+                    />
 
+                    {/* DISPLAY SELECTED ASSIGNMENT (DUE DATE, TITLE, TYPE ) */}
+                    {selectedAssignmentObj && (<AssignmentDetails selectedAssignmentObj={selectedAssignmentObj} />)}
 
-                {/* JUPITER EXPORT BUTTON */}
-                <button
-                disabled={!selectedAssignmentId || filteredSubs.length === 0 || !selectedSection}
-                onClick={async () => {
-                    window.location.href = `${process.env.REACT_APP_API_URL}/admin/exportAssignment?assignmentId=${selectedAssignmentId}${selectedSection ? `&sectionId=${selectedSection}` : ''}`;
-                }}
-                style={{
-                    width: '100%',
-                    padding: '10px',
-                    backgroundColor: '#007bff',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    fontSize: '16px'
-                }}
-            >
-                JUPITER EXPORT
-            </button>
-
-            {/* DISPLAY SELECTED ASSIGNMENT (DUE DATE, TITLE, TYPE ) */}
-            {selectedAssignmentObj && (<AssignmentDetails selectedAssignmentObj={selectedAssignmentObj} />)}
-
-
-            {/* SUBMISSION LIST */}
-            <div style={{
-                maxWidth: '600px',
-                margin: '20px auto',
-                padding: '20px',
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-                backgroundColor: '#f9f9f9'
-            }}>
-                <h3 style={{ textAlign: 'center', marginTop: 0 }}>
-                    Submissions for Assignment: {selectedAssignmentObj ? selectedAssignmentObj.title : ''}
-                </h3>
-
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '12px' }}>
-                    <thead>
-                        <tr>
-                            <th style={{ border: '1px solid #ccc', padding: '4px' }}>Section ID/Name</th>
-                            <th style={{ border: '1px solid #ccc', padding: '4px' }}>User ID</th>
-                            <th style={{ border: '1px solid #ccc', padding: '4px' }}>User Name</th>
-                            <th style={{ border: '1px solid #ccc', padding: '4px' }}>Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredSubs.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} style={{ color: 'red', textAlign: 'center', padding: '8px' }}>
-                                    No Submissions
-                                </td>
-                            </tr>
-                        ) : (
-                            filteredSubs.map(sub => (
-                                <tr key={sub.id}>
-                                    <td style={{ border: '1px solid #ccc', padding: '4px' }}>{sub.user.sectionId} {sub.user?.section?.name || ''}</td>
-                                    <td style={{ border: '1px solid #ccc', padding: '4px' }}>{sub.userId}</td>
-                                    <td style={{ border: '1px solid #ccc', padding: '4px' }}>{sub.user?.name ? sub.user.name : 'no user'}</td>
-                                    <td style={{ border: '1px solid #ccc', padding: '4px' }}>
-                                        <input
-                                            type="number"
-                                            value={editedScores[sub.id] !== undefined ? editedScores[sub.id] : sub.score}
-                                            onChange={(e) => {
-                                                setEditedScores(prev => ({
-                                                    ...prev,
-                                                    [sub.id]: Number(e.target.value)
-                                                }));
-                                                setHasChanges(true);
-                                            }}
-                                            style={{
-                                                width: '60px',
-                                                padding: '2px',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '3px'
-                                            }}
-                                        />
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-                {/* UPDATE BUTTON */}
-                {hasChanges && (
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        marginTop: '10px'
-                    }}>
-                        <button
-                            onClick={async () => {
-                                try {
-                                    //create a promise for each submission that is in the edited list
-                                    await Promise.all(
-                                        Object.entries(editedScores).map(([submissionId, score]) =>
-                                            axios.post(`${process.env.REACT_APP_API_URL}/submissions/update-grade`, {
-                                                submissionId: Number(submissionId),
-                                                score: Number(score)
-                                            })
+                    <SubmissionList
+                        filteredSubs={filteredSubs}
+                        selectedAssignmentObj={selectedAssignmentObj}
+                        editedScores={editedScores}
+                        setEditedScores={setEditedScores}
+                        setHasChanges={setHasChanges}
+                        hasChanges={hasChanges}
+                        setSubmissions={setSubmissions}
+                    />
+                    <EditAssignmentForm
+                        assignment={selectedAssignmentObj}
+                        updateAssignments={
+                            updatedAssignment => { //function passed in child component
+                                setAssignments(
+                                    oldAssignments =>
+                                        oldAssignments.map(
+                                            assignment => assignment.id === updatedAssignment.id ? updatedAssignment : assignment
                                         )
-                                    );
-                                    setHasChanges(false); //no more changes
-                                    //update local state map the previous submissions to the editedScores 
-                                    setSubmissions(prev => {
-                                        return prev.map(submission => ({
-                                            ...submission,
-                                            score: editedScores[submission.id] ?? submission.score //nullish returns right side if left is null
-                                        }))
-                                    })
-                                } catch (error) {
-                                    console.error('Failed to update grades:', error);
-                                }
-                            }}
-                            style={{
-                                padding: '8px 16px',
-                                backgroundColor: '#28a745',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                fontSize: '16px'
-                            }}
-                        >
-                            Update Grades
-                        </button>
-                    </div>
-                )}
+                                )
+                            }
+                        }
+                    />
+                </>
+            )}
 
-            </div>
-
-
-            <EditAssignmentForm assignment={selectedAssignmentObj} updateAssignments={
-                updatedAssignment => { //function passed in child component
-                    setAssignments(
-                        oldAssignments =>
-                            oldAssignments.map(
-                                assignment => assignment.id === updatedAssignment.id ? updatedAssignment : assignment
-                            )
-                    )
-                }
-            } />
-
-            {/* CREATE AND EDIT ASSIGNMENT FORMS - MOVED TO BOTTOM */}
-            <CreateAssignmentForm updateAssignments={
-                childData => setAssignments(oldAssignments => [...oldAssignments, childData])
-            } />
-
-
-
-            <h3>Assignments</h3>
+            {currentTab === 'create' && (
+                <CreateAssignmentForm updateAssignments={
+                    childData => setAssignments(oldAssignments => [...oldAssignments, childData])
+                } />
+            )}
         </div>
     );
 }

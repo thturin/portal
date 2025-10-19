@@ -6,9 +6,10 @@ const AssignmentMenu = ({
     selectedAssignmentId,
     assignments,
     setSelectedSection,
-    sections }) => (
+    selectedSection,
+    sections,
+    filteredSubsLength }) => (
     <>
-        <h3 style={{ textAlign: 'center', marginTop: 0 }}>Select Assignment</h3>
 
         <div style={{
             maxWidth: '600px',
@@ -77,6 +78,24 @@ const AssignmentMenu = ({
                     ))}
                 </select>
             </div>
+            {/* JUPITER EXPORT BUTTON */}
+            <button
+                disabled={!selectedAssignmentId || filteredSubsLength === 0 || !selectedSection}
+                onClick={async () => {
+                    window.location.href = `${process.env.REACT_APP_API_URL}/admin/exportAssignment?assignmentId=${selectedAssignmentId}${selectedSection ? `&sectionId=${selectedSection}` : ''}`;
+                }}
+                style={{
+                    width: '100%',
+                    padding: '10px',
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '16px'
+                }}
+            >
+                JUPITER EXPORT
+            </button>
 
         </div>
     </>

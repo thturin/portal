@@ -121,7 +121,7 @@ const CreateAssignmentForm=({updateAssignments})=>{
                     >
                         <option value="">Select type</option>
                         <option value="github">GitHub Repository</option>
-                        <option value="googledoc">Google Document</option>
+                        <option value="lab">Lab</option>
                     </select>
                 </div>
 
