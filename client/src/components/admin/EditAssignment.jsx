@@ -1,42 +1,30 @@
-import axios from 'axios';
+import React from 'react';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 
-const EditAssignmentForm = ({assignment, updateAssignments})=>{
-    const apiUrl = process.env.REACT_APP_API_URL;
-    const [title, setTitle] = useState('');
-    const [dueDate, setDueDate] = useState('') ;
-    const [type, setType] = useState('');
-    const [success,setSuccess] = useState('');
-    const [error, setError] = useState('');
+const EditAssignment = ({ selectedAssignmentObj }) => {
+    const [hasChanges, setHasChanges] = useState(false);
+    const [title, setTitle] = useState(selectedAssignmentObj.title);
+    const [dueDate, setDueDate] = useState(selectedAssignmentObj.dueDate);
+    const [type, setType] = useState(selectedAssignmentObj.type);
 
-//when a user first logs in, no assignment is selected 
-//component renders before the assignment is selected so you need to use useEffect()
-    useEffect(()=>{ //when there is an assignment 
-        if(assignment){
-            setTitle(assignment.title); //place the current values of title, dueDate, and type 
-            setDueDate(assignment.dueDate.split('T')[0]);
-            setType(assignment.type);
-        }
-    },[assignment]);
+    // useEffect(()=>{
+    //     setHasChanges()
+    // },[selectedAssignmentObj])
 
-    if(!assignment){ //if there is no assignment selected, return component empty
-        return null;
-    }
-    const handleSubmit = async(e)=>{
-        e.preventDefault();
-        setError('');
-        setSuccess('');
-        try{
-            const res = await axios.put(`${apiUrl}/assignments/${assignment.id}`,{
+    const handleUpdate = async () => {
+        try {
+            const response = await axios.put(`${process.env.REACT_APP_API_URL}/assignments/${selectedAssignmentObj.id}`, {
                 title,
                 dueDate,
                 type
             });
-            setSuccess('Assignment updated successfully!');
-            if(updateAssignments) updateAssignments(res.data);
-        }catch(err){
-            setError(err.response?.data?.error || 'Failed to update Assignment');
+            if(response.data){
+                setHasChanges(false);
+            }
+        } catch (err) {
+            console.error('error in AssignmentDetails handleUpdate->', err);
         }
     };
 
@@ -49,105 +37,74 @@ const EditAssignmentForm = ({assignment, updateAssignments})=>{
             borderRadius: '8px',
             backgroundColor: '#f9f9f9'
         }}>
-            <h3 style={{ textAlign: 'center', marginTop: 0 }}>Edit Assignment {assignment.title}</h3>
-            
-            <form onSubmit={handleSubmit}>
-                {/* ✅ Title field */}
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ 
-                        display: 'block', 
-                        marginBottom: '5px', 
-                        fontWeight: 'bold' 
-                    }}>
-                        Assignment Title:
-                    </label>
-                    <input
-                        type="text"
-                        name="title"
-                        placeholder={assignment.title}
-                        value={title}
-                        onChange={e=>setTitle(e.target.value)}
-                        required
-                        style={{ 
-                            width: '100%', 
-                            padding: '8px', 
-                            border: '1px solid #ccc',
-                            borderRadius: '4px',
-                            fontSize: '14px'
-                        }}
-                    />
-                </div>
+            <h3 style={{ textAlign: 'center', marginTop: 0 }}>Assignment Details</h3>
 
-                {/* ✅ Due date field */}
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ 
-                        display: 'block', 
-                        marginBottom: '5px', 
-                        fontWeight: 'bold' 
-                    }}>
-                        Due Date:
-                    </label>
-                    <input
-                        type="datetime-local"
-                        name="dueDate"
-                        value={dueDate}
-                        onChange={e=>setDueDate(e.target.value)}
-                        style={{ 
-                            width: '100%', 
-                            padding: '8px', 
-                            border: '1px solid #ccc',
-                            borderRadius: '4px',
-                            fontSize: '14px'
-                        }}
-                    />
-                </div>
+            <div style={{ marginBottom: '10px' }}>
+                <input
+                    type="string"
+                    value={title}
+                    onChange={(e) => {
+                        setTitle(e.target.value);
+                        setHasChanges(true);
+                    }}
+                />
+            </div>
 
-                {/* ✅ Submission type field */}
-                <div style={{ marginBottom: '20px' }}>
-                    <label style={{ 
-                        display: 'block', 
-                        marginBottom: '5px', 
-                        fontWeight: 'bold' 
-                    }}>
-                        Submission Type:
-                    </label>
-                    <select
-                        name="type"
-                        value={type}
-                        onChange={e=>setType(e.target.value)}
-                        required
-                        style={{ 
-                            width: '100%', 
-                            padding: '8px', 
-                            border: '1px solid #ccc',
-                            borderRadius: '4px',
-                            fontSize: '14px'
-                        }}
-                    >
-                        <option value="">Select type</option>
-                        <option value="github">GitHub Repository</option>
-                        <option value="googledoc">Google Document</option>
-                    </select>
-                </div>
+            <div style={{ marginBottom: '10px' }}>
+                <input
+                    type="date"
+                    value={new Date(dueDate).toISOString().split('T')[0]}
+                    onChange={(e) => {
+                        setDueDate(e.target.value)
+                        setHasChanges(true);
+                    }}
+                />
+            </div>
 
-                {/* ✅ Submit Button */}
-                <button type="submit" style={{
-                    width: '100%',
-                    padding: '10px',
-                    backgroundColor: '#007bff',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    fontSize: '16px'
+            <div style={{ marginBottom: '10px' }}>
+                <select
+                    value={type}
+                    onChange={(e) => {
+                        setType(e.target.value);
+                        setHasChanges(true);
+                    }}
+                    style={{
+                        padding: '8px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px'
+                    }}
+                >
+                    <option value="lab">Lab</option>
+                    <option value="assignment">Assignment</option>
+                </select>
+            </div>
+
+            {/* UPDATE BUTTON */}
+            {hasChanges && (
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    marginTop: '10px'
                 }}>
-                    Update
-                </button> 
-   
-                {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
-                {success && <div style={{ color: 'green', marginTop: 8 }}>{success}</div>}
-            </form>
+                    <button
+                        onClick={handleUpdate} 
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#28a745',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                        }}
+                    > 
+                        Update Assignment
+                    </button>
+
+                </div>
+                )
+            }
         </div>
     );
 };
 
-export default EditAssignmentForm;
+export default EditAssignment;

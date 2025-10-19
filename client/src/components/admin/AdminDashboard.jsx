@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import CreateAssignmentForm from './CreateAssignment';
-import EditAssignmentForm from './EditAssignment';
+import EditAssignment from './EditAssignment';
 import Navbar from '../shared/Navbar';
-import AssignmentDetails from './AssignmentDetails';
 import AssignmentMenu from './AssignmentMenu';
 import SubmissionList from './SubmissionList';
 
@@ -56,7 +55,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             />
             <h2> Welcome ADMIN, {user.name}</h2>
 
-            {currentTab === 'view' && (
+            {currentTab === 'review' && (
                 <>
                     {/* SELECT ASSIGNMENT AND SUBMISSIONS SECTION - MOVED TO TOP */}
                     <AssignmentMenu
@@ -70,7 +69,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                     />
 
                     {/* DISPLAY SELECTED ASSIGNMENT (DUE DATE, TITLE, TYPE ) */}
-                    {selectedAssignmentObj && (<AssignmentDetails selectedAssignmentObj={selectedAssignmentObj} />)}
+                    {selectedAssignmentObj && (<EditAssignment selectedAssignmentObj={selectedAssignmentObj} />)}
 
                     <SubmissionList
                         filteredSubs={filteredSubs}
@@ -80,19 +79,6 @@ const AdminDashboard = ({ user, onLogout }) => {
                         setHasChanges={setHasChanges}
                         hasChanges={hasChanges}
                         setSubmissions={setSubmissions}
-                    />
-                    <EditAssignmentForm
-                        assignment={selectedAssignmentObj}
-                        updateAssignments={
-                            updatedAssignment => { //function passed in child component
-                                setAssignments(
-                                    oldAssignments =>
-                                        oldAssignments.map(
-                                            assignment => assignment.id === updatedAssignment.id ? updatedAssignment : assignment
-                                        )
-                                )
-                            }
-                        }
                     />
                 </>
             )}

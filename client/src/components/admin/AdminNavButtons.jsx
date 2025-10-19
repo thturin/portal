@@ -5,14 +5,14 @@ const AdminNavButtons = ({ onSelect }) => {
     return (
          <>                  
          {/* //(OnSelect wrapped in function prevents function from executing immediately. Only on click */}
-            <Button color="primary" onClick={() => onSelect('view')}>
-                View 
+            <Button color="primary" onClick={() => onSelect('review')}>
+            👁️ Review 
             </Button>
             <Button color="secondary" onClick={() => onSelect('manage')}>
-                Manage 
+            ✅ Manage 
             </Button>
             <Button color="secondary" onClick={() => onSelect('create')}>
-                Create
+            🔨 Create
             </Button>
         </>
     );
