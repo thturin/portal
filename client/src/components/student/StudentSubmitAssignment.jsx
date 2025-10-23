@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import SubmitForm from './SubmitForm';
-import StudentSubmissionList from './StudentSubmissionList'; // <-- Add this import
+import SubmitForm from './StudentSubmitGithub';
 
 const StudentSubmitAssignment = ({ user, submissions, setSubmissions, assignments }) => {
     return (
@@ -46,12 +45,6 @@ const StudentSubmitAssignment = ({ user, submissions, setSubmissions, assignment
                                 submissions={submissions || []}
                             />
                         </div>
-
-                        {/* ✨ Student Submission List */}
-                        <StudentSubmissionList
-                            submissions={submissions}
-                            assignments={assignments}
-                        />
                     </div>
                 </div>
             </div>

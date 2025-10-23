@@ -9,7 +9,7 @@ const apiUrl = process.env.REACT_APP_API_URL;
 //MAKE SURE AXIOS IS SEENDING SESSION COOKIES TO BACKEND
 axios.defaults.withCredentials = true;
 
-const SubmitForm = ({ onNewSubmission, user, submissions }) => {
+const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
 
     const [url, setUrl] = useState('');
     const [assignmentId, setAssignmentId] = useState(''); //the current assignment
@@ -38,6 +38,25 @@ const SubmitForm = ({ onNewSubmission, user, submissions }) => {
         fetchAssignments();
     }, []); //happens on the mount [] are the dependencies which means the function will run only when those dependencies change
 
+    const verifyGithubOwnership = async (url, githubUsername){
+        const res = await axios.post(`${apiUrl}/verify-github-ownership`, {
+            url: url,
+            githubUsername: user.githubUsername
+        });
+        return res.data
+    };
+
+    const updateSubmission = async (existingSubmission, data) => {
+        const res = await axios.put(`${apiUrl}/submissions/${existingSubmission.id}`, data);
+        return res.data;
+    }
+
+    const createSubmission = async (data) => {
+        const res = await axios.post(`${apiUrl}/submit`, data);
+        return res.data;
+    }
+
+
 
     const handleSubmit = async (e) => {
         setSubmissionExists(false);
@@ -49,17 +68,12 @@ const SubmitForm = ({ onNewSubmission, user, submissions }) => {
         setIsSubmitting(true);
 
         try {
-            console.log('-----Handle Submission--------');
             //VERIFY USER OWNERSHIP FOR GITHUB 
             try {
-                const verifyRes = await axios.post(`${apiUrl}/verify-github-ownership`, {
-                    url: url,
-                    githubUsername: user.githubUsername
-                });
+                const verifyRes = await verifyGithubOwnership(url, user.githubUsername);
                 setVerificationFeedback(verifyRes.data.output);
                 if (!verifyRes.data.success) return; //if promise is successfull but verification failed, return
             } catch (err) {
-                console.error('/verify-github-ownership failure', err);
                 setError('Failed to verify github user')
                 return;
             }
@@ -68,47 +82,27 @@ const SubmitForm = ({ onNewSubmission, user, submissions }) => {
             const existingSubmission = submissions.find(
                 sub => String(sub.assignmentId) === String(assignmentId)
             );
+            const data = {
+                url,
+                assignmentId,
+                userId: user.id,
+                submissionType: 'github',
+                assignmentTitle: assignment.title,
+                dueDate: existingSubmission ? assignment.dueDate : new Date(assignment.dueDate).toISOString()
+            };
             //---------UPDATE SUBMISSION------------
+            let result;
             if (existingSubmission) { //go to the ssubmission and update it
-                try {
-                    setSubmissionExists(true);
-                    const data = {
-                        url,
-                        assignmentId,
-                        userId: user.id,
-                        submissionType:'github',
-                        assignmentTitle: assignment.title,
-                        dueDate: assignment.dueDate
-                    };
-                    const res = await axios.put(`${apiUrl}/submissions/${existingSubmission.id}`, data);
-                    setScore(res.data.score); //score is added to database and evaluated on backend
-                    setGradleOutput(res.data.output);
-                    if (onNewSubmission) onNewSubmission(res.data);
-                } catch (err) {
-                    console.error('Error updating submissions', err);
-                }
-
+                setSubmissionExists(true);
+                result = await updateSubmission(existingSubmission, data);
             } else {
-                try {
-                    //-=-----CREATE NEW SUBMISSION-------
-                    const data = { //send to the backend
-                        url,
-                        assignmentId,
-                        userId: user.id,
-                        submissionType:'github', //need this for scoreSubmission method in controller
-                        assignmentTitle: assignment.title,
-                        dueDate: new Date(assignment.dueDate).toISOString()
-                    };
-
-                    const res = await axios.post(`${apiUrl}/submit`, data);
-                    setScore(res.data.score);
-                    setGradleOutput(res.data.output);
-                    //if property was passed in by component call in parent component, send the res.data as the value of pproperty
-                    if (onNewSubmission) onNewSubmission(res.data);
-                } catch (err) {
-                    console.error('Failed to create a new submission', err);
-                }
+                //-=-----CREATE NEW SUBMISSION-------
+                result = await createSubmission(data);
             }
+            setScore(res.data.score);
+            setGradleOutput(res.data.output);
+            //if property was passed in by component call in parent component, send the res.data as the value of pproperty
+            if (onNewSubmission) onNewSubmission(res.data);
         } catch (err) {
             console.error(err);
             //if err.response exists -> if error.response.data exists, check the .error message
@@ -120,7 +114,7 @@ const SubmitForm = ({ onNewSubmission, user, submissions }) => {
     };
 
     ///PLACEHOLDER FOR URL LINK 
-    let placeholder = 'https://github.com/username/repository';
+    let placeholder = 'https://github.com/username/repo name';
 
     return (
         <div className="submit-form">
@@ -164,7 +158,7 @@ const SubmitForm = ({ onNewSubmission, user, submissions }) => {
                     placeholder={placeholder}
                     value={url}
                     onChange={(e) => {
-                        setUrl(e.target.value.trim());   
+                        setUrl(e.target.value.trim());
                     }}
                     required style={{ width: '400px', padding: '8px' }}
                 />
@@ -251,4 +245,4 @@ const SubmitForm = ({ onNewSubmission, user, submissions }) => {
     );
 };
 
-export default SubmitForm;
+export default StudentSubmitGithub;
