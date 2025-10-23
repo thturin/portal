@@ -1,5 +1,6 @@
 import React from 'react';
 import AdminNavButtons from '../admin/AdminNavButtons';
+import StudentNavButtons from '../student/StudentNavButtons';
 
 
 const Navbar = ({ user, onSelect, onLogout }) => {
@@ -25,60 +26,10 @@ const Navbar = ({ user, onSelect, onLogout }) => {
                     {isAdmin? 'Admin' : 'Student'} Portal
                 </div>
                 {/* Navigation Buttons */}
-                {isAdmin ? (
+                {isAdmin ? 
                     <AdminNavButtons onSelect={onSelect} />
-                ) : (
-                    <>
-                        <button
-                            style={{
-                                background: '#fff',
-                                color: '#764ba2',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '8px 20px',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                            }}
-                            onClick={() => onSelect('submit')}
-                        >
-                            Submit Assignment
-                        </button>
-                        <button
-                            style={{
-                                background: '#fff',
-                                color: '#667eea',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '8px 20px',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                            }}
-                            onClick={() => onSelect('work')}
-                        >
-                            Work on Assignment
-                        </button>
-                        <button
-                            style={{
-                                background: '#fff',
-                                color: '#f59e42',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '8px 20px',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                            }}
-                            onClick={() => onSelect('late')}
-                        >
-                            Late Policy
-                        </button>
-                    </>
-                )}
+                    : <StudentNavButtons onSelect={onSelect}/>
+                }
             </div>
             {/* Logout Button */}
             <button

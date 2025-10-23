@@ -1,6 +1,6 @@
-import axios from 'axios'; //<-- how frontend will communicate with app.js server
-import { format, formatDistanceToNow, parseISO } from 'date-fns';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { formatDate, isPastDue } from '../../utils/dateUtils';
 import Spinner from '../shared/Spinner';
 
 const apiUrl = process.env.REACT_APP_API_URL;
@@ -9,60 +9,37 @@ const apiUrl = process.env.REACT_APP_API_URL;
 //MAKE SURE AXIOS IS SEENDING SESSION COOKIES TO BACKEND
 axios.defaults.withCredentials = true;
 
-const SubmitForm = ({onNewSubmission, user, submissions})=>{
+const SubmitForm = ({ onNewSubmission, user, submissions }) => {
 
     const [url, setUrl] = useState('');
-    const [assignmentId,setAssignmentId] = useState(''); //the current assignment
+    const [assignmentId, setAssignmentId] = useState(''); //the current assignment
     const [assignment, setAssignment] = useState(null);
     const [assignments, setAssignments] = useState([]); //assignment list 
-    const [score, setScore] = useState(null); 
+    const [score, setScore] = useState(null);
     const [error, setError] = useState('');
     const [submissionExists, setSubmissionExists] = useState(false);
     const [gradleOutput, setGradleOutput] = useState(''); //gradle test output
-    const [submissionType, setSubmissionType] = useState(''); //github or googledoc
     const [verificationFeedback, setVerificationFeedback] = useState(''); //show googledoc feedback
-    const [isSubmitting,setIsSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(()=>{
-        console.log('🔍 Axios Config Check:', {
-            withCredentials: axios.defaults.withCredentials,
-            baseURL: axios.defaults.baseURL,
-            globalDefaults: axios.defaults
-        });
-
-    },[]);
 
     //FETCH ASSIGNMENTES
-    useEffect(()=>{ //useEffect() code to run after the component renders
+    useEffect(() => { //useEffect() code to run after the component renders
         //useEffect let your perform actions (side effects) in your componenet, such as fetching api data
-        async function fetchAssignments(){
+        async function fetchAssignments() {
             console.log('-------FETCHING ASSIGNMENTS----------');
-            try{
+            try {
                 const res = await axios.get(`${apiUrl}/assignments`);
                 setAssignments(res.data);
-            }catch(err){
+            } catch (err) {
                 setError('Failed to load assignments');
             }
         }
         fetchAssignments();
-    },[]); //happens on the mount [] are the dependencies which means the function will run only when those dependencies change
-
-    //When assignment is selected, determine the assignment type
-    useEffect(()=>{
-        if(assignmentId){
-            const selectedAssignment =assignments.find(a=>String(a.id)===String(assignmentId));
-            setAssignment(selectedAssignment);
-            if(selectedAssignment){//if the assignment exists, set the submission type
-                setSubmissionType(selectedAssignment.type || 'error');
-                setUrl(''); //just in case
-            }
-                    //console.log(selectedAssignment.type);
-        }
-
-    },[assignmentId, assignments]); // call when current assignment changes or assignments list gets updated
+    }, []); //happens on the mount [] are the dependencies which means the function will run only when those dependencies change
 
 
-    const handleSubmit = async (e)=>{
+    const handleSubmit = async (e) => {
         setSubmissionExists(false);
         e.preventDefault();
         setScore(null);
@@ -71,198 +48,135 @@ const SubmitForm = ({onNewSubmission, user, submissions})=>{
         setVerificationFeedback('');
         setIsSubmitting(true);
 
-        try{
+        try {
             console.log('-----Handle Submission--------');
-
-            //FEATURE DEACTIVATED
-            // try{
-            //     console.log('Validating Session....');
-            //     await axios.get(`${apiUrl}/auth/me`);
-            //     console.log('✅ Session valid');
-            // }catch(err){
-            //     setError('Session Expired. Please login again');
-            //     // setTimeout(() => { //send back to login page
-            //     //     window.location.href = `${apiUrl}/auth/github`;
-            //     // }, 2000);
-            //     return;
-            // }
-            
-            //VERIFY USER OWNERSHIP FOR GOOGLE DOC 
-            if(submissionType === 'googledoc'){
-                //extract the document id from the url
-                const match = url.match(/\/document\/d\/([a-zA-Z0-9-_]+)/);
-                const documentId = match ? match[1] : null; 
-                if(!documentId){
-                    setError('invalid google doc url');
-                    return;
-                }
-
-                const verifyRes = await  axios.post(`${apiUrl}/verify-doc-ownership`,{
-                    documentId,
-                    userEmail: user.email
+            //VERIFY USER OWNERSHIP FOR GITHUB 
+            try {
+                const verifyRes = await axios.post(`${apiUrl}/verify-github-ownership`, {
+                    url: url,
+                    githubUsername: user.githubUsername
                 });
                 setVerificationFeedback(verifyRes.data.output);
-                //you don't need to send an error message 
-                if(!verifyRes.data.success){
-                    //do not update or create new submission, just return 
-                    return;
-                }
+                if (!verifyRes.data.success) return; //if promise is successfull but verification failed, return
+            } catch (err) {
+                console.error('/verify-github-ownership failure', err);
+                setError('Failed to verify github user')
+                return;
             }
-
-            //VERIFY USER OWNERSHIP FOR GITHUB 
-            if(submissionType=== 'github'){
-                try{
-                    const verifyRes = await axios.post(`${apiUrl}/verify-github-ownership`,{
-                        url:url,
-                        githubUsername: user.githubUsername
-                    });            
-                    setVerificationFeedback(verifyRes.data.output);
-                    if(!verifyRes.data.success) return; //if promise is successfull but verification failed, return
-                }catch(err){
-                    console.error('/verify-github-ownership failure', err);
-                    setError('Failed to verify github user')
-                    return;
-                }
-            }
-
 
             //CHECK FOR EXISTING SUBMISSION
             const existingSubmission = submissions.find(
-                sub=> String(sub.assignmentId) === String(assignmentId)
+                sub => String(sub.assignmentId) === String(assignmentId)
             );
             //---------UPDATE SUBMISSION------------
-            if(existingSubmission){ //go to the ssubmission and update it
-            
-                try{
+            if (existingSubmission) { //go to the ssubmission and update it
+                try {
                     setSubmissionExists(true);
-              
                     const data = {
                         url,
                         assignmentId,
                         userId: user.id,
-                        submissionType,
-                        assignmentTitle:assignment.title,
+                        submissionType:'github',
+                        assignmentTitle: assignment.title,
                         dueDate: assignment.dueDate
                     };
-                    const res = await axios.put(`${apiUrl}/submissions/${existingSubmission.id}`,data);
+                    const res = await axios.put(`${apiUrl}/submissions/${existingSubmission.id}`, data);
                     setScore(res.data.score); //score is added to database and evaluated on backend
                     setGradleOutput(res.data.output);
-                    if(onNewSubmission) onNewSubmission(res.data);
-                }catch(err){
-                    console.error('Error updating submissions',err);
+                    if (onNewSubmission) onNewSubmission(res.data);
+                } catch (err) {
+                    console.error('Error updating submissions', err);
                 }
-                
-            }else{
-                try{
+
+            } else {
+                try {
                     //-=-----CREATE NEW SUBMISSION-------
                     const data = { //send to the backend
                         url,
                         assignmentId,
-                        userId:user.id,
-                        submissionType, //need this for scoreSubmission method in controller
+                        userId: user.id,
+                        submissionType:'github', //need this for scoreSubmission method in controller
                         assignmentTitle: assignment.title,
                         dueDate: new Date(assignment.dueDate).toISOString()
                     };
-    
-                    const res = await axios.post(`${apiUrl}/submit`,data); 
+
+                    const res = await axios.post(`${apiUrl}/submit`, data);
                     setScore(res.data.score);
                     setGradleOutput(res.data.output);
                     //if property was passed in by component call in parent component, send the res.data as the value of pproperty
-                    if(onNewSubmission) onNewSubmission(res.data);
-                }catch(err){
-                    console.error('Failed to create a new submission',err);
+                    if (onNewSubmission) onNewSubmission(res.data);
+                } catch (err) {
+                    console.error('Failed to create a new submission', err);
                 }
-        }}catch(err){
+            }
+        } catch (err) {
             console.error(err);
             //if err.response exists -> if error.response.data exists, check the .error message
             setError(err.response?.data?.error || 'Submission Failed');
             setGradleOutput(err.response?.data?.output || '');
-        }finally{
+        } finally {
             setIsSubmitting(false); //for spinner 
-        }   
+        }
     };
 
     ///PLACEHOLDER FOR URL LINK 
-    let placeholder = 'Select an assignment first';
-    if(submissionType === 'github'){
-        placeholder = 'https://github.com/username/repository';
-    }else if (submissionType === 'googledoc'){
-        placeholder = 'https://docs.google.com/document/d/your-document-id/edit';
-    }
-    const formatDate = (dateString, option) =>{
-            const date = parseISO(dateString);
-
-            if(option === 1) return format(date, 'MMM dd, yyyy \'at\' h:mm a');
-            if(option === 2) return formatDistanceToNow(date, { addSuffix: true })
-        };
-
-    //changes font color
-    const isPastDue = (dueDateString) =>{
-        const dueDate = parseISO(dueDateString);
-        const now = new Date();
-        return now>dueDate; //false if late 
-    }
+    let placeholder = 'https://github.com/username/repository';
 
     return (
-        <div className = "submit-form">
-            <h3>Submit An Assignment</h3>
-            <form onSubmit ={handleSubmit}>
+        <div className="submit-form">
+            <h3>Submit a Github Repository</h3>
+            <form onSubmit={handleSubmit}>
 
                 {/* ASSIGNMENT OPTION  */}
                 <div style={{ marginBottom: '15px' }}>
                     <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
                         Select Assignment:
                     </label>
-                    <select 
+                    <select
                         value={assignmentId}
                         //prevents the number casting to turn Number("") not 0 but empty
-                        onChange={e=> setAssignmentId(e.target.value === "" ? "" :Number(e.target.value))}
-                        required 
-                        style = {{ 
-                            width: '250px', padding: '8px', marginRight: '10px'}}
+                        onChange={e => setAssignmentId(e.target.value === "" ? "" : Number(e.target.value))}
+                        required
+                        style={{
+                            width: '250px', padding: '8px', marginRight: '10px'
+                        }}
                     >
                         <option value=""> Select Assignment</option>
-                        {assignments.map(ass=>( //print out each assignment that exists as option
-                            <option 
-                                key={ass.id} 
+                        {assignments.map(ass => ( //print out each assignment that exists as option
+                            <option
+                                key={ass.id}
                                 value={ass.id}
                                 style={{ color: isPastDue(ass.dueDate) ? 'red' : 'black' }}
                             >
-                                {ass.title} - Due Date: {formatDate(ass.dueDate,1)} {formatDate(ass.dueDate,2)}
+                                {ass.title} - Due Date: {formatDate(ass.dueDate, 1)} {formatDate(ass.dueDate, 2)}
                             </option>
                         ))}
                     </select>
                 </div>
-                
+
                 {/*  LINK BOX */}
                 <label>
-                    {submissionType === 'github' ? 'GitHub Repository URL:' : 'Google Docs URL:'}
+                    GitHub Repository URL
                 </label>
 
-                {/* Show instructions for Google Docs */}
-                {submissionType === 'googledoc' && (
-                    <div style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>
-                        📋 Make sure your Google Doc is shared with "Anyone with the link can view"
-                    </div>
-                )}
-
-                <input 
+                <input
                     type="url"
                     placeholder={placeholder}
                     value={url}
-                    onChange={(e)=>{
-                        setUrl(e.target.value.trim());
-                        //console.log(`LOOK HERE ->> ${e.target.value}`);    
+                    onChange={(e) => {
+                        setUrl(e.target.value.trim());   
                     }}
                     required style={{ width: '400px', padding: '8px' }}
-                /> 
+                />
 
                 {/* SUBMIT BUTTON */}
                 <button type="submit"
-                         style={{marginLeft: '10px',
-                                opacity: isSubmitting ? 0.6 : 1,
-                                cursor: isSubmitting ? 'not-allowed' : 'pointer' }} 
-                        disabled={isSubmitting}
+                    style={{
+                        marginLeft: '10px',
+                        opacity: isSubmitting ? 0.6 : 1,
+                        cursor: isSubmitting ? 'not-allowed' : 'pointer'
+                    }}
+                    disabled={isSubmitting}
                 >
                     {isSubmitting ? (
                         <>
@@ -273,24 +187,24 @@ const SubmitForm = ({onNewSubmission, user, submissions})=>{
                     )}
                 </button>
 
-                <span  style={{ color: 'green', marginLeft: '12px', verticalAlign: 'middle' }}>
+                <span style={{ color: 'green', marginLeft: '12px', verticalAlign: 'middle' }}>
                     {submissionExists ? "Resubmitted"
-                    : (!error && "")
+                        : (!error && "")
                     }
                 </span>
             </form>
 
-              {/* Loading indicator for gradle tests */}
-            {isSubmitting && submissionType === 'github' && (
-                <div style={{ 
-                    marginTop: '20px', 
-                    padding: '15px', 
-                    backgroundColor: '#f0f8ff', 
-                    border: '1px solid #b0d4f1', 
+            {/* Loading indicator for gradle tests */}
+            {isSubmitting && (
+                <div style={{
+                    marginTop: '20px',
+                    padding: '15px',
+                    backgroundColor: '#f0f8ff',
+                    border: '1px solid #b0d4f1',
                     borderRadius: '4px',
                     textAlign: 'center'
                 }}>
-                    <Spinner /> 
+                    <Spinner />
                     <strong>Running Gradle Tests...</strong>
                     <div style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>
                         This may take 30-60 seconds. Please wait...
@@ -330,7 +244,7 @@ const SubmitForm = ({onNewSubmission, user, submissions})=>{
             )}
 
             {/* //if there was an error */}
-            {error &&(
+            {error && (
                 <p style={{ marginTop: '20px', color: 'red' }}>❌ {error}</p>
             )}
         </div>

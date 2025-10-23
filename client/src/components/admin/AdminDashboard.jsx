@@ -1,12 +1,18 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import CreateAssignmentForm from './CreateAssignment';
 import EditAssignment from './EditAssignment';
 import Navbar from '../shared/Navbar';
 import AssignmentMenu from './AssignmentMenu';
 import SubmissionList from './SubmissionList';
 
+
+
 const AdminDashboard = ({ user, onLogout }) => {
+    //for lab-builder
+    const [blocks, setBlocks] = useState([]);
+    const [labTitle, setLabTitle] = useState('');
+
     const [assignments, setAssignments] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [selectedAssignmentId, setSelectedAssignmentId] = useState('');
@@ -84,10 +90,55 @@ const AdminDashboard = ({ user, onLogout }) => {
             )}
 
             {currentTab === 'create' && (
-                <CreateAssignmentForm updateAssignments={
-                    childData => setAssignments(oldAssignments => [...oldAssignments, childData])
-                } />
+                <div style={{ padding: '20px' }}>
+                    <CreateAssignmentForm
+                        updateAssignments={childData =>
+                            setAssignments(oldAssignments => [...oldAssignments, childData])
+                        }
+                    />
+
+                    <div style={{
+                        marginTop: '20px',
+                        padding: '20px',
+                        border: '1px solid #ddd',
+                        borderRadius: '8px',
+                        backgroundColor: '#f9f9f9'
+                    }}>
+                        <h3>Lab Builder</h3>
+                        <iframe
+                            src="http://localhost:13001/builder" // Change to your actual LabBuilder URL
+                            title="Lab Builder"
+                            width="100%"
+                            height="600px"
+                            style={{ border: 'none' }}
+                            sandbox="allow-scripts allow-same-origin allow-forms"
+                        />
+                    </div>
+                </div>
             )}
+
+            {currentTab === 'manage' && (
+
+                <div style={{
+                    marginTop: '20px',
+                    padding: '20px',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    backgroundColor: '#f9f9f9'
+                }}>
+                    <h3>Lab Builder</h3>
+                    <iframe
+                        src="http://localhost:13001/preview" // Change to your actual LabBuilder URL
+                        title="Lab Builder"
+                        width="100%"
+                        height="600px"
+                        style={{ border: 'none' }}
+                        sandbox="allow-scripts allow-same-origin allow-forms"
+                    />
+                </div>
+            )}
+
+
         </div>
     );
 }
