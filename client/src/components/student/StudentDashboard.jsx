@@ -23,7 +23,7 @@ const StudentDashboard = ({ user, onLogout }) => {
     }, [user.id]);
 
     const updateSubmissions = (childData) => {
-        setSubmissions(prev => //filter old submissions to remove current chosen assignment
+        setSubmissions(prev =>
             [
                 ...prev.filter(sub => String(sub.assignmentId) !== String(childData.assignmentId)),
                 childData
@@ -51,21 +51,41 @@ const StudentDashboard = ({ user, onLogout }) => {
                 width: '100%',
             }}>
 
-                {selection === 'github' && user &&
-                    <StudentSubmitGithub
-                        user = {user}
-                        onNewSubmission={updateSubmissions}
-                        submissions={submissions}
-                    />
-                }
+                {selection === 'github' && user && (
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',    // center horizontally
+                        alignItems: 'flex-start',
+                        width: '100%',
+                        padding: '16px 0'
+                    }}>
+                        <div style={{ width: '100%', maxWidth: 900 }}>
+                            <StudentSubmitGithub
+                                user={user}
+                                onNewSubmission={updateSubmissions}
+                                submissions={submissions}
+                            />
+                        </div>
+                    </div>
+                )}
 
                 {selection === 'lab' }
 
                 {selection === 'view' && user && (
-                        <StudentSubmissionList
-                            submissions={submissions}
-                            assignments={assignments}
-                        />
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',    // center horizontally
+                        alignItems: 'flex-start',
+                        width: '100%',
+                        padding: '16px 0'
+                    }}>
+                        <div style={{ width: '100%', maxWidth: 900 }}>
+                            <StudentSubmissionList
+                                submissions={submissions}
+                                assignments={assignments}
+                            />
+                        </div>
+                    </div>
                 )}
 
                 {selection === 'late' && user && <LatePolicyInfo />}

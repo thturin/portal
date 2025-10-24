@@ -1,11 +1,6 @@
-// exports.handleSubmission = (req,res) => {
-//     res.status(200).json({message:'Submission received successfully'});
-// }
 const { format, formatDistanceToNow, parseISO } = require('date-fns');
 const { cloneRepo } = require('../services/gitService');
 const { gradeJavaSubmission } = require('../services/gradingService');
-
-//const{gradeSubmission} = require('../services/gradingService');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const axios = require('axios');
@@ -15,10 +10,8 @@ let assignmentPrefix;
 
 const verifyGithubOwnership = async (req, res) => {
     try {
-
         const { url, githubUsername } = req.body;
 
-   
         if (!url) {
             return res.status(400).json({
                 error: 'GitHub URL is required'
@@ -64,8 +57,6 @@ const verifyGithubOwnership = async (req, res) => {
         });
     }
 };
-
-
 
 const calculateLateScore = (submissionDate, dueDateString, score) => {
     //const submissionDate = parseISO(submissionDateString);
@@ -142,9 +133,7 @@ const createSubmission = async (req, res) => {
 
         const submittedAt = new Date(); //create the submission date
 
-
         result = await scoreSubmission(url, path, assignmentTitle, submissionType, submittedAt, dueDate);
-
 
         let language = submissionType === 'github' ? 'java' : 'none';
 
