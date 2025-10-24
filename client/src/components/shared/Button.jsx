@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Button = ({ children, color, onClick }) => {
+const Button = ({ children, style={}, color, onClick, disabled=false, type='button' }) => {
     const colors = {
         primary: '#764ba2',
         secondary: '#667eea',
@@ -10,6 +10,7 @@ const Button = ({ children, color, onClick }) => {
 
     return (
         <button
+            type={type}
             style={{
                 background: '#fff',
                 color: colors[color],
@@ -19,9 +20,11 @@ const Button = ({ children, color, onClick }) => {
                 fontWeight: '600',
                 cursor: 'pointer',
                 fontSize: '16px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                ...style
             }}
             onClick={onClick}
+            disabled={disabled}
         >
             {children}
         </button>

@@ -17,9 +17,8 @@ const verifyGithubOwnership = async (req, res) => {
     try {
 
         const { url, githubUsername } = req.body;
-        //DEACTIVATED
-        //const githubUsername = req.user?.githubUsername
 
+   
         if (!url) {
             return res.status(400).json({
                 error: 'GitHub URL is required'
@@ -52,16 +51,16 @@ const verifyGithubOwnership = async (req, res) => {
         const assignmentPrefixMatch = repoName.match(/u\d+[pt]\d+/i); //case insensitive
 
         assignmentPrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
+     
         return res.json({
             success: isOwner,
             output: isOwner ? `✅ You are the owner of this repository (${githubUsername})`
                 : `❌ Repository does not belong to ${githubUsername}`
         });
-
     } catch (err) {
         console.error('Error verifying github username', err);
         res.status(500).json({
-            error: 'Failed to verify Github ownership'
+            error: 'POST/ verifyGithubOwnerShip (server) Failed to verify Github ownership'
         });
     }
 };

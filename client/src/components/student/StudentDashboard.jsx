@@ -1,13 +1,10 @@
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import { useEffect, useState } from 'react';
-import StudentSubmitAssignment from './StudentSubmitAssignment.jsx';
 import StudentSubmitGithub from './StudentSubmitGithub.jsx';
 import StudentSubmissionList from './StudentSubmissionList.jsx';
 import LatePolicyInfo from './LatePolicyInfo.jsx';
 import Navbar from '../shared/Navbar.jsx';
-
-
 
 const StudentDashboard = ({ user, onLogout }) => {
     const [submissions, setSubmissions] = useState([]);
@@ -55,12 +52,6 @@ const StudentDashboard = ({ user, onLogout }) => {
             }}>
 
                 {selection === 'github' && user &&
-                    // <StudentSubmitAssignment
-                    //     user={user}
-                    //     submissions={submissions}
-                    //     setSubmissions={setSubmissions}
-                    //     assignments={assignments}
-                    // />
                     <StudentSubmitGithub
                         user = {user}
                         onNewSubmission={updateSubmissions}

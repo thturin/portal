@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { formatDate, isPastDue } from '../../utils/dateUtils';
 import Spinner from '../shared/Spinner';
+import Button from '../shared/Button';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 //set global axios defaults
@@ -13,7 +14,6 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
 
     const [url, setUrl] = useState('');
     const [assignmentId, setAssignmentId] = useState(''); //the current assignment
-    const [assignment, setAssignment] = useState(null);
     const [assignments, setAssignments] = useState([]); //assignment list 
     const [score, setScore] = useState(null);
     const [error, setError] = useState('');
@@ -38,12 +38,13 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
         fetchAssignments();
     }, []); //happens on the mount [] are the dependencies which means the function will run only when those dependencies change
 
-    const verifyGithubOwnership = async (url, githubUsername){
+    const verifyGithubOwnership = async (url) => {
         const res = await axios.post(`${apiUrl}/verify-github-ownership`, {
             url: url,
             githubUsername: user.githubUsername
         });
-        return res.data
+        //return {success: false, output:"yay"}
+        return res.data;
     };
 
     const updateSubmission = async (existingSubmission, data) => {
@@ -56,9 +57,7 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
         return res.data;
     }
 
-
-
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => { //on button click of form
         setSubmissionExists(false);
         e.preventDefault();
         setScore(null);
@@ -70,25 +69,31 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
         try {
             //VERIFY USER OWNERSHIP FOR GITHUB 
             try {
-                const verifyRes = await verifyGithubOwnership(url, user.githubUsername);
-                setVerificationFeedback(verifyRes.data.output);
-                if (!verifyRes.data.success) return; //if promise is successfull but verification failed, return
+                const verifyRes = await verifyGithubOwnership(url);
+                setVerificationFeedback(verifyRes.output);
+                if (!verifyRes.success) return; //if promise is successfull but verification failed, return
             } catch (err) {
-                setError('Failed to verify github user')
+                console.error('error caught verifyGithubOwnership (client)', err);
+                setError('Failed to verify github user');
                 return;
             }
 
             //CHECK FOR EXISTING SUBMISSION
+            //you probably don't need to look through all of the submissions 
+            //future, setSubmisisons to user submisisons only
             const existingSubmission = submissions.find(
                 sub => String(sub.assignmentId) === String(assignmentId)
             );
+
+            const selectedAssignment = assignments.find(a=>String(a.id)===String(assignmentId));
+            
             const data = {
                 url,
                 assignmentId,
                 userId: user.id,
                 submissionType: 'github',
-                assignmentTitle: assignment.title,
-                dueDate: existingSubmission ? assignment.dueDate : new Date(assignment.dueDate).toISOString()
+                assignmentTitle: selectedAssignment?.title,
+                dueDate: existingSubmission ? selectedAssignment?.dueDate : new Date(selectedAssignment?.dueDate).toISOString()
             };
             //---------UPDATE SUBMISSION------------
             let result;
@@ -99,10 +104,10 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
                 //-=-----CREATE NEW SUBMISSION-------
                 result = await createSubmission(data);
             }
-            setScore(res.data.score);
-            setGradleOutput(res.data.output);
+            setScore(result.score);
+            setGradleOutput(result.output);
             //if property was passed in by component call in parent component, send the res.data as the value of pproperty
-            if (onNewSubmission) onNewSubmission(res.data);
+            if (onNewSubmission) onNewSubmission(result);
         } catch (err) {
             console.error(err);
             //if err.response exists -> if error.response.data exists, check the .error message
@@ -112,9 +117,6 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
             setIsSubmitting(false); //for spinner 
         }
     };
-
-    ///PLACEHOLDER FOR URL LINK 
-    let placeholder = 'https://github.com/username/repo name';
 
     return (
         <div className="submit-form">
@@ -155,7 +157,7 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
 
                 <input
                     type="url"
-                    placeholder={placeholder}
+                    placeholder={'https://github.com/username/repo name'}
                     value={url}
                     onChange={(e) => {
                         setUrl(e.target.value.trim());
@@ -163,8 +165,9 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
                     required style={{ width: '400px', padding: '8px' }}
                 />
 
-                {/* SUBMIT BUTTON */}
-                <button type="submit"
+                <Button
+                    type='submit'
+                    color='primary'
                     style={{
                         marginLeft: '10px',
                         opacity: isSubmitting ? 0.6 : 1,
@@ -179,7 +182,9 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
                     ) : (
                         'Submit'
                     )}
-                </button>
+
+                </Button>
+                {/* SUBMIT BUTTON */}
 
                 <span style={{ color: 'green', marginLeft: '12px', verticalAlign: 'middle' }}>
                     {submissionExists ? "Resubmitted"
