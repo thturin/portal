@@ -16,30 +16,19 @@ ENV PATH="$PATH:/opt/gradle-${GRADLE_VERSION}/bin"
 
 WORKDIR /app
 
-COPY package*.json ./
-# install dev dependencies so nodemon is available
+# Copy package files first for better cache
+COPY ./package*.json ./
 COPY prisma ./prisma
+# Install dependencies
 RUN npm ci
 
-# copy everything (won't be used when mounted by docker-compose)
+# Generate Prisma client
+RUN npx prisma generate 
+
+# Copy the rest of your server code
 COPY . .
 
 EXPOSE 5000
 
-
-CMD ["npx","nodemon", "app.js"]
-
-# FROM node:18-alpine
-
-# WORKDIR /app
-
-# COPY package*.json ./
-# COPY prisma ./prisma
-# RUN npm install
-
-# COPY . .
-
-# EXPOSE 5000
-
-# CMD ["npx","nodemon", "app.js"]
+CMD ["npx", "nodemon", "app.js"]
 

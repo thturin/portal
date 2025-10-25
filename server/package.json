@@ -8,7 +8,6 @@
     "start": " node app.js",
     "deploy": "prisma migrate deploy",
     "build": "npx prisma generate",
-    "postinstall": "npx prisma generate",
     "seed": "node prisma/seed.js"
   },
   "engines": {
