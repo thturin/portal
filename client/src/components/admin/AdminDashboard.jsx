@@ -1,11 +1,12 @@
 import axios from 'axios';
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import CreateAssignmentForm from './CreateAssignment';
 import EditAssignment from './EditAssignment';
 import Navbar from '../shared/Navbar';
 import AssignmentMenu from './AssignmentMenu';
 import SubmissionList from './SubmissionList';
-
+import JupiterExportButton from './JupiterExportButton';
+import SectionSelection from './SectionSelection';
 
 
 const AdminDashboard = ({ user, onLogout }) => {
@@ -63,19 +64,18 @@ const AdminDashboard = ({ user, onLogout }) => {
 
             {currentTab === 'review' && (
                 <>
-                    {/* SELECT ASSIGNMENT AND SUBMISSIONS SECTION - MOVED TO TOP */}
-                    <AssignmentMenu
-                        setSelectedAssignmentId={setSelectedAssignmentId}
+    {/* JUPITER EXPORT BUTTON */}
+                    <JupiterExportButton
                         selectedAssignmentId={selectedAssignmentId}
-                        assignments={assignments}
-                        selectedSection={selectedSection}
-                        setSelectedSection={setSelectedSection}
-                        sections={sections}
                         filteredSubsLength={filteredSubs.length}
+                        selectedSection={selectedSection}
                     />
-
-                    {/* DISPLAY SELECTED ASSIGNMENT (DUE DATE, TITLE, TYPE ) */}
-                    {selectedAssignmentObj && (<EditAssignment selectedAssignmentObj={selectedAssignmentObj} />)}
+    {/* DROP DOWN MENU FOR SECTION */}
+                    <SectionSelection 
+                        setSelectedSection={setSelectedSection}
+                        selectedSection={selectedSection}
+                        sections={sections}
+                    />
 
                     <SubmissionList
                         filteredSubs={filteredSubs}
@@ -91,11 +91,17 @@ const AdminDashboard = ({ user, onLogout }) => {
 
             {currentTab === 'create' && (
                 <div style={{ padding: '20px' }}>
-                    <CreateAssignmentForm
-                        updateAssignments={childData =>
-                            setAssignments(oldAssignments => [...oldAssignments, childData])
-                        }
+                    <AssignmentMenu
+                        setSelectedAssignmentId={setSelectedAssignmentId}
+                        selectedAssignmentId={selectedAssignmentId}
+                        assignments={assignments}
+                        setAssignments={setAssignments}
+                        selectedSection={selectedSection}
+                        setSelectedSection={setSelectedSection}
+                        sections={sections}
+                        selectedAssignmentObj={selectedAssignmentObj}
                     />
+
 
                     <div style={{
                         marginTop: '20px',

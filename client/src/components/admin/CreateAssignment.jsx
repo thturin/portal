@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 
-const CreateAssignmentForm=({updateAssignments})=>{
+const CreateAssignment=({updateAssignments})=>{
     const apiUrl = process.env.REACT_APP_API_URL;
     const [title, setTitle] = useState('');
     const [dueDate, setDueDate] = useState('');
@@ -146,4 +146,4 @@ const CreateAssignmentForm=({updateAssignments})=>{
     );
 };
 
-export default CreateAssignmentForm;
+export default CreateAssignment;

@@ -9,10 +9,12 @@ const EditAssignment = ({ selectedAssignmentObj }) => {
     const [dueDate, setDueDate] = useState(selectedAssignmentObj.dueDate);
     const [type, setType] = useState(selectedAssignmentObj.type);
 
-    // useEffect(()=>{
-    //     setHasChanges()
-    // },[selectedAssignmentObj])
-
+    useEffect(()=>{
+        setTitle(selectedAssignmentObj.title);
+        setDueDate(selectedAssignmentObj.dueDate);
+        setType(selectedAssignmentObj.type);
+        setHasChanges(false);
+    },[selectedAssignmentObj]); //when selection changes, update field in assignment details
     const handleUpdate = async () => {
         try {
             const response = await axios.put(`${process.env.REACT_APP_API_URL}/assignments/${selectedAssignmentObj.id}`, {

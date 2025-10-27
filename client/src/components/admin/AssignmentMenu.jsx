@@ -1,16 +1,28 @@
 import React from 'react';
-
+import { useEffect, useState } from 'react';
+import CreateAssignment from './CreateAssignment';
+import EditAssignment from './EditAssignment';
 
 const AssignmentMenu = ({
     setSelectedAssignmentId,
     selectedAssignmentId,
     assignments,
+    setAssignments,
     setSelectedSection,
     selectedSection,
     sections,
-    filteredSubsLength }) => (
-    <>
+    selectedAssignmentObj
+}) => {
+    const [showCreateAssignment, setShowCreateAssignment] = useState(false);
+    const handleAssignmentChange = (val) => {
+        if (val === "__new__") {
+            setShowCreateAssignment(true);
+        } else {
+            setShowCreateAssignment(false);
+        }
+    }
 
+    return (<>
         <div style={{
             maxWidth: '600px',
             margin: '20px auto',
@@ -19,7 +31,7 @@ const AssignmentMenu = ({
             borderRadius: '8px',
             backgroundColor: '#f9f9f9'
         }}>
-            <h3 style={{ textAlign: 'center', marginTop: 0 }}>Select Assignment</h3>
+            <h3 style={{ textAlign: 'center', marginTop: 0 }}>Select or Create Assignment</h3>
 
             {/* DROP DOWN MENU FOR ASSIGNMENTS */}
             <div style={{ marginBottom: '15px' }}>
@@ -31,8 +43,11 @@ const AssignmentMenu = ({
                     Assignment:
                 </label>
                 <select
-                    value={selectedAssignmentId}
-                    onChange={e => setSelectedAssignmentId(e.target.value)}
+                    value={selectedAssignmentId} //value that gets passed is not the text but assignment id
+                    onChange={e => {
+                        handleAssignmentChange(e.target.value);
+                        setSelectedAssignmentId(e.target.value);
+                    }}
                     style={{
                         width: '100%',
                         padding: '8px',
@@ -42,6 +57,7 @@ const AssignmentMenu = ({
                     }}
                 >
                     <option value="">Select an Assignment</option>
+                    <option value="__new__">➕ Create New Assignment</option>
                     {assignments.map(ass => (
                         <option key={ass.id} value={ass.id}>
                             {ass.title}
@@ -50,56 +66,14 @@ const AssignmentMenu = ({
                 </select>
             </div>
 
-            {/* DROP DOWN MENU FOR SECTION */}
-            <div style={{ marginBottom: '15px' }}>
-                <label style={{
-                    display: 'block',
-                    marginBottom: '5px',
-                    fontWeight: 'bold'
-                }}>
-                    Section:
-                </label>
-                <select
-                    value={selectedSection}
-                    onChange={e => setSelectedSection(e.target.value)}
-                    style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        fontSize: '14px'
-                    }}
-                >
-                    <option value="">All Sections</option>
-                    {sections.map(sec => (
-                        <option key={sec.id} value={sec.id}>
-                            {sec.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-            {/* JUPITER EXPORT BUTTON */}
-            <button
-                disabled={!selectedAssignmentId || filteredSubsLength === 0 || !selectedSection}
-                onClick={async () => {
-                    window.location.href = `${process.env.REACT_APP_API_URL}/admin/exportAssignment?assignmentId=${selectedAssignmentId}${selectedSection ? `&sectionId=${selectedSection}` : ''}`;
-                }}
-                style={{
-                    width: '100%',
-                    padding: '10px',
-                    backgroundColor: '#007bff',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    fontSize: '16px'
-                }}
-            >
-                JUPITER EXPORT
-            </button>
+            {showCreateAssignment && <CreateAssignment
+                updateAssignments={childData => setAssignments(oldAssignments => [...oldAssignments, childData])} />}
+
+{/* DISPLAY SELECTED ASSIGNMENT (DUE DATE, TITLE, TYPE ) */}
+            {selectedAssignmentObj && (<EditAssignment selectedAssignmentObj={selectedAssignmentObj} />)}
 
         </div>
-    </>
-)
-
+    </>);
+}
 
 export default AssignmentMenu;
