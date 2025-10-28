@@ -8,6 +8,8 @@ import StudentDashboard from './components/student/StudentDashboard.jsx';
 function App() {
   //set the current user in Parent compontnet (this app.js)
   const [user, setUser] = useState(null);
+  const [assignmentId, setAssignmentId] = useState(null);
+  const [title, setTitle] = useState(null);
   
   const handleLogin=(userData)=>{
     setUser(userData); 
@@ -53,7 +55,10 @@ function App() {
       )}
 
       {user && user.role === 'admin' &&(
-        <AdminDashboard user={user} onLogout={handleLogout}/>
+        <AdminDashboard user={user} 
+                        onLogout={handleLogout}
+                        setAssignmentId={setAssignmentId}
+        />
       )}
     </div>
   );

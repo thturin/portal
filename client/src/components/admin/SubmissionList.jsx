@@ -12,14 +12,7 @@ const SubmissionList = ({
 }) => (
     <>
         {/* SUBMISSION LIST */}
-        <div style={{
-            maxWidth: '600px',
-            margin: '20px auto',
-            padding: '20px',
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            backgroundColor: '#f9f9f9'
-        }}>
+
             <h3 style={{ textAlign: 'center', marginTop: 0 }}>
                 Submissions for Assignment: {selectedAssignmentObj ? selectedAssignmentObj.title : ''}
             </h3>
@@ -115,7 +108,7 @@ const SubmissionList = ({
                 </div>
             )}
 
-        </div>
+        
 
     </>
 );

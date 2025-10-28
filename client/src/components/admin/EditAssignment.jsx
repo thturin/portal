@@ -77,7 +77,7 @@ const EditAssignment = ({ selectedAssignmentObj }) => {
                     }}
                 >
                     <option value="lab">Lab</option>
-                    <option value="assignment">Assignment</option>
+                    <option value="code">Code</option>
                 </select>
             </div>
 

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import CreateAssignmentForm from './CreateAssignment';
 import EditAssignment from './EditAssignment';
 import Navbar from '../shared/Navbar';
@@ -9,10 +9,11 @@ import JupiterExportButton from './JupiterExportButton';
 import SectionSelection from './SectionSelection';
 
 
-const AdminDashboard = ({ user, onLogout }) => {
+const AdminDashboard = ({ user, onLogout,  setAssignmentId }) => {
     //for lab-builder
     const [blocks, setBlocks] = useState([]);
     const [labTitle, setLabTitle] = useState('');
+    const labBuilderRef = useRef(null);
 
     const [assignments, setAssignments] = useState([]);
     const [submissions, setSubmissions] = useState([]);
@@ -23,16 +24,33 @@ const AdminDashboard = ({ user, onLogout }) => {
     const [hasChanges, setHasChanges] = useState(false);
     const [currentTab, setCurrentTab] = useState('');
 
+    const selectedAssignmentObj = assignments.find(
+        ass => ass.id === Number(selectedAssignmentId)
+    );
 
+    //set the title when it changes
+    useEffect(() => {
+        if (currentTab === 'create' && selectedAssignmentId && labBuilderRef.current &&selectedAssignmentObj?.title) {
+            labBuilderRef.current.contentWindow.postMessage(
+                { type: 'SET_ASSIGNMENT', 
+                    assignmentId: selectedAssignmentId,
+                    title:selectedAssignmentObj.title },
+                '*'
+            );
+        }
+        setAssignmentId(selectedAssignmentId);
+    }, [selectedAssignmentId]);
+
+    //fetch assignmenbts, submissions, and sections
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}/assignments`).then(res => setAssignments(res.data));
         axios.get(`${process.env.REACT_APP_API_URL}/submissions`).then(res => setSubmissions(res.data));
         axios.get(`${process.env.REACT_APP_API_URL}/sections`).then(res => setSections(res.data));
     }, []);
 
-    useEffect(() => {
-        console.log(submissions);
-    }, [submissions]);
+    // useEffect(() => {
+    //     console.log('assignmentObj->',selectedAssignmentObj?.id);
+    // }, [selectedAssignmentObj]);
 
     const filteredSubs = submissions.filter(
         sub => {
@@ -43,10 +61,6 @@ const AdminDashboard = ({ user, onLogout }) => {
                 return sub.assignmentId === Number(selectedAssignmentId) && sub.user?.sectionId === Number(selectedSection);
             }
         }
-    );
-
-    const selectedAssignmentObj = assignments.find(
-        ass => ass.id === Number(selectedAssignmentId)
     );
 
     const handleTabSelect = (tab) => {
@@ -64,28 +78,37 @@ const AdminDashboard = ({ user, onLogout }) => {
 
             {currentTab === 'review' && (
                 <>
-    {/* JUPITER EXPORT BUTTON */}
-                    <JupiterExportButton
-                        selectedAssignmentId={selectedAssignmentId}
-                        filteredSubsLength={filteredSubs.length}
-                        selectedSection={selectedSection}
-                    />
-    {/* DROP DOWN MENU FOR SECTION */}
-                    <SectionSelection 
-                        setSelectedSection={setSelectedSection}
-                        selectedSection={selectedSection}
-                        sections={sections}
-                    />
+                    <div style={{
+                        maxWidth: '600px',
+                        margin: '20px auto',
+                        padding: '20px',
+                        border: '1px solid #ddd',
+                        borderRadius: '8px',
+                        backgroundColor: '#f9f9f9'
+                    }}>
+                        {/* JUPITER EXPORT BUTTON */}
+                        <JupiterExportButton
+                            selectedAssignmentId={selectedAssignmentId}
+                            filteredSubsLength={filteredSubs.length}
+                            selectedSection={selectedSection}
+                        />
+                        {/* DROP DOWN MENU FOR SECTION */}
+                        <SectionSelection
+                            setSelectedSection={setSelectedSection}
+                            selectedSection={selectedSection}
+                            sections={sections}
+                        />
 
-                    <SubmissionList
-                        filteredSubs={filteredSubs}
-                        selectedAssignmentObj={selectedAssignmentObj}
-                        editedScores={editedScores}
-                        setEditedScores={setEditedScores}
-                        setHasChanges={setHasChanges}
-                        hasChanges={hasChanges}
-                        setSubmissions={setSubmissions}
-                    />
+                        <SubmissionList
+                            filteredSubs={filteredSubs}
+                            selectedAssignmentObj={selectedAssignmentObj}
+                            editedScores={editedScores}
+                            setEditedScores={setEditedScores}
+                            setHasChanges={setHasChanges}
+                            hasChanges={hasChanges}
+                            setSubmissions={setSubmissions}
+                        />
+                    </div>
                 </>
             )}
 
@@ -112,6 +135,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                     }}>
                         <h3>Lab Builder</h3>
                         <iframe
+                            ref={labBuilderRef}
                             src="http://localhost:13001/builder" // Change to your actual LabBuilder URL
                             title="Lab Builder"
                             width="100%"
