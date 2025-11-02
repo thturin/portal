@@ -1,23 +1,23 @@
 import axios from 'axios';
-import { format, parseISO } from 'date-fns';
 import { useEffect, useState } from 'react';
-import StudentSubmitGithub from './StudentSubmitGithub.jsx';
-import StudentSubmissionList from './StudentSubmissionList.jsx';
-import LatePolicyInfo from './LatePolicyInfo.jsx';
-import Navbar from '../shared/Navbar.jsx';
+import StudentSubmitGithub from '../components/StudentSubmitGithub.jsx';
+import StudentSubmissionList from '../components/StudentSubmissionList.jsx';
+import LatePolicyInfo from '../components/LatePolicyInfo.jsx';
+import Navbar from '../../../shared/Navbar.jsx';
 
 const StudentDashboard = ({ user, onLogout }) => {
     const [submissions, setSubmissions] = useState([]);
     const [assignments, setAssignments] = useState([]);
+    const [sessions, setSessions] = useState([]);
     const [selection, setSelection] = useState(); //work, submit, late or create, a, create l , test
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_URL}/submissions`).then(res => {
+        axios.get(`${process.env.REACT_APP_API_HOST}/submissions`).then(res => {
             const userSubs = res.data.filter(sub => sub.userId === user.id);
             setSubmissions(userSubs);
         });
 
-        axios.get(`${process.env.REACT_APP_API_URL}/assignments`).then(res => {
+        axios.get(`${process.env.REACT_APP_API_HOST}/assignments`).then(res => {
             setAssignments(res.data);
         });
     }, [user.id]);

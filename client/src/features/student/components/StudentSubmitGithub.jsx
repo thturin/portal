@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { formatDate, isPastDue } from '../../utils/dateUtils';
-import Spinner from '../shared/Spinner';
-import Button from '../shared/Button';
+import Spinner from '../../../shared/Spinner';
+import Button from '../../../shared/Button';
+import AssignmentMenu from './AssignmentMenu';
 
-const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = process.env.REACT_APP_API_HOST;
 //set global axios defaults
 
 //MAKE SURE AXIOS IS SEENDING SESSION COOKIES TO BACKEND
@@ -13,8 +13,9 @@ axios.defaults.withCredentials = true;
 const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
 
     const [url, setUrl] = useState('');
-    const [assignmentId, setAssignmentId] = useState(''); //the current assignment
+    const [selectedAssignmentId, setSelectedAssignmentId] = useState(''); //the current assignment
     const [assignments, setAssignments] = useState([]); //assignment list 
+    const [assignmentType, setAssignmentType] = useState('');
     const [score, setScore] = useState(null);
     const [error, setError] = useState('');
     const [submissionExists, setSubmissionExists] = useState(false);
@@ -23,7 +24,7 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
 
-    //FETCH ASSIGNMENTES
+    //FETCH ASSIGNMENTES and setAssignmentType to 'github'
     useEffect(() => { //useEffect() code to run after the component renders
         //useEffect let your perform actions (side effects) in your componenet, such as fetching api data
         async function fetchAssignments() {
@@ -36,6 +37,9 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
             }
         }
         fetchAssignments();
+        setAssignmentType('github');
+    
+    
     }, []); //happens on the mount [] are the dependencies which means the function will run only when those dependencies change
 
     const verifyGithubOwnership = async (url) => {
@@ -78,18 +82,19 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
                 return;
             }
 
-            //CHECK FOR EXISTING SUBMISSION
-            //you probably don't need to look through all of the submissions 
-            //future, setSubmisisons to user submisisons only
+    //CHECK FOR EXISTING SUBMISSION
+    //you probably don't need to look through all of the submissions 
+    //future, setSubmisisons to user submisisons only
             const existingSubmission = submissions.find(
-                sub => String(sub.assignmentId) === String(assignmentId)
+                sub => String(sub.assignmentId) === String(selectedAssignmentId)
             );
 
-            const selectedAssignment = assignments.find(a=>String(a.id)===String(assignmentId));
+
+            const selectedAssignment = assignments.find(a=>String(a.id)===String(selectedAssignmentId));
             
             const data = {
                 url,
-                assignmentId,
+                assignmentId: selectedAssignmentId,
                 userId: user.id,
                 submissionType: 'github',
                 assignmentTitle: selectedAssignment?.title,
@@ -124,32 +129,12 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
             <form onSubmit={handleSubmit}>
 
                 {/* ASSIGNMENT OPTION  */}
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                        Select Assignment:
-                    </label>
-                    <select
-                        value={assignmentId}
-                        //prevents the number casting to turn Number("") not 0 but empty
-                        onChange={e => setAssignmentId(e.target.value === "" ? "" : Number(e.target.value))}
-                        required
-                        style={{
-                            width: '250px', padding: '8px', marginRight: '10px'
-                        }}
-                    >
-                        <option value=""> Select Assignment</option>
-                        {assignments.map(ass => ( //print out each assignment that exists as option
-                            <option
-                                key={ass.id}
-                                value={ass.id}
-                                style={{ color: isPastDue(ass.dueDate) ? 'red' : 'black' }}
-                            >
-                                {ass.title} - Due Date: {formatDate(ass.dueDate, 1)} {formatDate(ass.dueDate, 2)}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
+                <AssignmentMenu 
+                    setSelectedAssignmentId={setSelectedAssignmentId}
+                    selectedAssignmentId={selectedAssignmentId}
+                    assignments={assignments}
+                    assignmentType={assignmentType}
+                />
                 {/*  LINK BOX */}
                 <label>
                     GitHub Repository URL

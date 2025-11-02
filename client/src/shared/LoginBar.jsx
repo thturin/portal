@@ -10,22 +10,6 @@ const LoginBar = ({onLogin}) =>{
     const [userName, setUserName] = useState('');
     const [password, setPassword] = useState('');
 
-    //WHEN THE USER LOGS OUT, YOU SHOULD NOT PERFORM THE GET METHOD BELOW `
-    //currently github authorization is not working
-    // useEffect(()=>{
-    //     axios.get(`${process.env.REACT_APP_API_URL}/auth/me`)
-    //     .then(res=>{
-    //         setUserName(res.data.name);
-    //         setSuccess(true);
-    //         if(onLogin) onLogin(res.data); //send user data to parent
-    //         }).catch(()=>{
-    //             //this happens the user logs out and the user is now null, it will try to GET /auth/me but the session has expired
-    //             setSuccess(false);
-    //             setUserName('');
-    //             //setPassword('');
-    //         });
-    // },[onLogin]);
-
     //handle github authorization login. After the user clicks login and we know the email exists in the database
     const handleGithubLogin= async (e)=>{
         e.preventDefault(); //I think this was the problem of http://localhost:5000/api/auth/me not authorizing???
@@ -41,8 +25,8 @@ const LoginBar = ({onLogin}) =>{
         }else{
             ///check password
             try{
-                console.log('look here',process.env.REACT_APP_API_URL);
-                const res = await axios.post(process.env.REACT_APP_API_URL+'/login', { userName, password});
+                console.log(process.env.REACT_APP_API_HOST);
+                const res = await axios.post(process.env.REACT_APP_API_HOST+'/login', { userName, password});
                 if(res.data && res.data.user){
                     //basic login 
                     onLogin(res.data.user);
@@ -51,7 +35,7 @@ const LoginBar = ({onLogin}) =>{
                     //if login is successful... there exists a response and a user found in db
                     //PASS THE EMAIL AS A STATE PARAM VIA URL TO PASSPORT STRATEGY      
                     //DEACTIVATED FEATURE  
-                    // const url = `${process.env.REACT_APP_API_URL}/auth/github?state=${encodeURIComponent(email)}`;
+                    // const url = `${process.env.REACT_APP_API_HOST}/auth/github?state=${encodeURIComponent(email)}`;
                     // window.location.href = url;
                 }else{
                     setError('Password incorrect');

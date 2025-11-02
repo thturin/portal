@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 
 const CreateAssignment=({updateAssignments})=>{
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = process.env.REACT_APP_API_HOST;
     const [title, setTitle] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [type, setType] = useState('');

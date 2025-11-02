@@ -1,9 +1,9 @@
 import React from 'react';
-import AdminNavButtons from '../admin/AdminNavButtons';
-import StudentNavButtons from '../student/StudentNavButtons';
+import AdminNavButtons from '../features/admin/components/AdminNavButtons';
+import StudentNavButtons from '../features/student/components/StudentNavButtons';
 
 
-const Navbar = ({ user, onSelect, onLogout }) => {
+const Navbar = ({ user, onSelect, onLogout, assignmentTitle }) => {
     const isAdmin = user.role === 'admin';
 
     return (
@@ -27,7 +27,7 @@ const Navbar = ({ user, onSelect, onLogout }) => {
                 </div>
                 {/* Navigation Buttons */}
                 {isAdmin ? 
-                    <AdminNavButtons onSelect={onSelect} />
+                    <AdminNavButtons onSelect={onSelect} assignmentTitle={assignmentTitle} />
                     : <StudentNavButtons onSelect={onSelect}/>
                 }
             </div>

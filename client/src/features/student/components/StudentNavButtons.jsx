@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '../shared/Button';
+import Button from '../../../shared/Button';
 
 const StudentNavButtons = ({ onSelect }) => {
     return (

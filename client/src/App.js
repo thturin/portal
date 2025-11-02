@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import './App.css';
-import AdminDashboard from './components/admin/AdminDashboard.jsx';
-import LoginBar from './components/shared/LoginBar.jsx';
-import StudentDashboard from './components/student/StudentDashboard.jsx';
+import AdminDashboard from './features/admin/pages/AdminDashboard.jsx';
+import LoginBar from './shared/LoginBar.jsx';
+import StudentDashboard from './features/student/pages/StudentDashboard.jsx';
 
 function App() {
   //set the current user in Parent compontnet (this app.js)
@@ -19,7 +19,7 @@ function App() {
     //you need to make a post request because according to HTTP, actions that change 
     //the server state should use POST, not GET
     //also passport/express-session expects POST
-   // await axios.post(`${process.env.REACT_APP_API_URL}/auth/logout`,{},{withCredentials:true});
+   // await axios.post(`${process.env.REACT_APP_API_HOST}/auth/logout`,{},{withCredentials:true});
     setUser(null);
   }
 
@@ -57,7 +57,6 @@ function App() {
       {user && user.role === 'admin' &&(
         <AdminDashboard user={user} 
                         onLogout={handleLogout}
-                        setAssignmentId={setAssignmentId}
         />
       )}
     </div>

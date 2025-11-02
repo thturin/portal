@@ -1,19 +1,19 @@
 import axios from 'axios';
 import { useRef, useEffect, useState } from 'react';
-import CreateAssignmentForm from './CreateAssignment';
-import EditAssignment from './EditAssignment';
-import Navbar from '../shared/Navbar';
-import AssignmentMenu from './AssignmentMenu';
-import SubmissionList from './SubmissionList';
-import JupiterExportButton from './JupiterExportButton';
-import SectionSelection from './SectionSelection';
+import Navbar from '../../../shared/Navbar';
+import AssignmentMenu from '../components/AssignmentMenu';
+import SubmissionList from '../components/SubmissionList';
+import JupiterExportButton from '../components/JupiterExportButton';
+import SectionSelection from '../components/SectionSelection';
+import LabBuilder from '../../lab/components/LabBuilder';
+import LabPreview from '../../lab/components/LabPreview';
 
 
-const AdminDashboard = ({ user, onLogout,  setAssignmentId }) => {
-    //for lab-builder
+const AdminDashboard = ({ user, onLogout }) => {
+    //for lab-builder/preview
     const [blocks, setBlocks] = useState([]);
-    const [labTitle, setLabTitle] = useState('');
-    const labBuilderRef = useRef(null);
+    const [title, setTitle] = useState('');
+    const [selectedLabId, setSelectedLabId] = useState(null);
 
     const [assignments, setAssignments] = useState([]);
     const [submissions, setSubmissions] = useState([]);
@@ -24,33 +24,9 @@ const AdminDashboard = ({ user, onLogout,  setAssignmentId }) => {
     const [hasChanges, setHasChanges] = useState(false);
     const [currentTab, setCurrentTab] = useState('');
 
-    const selectedAssignmentObj = assignments.find(
+    const selectedAssignmentObj = assignments.find(  //this will execute on any render
         ass => ass.id === Number(selectedAssignmentId)
     );
-
-    //set the title when it changes
-    useEffect(() => {
-        if (currentTab === 'create' && selectedAssignmentId && labBuilderRef.current &&selectedAssignmentObj?.title) {
-            labBuilderRef.current.contentWindow.postMessage(
-                { type: 'SET_ASSIGNMENT', 
-                    assignmentId: selectedAssignmentId,
-                    title:selectedAssignmentObj.title },
-                '*'
-            );
-        }
-        setAssignmentId(selectedAssignmentId);
-    }, [selectedAssignmentId]);
-
-    //fetch assignmenbts, submissions, and sections
-    useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_URL}/assignments`).then(res => setAssignments(res.data));
-        axios.get(`${process.env.REACT_APP_API_URL}/submissions`).then(res => setSubmissions(res.data));
-        axios.get(`${process.env.REACT_APP_API_URL}/sections`).then(res => setSections(res.data));
-    }, []);
-
-    // useEffect(() => {
-    //     console.log('assignmentObj->',selectedAssignmentObj?.id);
-    // }, [selectedAssignmentObj]);
 
     const filteredSubs = submissions.filter(
         sub => {
@@ -63,6 +39,22 @@ const AdminDashboard = ({ user, onLogout,  setAssignmentId }) => {
         }
     );
 
+    //fetch assignmenbts, submissions, and sections
+    useEffect(() => {
+        console.log('fetching assignments, submissions on mount');
+        axios.get(`${process.env.REACT_APP_API_HOST}/assignments`).then(res => setAssignments(res.data));
+        axios.get(`${process.env.REACT_APP_API_HOST}/submissions`).then(res => setSubmissions(res.data));
+        axios.get(`${process.env.REACT_APP_API_HOST}/sections`).then(res => setSections(res.data));
+    }, []);
+
+    //when user selects assignment, find the labId from selected assignment obj
+    useEffect(()=>{
+        if(selectedAssignmentObj){
+            setSelectedLabId(selectedAssignmentObj.labId);
+        }
+
+    },[selectedAssignmentObj]);
+
     const handleTabSelect = (tab) => {
         console.log(`current tab is ${currentTab}`);
         setCurrentTab(tab);
@@ -73,6 +65,7 @@ const AdminDashboard = ({ user, onLogout,  setAssignmentId }) => {
             <Navbar user={user}
                 onSelect={handleTabSelect}
                 onLogout={onLogout}
+                assignmentTitle={selectedAssignmentObj?.title}
             />
             <h2> Welcome ADMIN, {user.name}</h2>
 
@@ -119,53 +112,51 @@ const AdminDashboard = ({ user, onLogout,  setAssignmentId }) => {
                         selectedAssignmentId={selectedAssignmentId}
                         assignments={assignments}
                         setAssignments={setAssignments}
-                        selectedSection={selectedSection}
-                        setSelectedSection={setSelectedSection}
-                        sections={sections}
                         selectedAssignmentObj={selectedAssignmentObj}
+                        setTitle={setTitle}
                     />
 
 
-                    <div style={{
+                    {/* <div style={{
                         marginTop: '20px',
                         padding: '20px',
                         border: '1px solid #ddd',
                         borderRadius: '8px',
                         backgroundColor: '#f9f9f9'
-                    }}>
-                        <h3>Lab Builder</h3>
-                        <iframe
-                            ref={labBuilderRef}
-                            src="http://localhost:13001/builder" // Change to your actual LabBuilder URL
-                            title="Lab Builder"
-                            width="100%"
-                            height="600px"
-                            style={{ border: 'none' }}
-                            sandbox="allow-scripts allow-same-origin allow-forms"
+                    }}> */}
+                        <LabBuilder
+                            blocks={blocks}
+                            setBlocks={setBlocks}
+                            title={title}
+                            setTitle={setTitle}
+                            assignmentId={selectedAssignmentId}
+                            setAssignmentId={setSelectedAssignmentId}
+                            id={selectedLabId}
+                            setId={setSelectedLabId}
                         />
-                    </div>
+                    {/* </div> */}
                 </div>
             )}
 
             {currentTab === 'manage' && (
 
-                <div style={{
-                    marginTop: '20px',
-                    padding: '20px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    backgroundColor: '#f9f9f9'
-                }}>
-                    <h3>Lab Builder</h3>
-                    <iframe
-                        src="http://localhost:13001/preview" // Change to your actual LabBuilder URL
-                        title="Lab Builder"
-                        width="100%"
-                        height="600px"
-                        style={{ border: 'none' }}
-                        sandbox="allow-scripts allow-same-origin allow-forms"
+                // <div style={{
+                //     marginTop: '20px',
+                //     padding: '20px',
+                //     border: '1px solid #ddd',
+                //     borderRadius: '8px',
+                //     backgroundColor: '#f9f9f9'
+                // }}>
+
+                    <LabPreview
+                        blocks={blocks}
+                        setBlocks={setBlocks}
+                        title={title}
+                        setTitle={setTitle}
+                        id={selectedLabId}
+                        setId={setSelectedAssignmentId}
                     />
-                </div>
+                //</div>
             )}
 
 

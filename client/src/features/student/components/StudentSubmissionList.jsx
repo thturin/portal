@@ -1,7 +1,7 @@
 import React from 'react';
-import { formatDate, isPastDueSubmission, calcDiffDays } from '../../utils/dateUtils';
-import ScoreDisplay from '../shared/ScoreDisplay';
-import StatusBadge from '../shared/StatusBadge';
+import { formatDate, isPastDueSubmission, calcDiffDays } from '../../../utils/dateUtils';
+import ScoreDisplay from '../../../shared/ScoreDisplay';
+import StatusBadge from '../../../shared/StatusBadge';
 
 // Utility functions (move to utils if you want)
 

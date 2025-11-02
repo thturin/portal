@@ -17,7 +17,7 @@ const EditAssignment = ({ selectedAssignmentObj }) => {
     },[selectedAssignmentObj]); //when selection changes, update field in assignment details
     const handleUpdate = async () => {
         try {
-            const response = await axios.put(`${process.env.REACT_APP_API_URL}/assignments/${selectedAssignmentObj.id}`, {
+            const response = await axios.put(`${process.env.REACT_APP_API_HOST}/assignments/${selectedAssignmentObj.id}`, {
                 title,
                 dueDate,
                 type

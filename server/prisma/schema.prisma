@@ -54,7 +54,7 @@ model Assignment {
   dueDate     DateTime
   type        String?
   submissions Submission[]
-        
+  labId       Int?
 }
 
 model Section{

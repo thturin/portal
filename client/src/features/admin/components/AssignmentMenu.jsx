@@ -8,12 +8,11 @@ const AssignmentMenu = ({
     selectedAssignmentId,
     assignments,
     setAssignments,
-    setSelectedSection,
-    selectedSection,
-    sections,
-    selectedAssignmentObj
+    selectedAssignmentObj,
+    setTitle
 }) => {
     const [showCreateAssignment, setShowCreateAssignment] = useState(false);
+    
     const handleAssignmentChange = (val) => {
         if (val === "__new__") {
             setShowCreateAssignment(true);
@@ -47,6 +46,8 @@ const AssignmentMenu = ({
                     onChange={e => {
                         handleAssignmentChange(e.target.value);
                         setSelectedAssignmentId(e.target.value);
+                        //setTitle to the assignment list selection
+                        if(e.target.value!=="__new__") setTitle(assignments.find(a=>String(a.id)==String(e.target.value))?.title ?? '');
                     }}
                     style={{
                         width: '100%',
@@ -69,7 +70,7 @@ const AssignmentMenu = ({
             {showCreateAssignment && <CreateAssignment
                 updateAssignments={childData => setAssignments(oldAssignments => [...oldAssignments, childData])} />}
 
-{/* DISPLAY SELECTED ASSIGNMENT (DUE DATE, TITLE, TYPE ) */}
+            {/* DISPLAY SELECTED ASSIGNMENT (DUE DATE, TITLE, TYPE ) */}
             {selectedAssignmentObj && (<EditAssignment selectedAssignmentObj={selectedAssignmentObj} />)}
 
         </div>

@@ -1,11 +1,11 @@
 import React from 'react';
-import Button from '../shared/Button';
+import Button from '../../../shared/Button';
 
 const JupiterExportButton = ({selectedAssignmentId,filteredSubsLength,selectedSection}) => (
             <Button
                 disabled={!selectedAssignmentId || filteredSubsLength === 0 || !selectedSection}
                 onClick={async () => {
-                    window.location.href = `${process.env.REACT_APP_API_URL}/admin/exportAssignment?assignmentId=${selectedAssignmentId}${selectedSection ? `&sectionId=${selectedSection}` : ''}`;
+                    window.location.href = `${process.env.REACT_APP_API_HOST}/admin/exportAssignment?assignmentId=${selectedAssignmentId}${selectedSection ? `&sectionId=${selectedSection}` : ''}`;
                 }}
                 style={{
                     width: '100%',

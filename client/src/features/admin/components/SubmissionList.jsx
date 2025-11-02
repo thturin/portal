@@ -76,7 +76,7 @@ const SubmissionList = ({
                                 //create a promise for each submission that is in the edited list
                                 await Promise.all(
                                     Object.entries(editedScores).map(([submissionId, score]) =>
-                                        axios.post(`${process.env.REACT_APP_API_URL}/submissions/update-grade`, {
+                                        axios.post(`${process.env.REACT_APP_API_HOST}/submissions/update-grade`, {
                                             submissionId: Number(submissionId),
                                             score: Number(score)
                                         })
