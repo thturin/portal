@@ -66,6 +66,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 onSelect={handleTabSelect}
                 onLogout={onLogout}
                 assignmentTitle={selectedAssignmentObj?.title}
+                assignmentType={selectedAssignmentObj?.type}
             />
             <h2> Welcome ADMIN, {user.name}</h2>
 
@@ -116,45 +117,29 @@ const AdminDashboard = ({ user, onLogout }) => {
                         setTitle={setTitle}
                     />
 
-
-                    {/* <div style={{
-                        marginTop: '20px',
-                        padding: '20px',
-                        border: '1px solid #ddd',
-                        borderRadius: '8px',
-                        backgroundColor: '#f9f9f9'
-                    }}> */}
                         <LabBuilder
                             blocks={blocks}
                             setBlocks={setBlocks}
                             title={title}
                             setTitle={setTitle}
-                            assignmentId={selectedAssignmentId}
-                            setAssignmentId={setSelectedAssignmentId}
-                            id={selectedLabId}
-                            setId={setSelectedLabId}
+                            mode='admin'
+                            userId='12345'
                         />
-                    {/* </div> */}
                 </div>
             )}
 
             {currentTab === 'manage' && (
-
-                // <div style={{
-                //     marginTop: '20px',
-                //     padding: '20px',
-                //     border: '1px solid #ddd',
-                //     borderRadius: '8px',
-                //     backgroundColor: '#f9f9f9'
-                // }}>
 
                     <LabPreview
                         blocks={blocks}
                         setBlocks={setBlocks}
                         title={title}
                         setTitle={setTitle}
-                        id={selectedLabId}
-                        setId={setSelectedAssignmentId}
+                        assignmentId={selectedAssignmentId}
+                        setAssignmentId={setSelectedAssignmentId}
+                        mode='admin'
+                        userId={user.id}
+                        username={user.username}
                     />
                 //</div>
             )}

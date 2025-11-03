@@ -4,20 +4,13 @@ import { createSession } from '../models/session';
 import MaterialBlock from './MaterialBlock';
 import QuestionBlock from './QuestionBlock';
 
-
-
-function LabPreview({ blocks, setBlocks, title, setTitle, id, setId, assignmentId }) {
-    const studentId = '1234';
+function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username }) {
+    const isAdmin = mode === 'admin';
     const [responses, setResponses] = useState({});
     const [gradedResults, setGradedResults] = useState({}); //object, not id
     const [finalResults, setFinalResults] = useState();
     const [sessionLoaded, setSessionLoaded] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
-
-    useEffect(()=>{
-
-    },[])
 
     const allQuestions = [
         //filter questions without subquestions
@@ -30,20 +23,47 @@ function LabPreview({ blocks, setBlocks, title, setTitle, id, setId, assignmentI
     ];
 
     //AT SOME POINT YOU NEED TO REPLACE THIS WITH THE LOADLAB.JS FUNCTION
-    const loadLab = async()=>{
-         try {
+    const loadLab = async () => {
+        try {
             const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/lab/load-lab`, {
-                params: { assignmentId: id, title }
+                params: { assignmentId, title }
             });
             setBlocks(response.data.blocks);
             setTitle(response.data.title);
-            setId(response.data.id);
         } catch (err) {
             console.error('Lab did not load from labController successfully', err.message);
         }
     };
-    
 
+    const loadSession = async () => {
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/session/load-session/${title}`,{
+                username,
+                userId
+            });
+            if (response.error) {
+                console.log(response.error);
+                return;
+            }
+            if (response.data.session.responses && Object.keys(response.data.session.responses).length > 0) {
+                setResponses(response.data.session.responses);
+            }
+            // Only set if gradedResults is not empty
+            if (response.data.session.gradedResults && Object.keys(response.data.session.gradedResults).length > 0) {
+                setGradedResults(response.data.session.gradedResults);
+            }
+            // Only set if finalScore exists
+            if (response.data.session.finalScore && response.data.session.finalScore.totalScore !== undefined) {
+                setFinalResults(response.data.session.finalScore.totalScore);
+            }
+            setSessionLoaded(true);
+        } catch (err) {
+            console.error('Error in getResponse()', err);
+        };
+    }
+
+
+    //DEBUG INFO
     useEffect(() => { // console.log() happens faster than fetchSession() use this to track values
         if (sessionLoaded) {
             console.log('State updated:', {
@@ -54,41 +74,18 @@ function LabPreview({ blocks, setBlocks, title, setTitle, id, setId, assignmentI
         }
     }, [responses, finalResults, gradedResults, sessionLoaded]);
 
-
-    //LOAD SESSION
+    //LOAD SESSION and LAB
     useEffect(() => { //on  mount, load json 
         //extract responses, graded results and final score
         //ENSURE THIS HAPPENS BEFORE AUTOSAVE USE EFFECT
-        const fetchSession = async () => {
-            try {
-                const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/session/load-session/${title}`);
-                if (response.error) {
-                    console.log(response.error);
-                    return;
-                }
-                if (response.data.session.responses && Object.keys(response.data.session.responses).length > 0) {
-                    setResponses(response.data.session.responses);
-                }
-                // Only set if gradedResults is not empty
-                if (response.data.session.gradedResults && Object.keys(response.data.session.gradedResults).length > 0) {
-                    setGradedResults(response.data.session.gradedResults);
-                }
-                // Only set if finalScore exists
-                if (response.data.session.finalScore && response.data.session.finalScore.totalScore !== undefined) {
-                    setFinalResults(response.data.session.finalScore.totalScore);
-                }
-                setSessionLoaded(true);
-            } catch (err) {
-                console.error('Error in getResponse()', err);
-            };
-        }
-        fetchSession();
+        loadLab();
+        loadSession();
     }, []);
 
     //SAVE SESSION - save 
     useEffect(() => { //useeffect cannot be async
         const saveSession = async () => {
-            if (!title || !studentId || !sessionLoaded) return; //if not title was created or studentId is not found, don't update
+            if (!title || !userId || !sessionLoaded) return; //if not title was created or studentId is not found, don't update
             const session = createSession();
             session.labInfo.title = title;
             if (responses) session.responses = responses;
@@ -157,7 +154,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, id, setId, assignmentI
                 }
             } catch (err) {
                 console.error("Error grading in LabPreview [LabPreview.jsx]");
-            } 
+            }
         } //END OF FOR LOOP
         //FOR QUESTIONS THAT WERE LEFT BLANK, CREATE A NEW OBJECT IN GRADEDRESULTS 
         //WITH SCORE 0 AND NO RESPONSE
@@ -190,9 +187,9 @@ function LabPreview({ blocks, setBlocks, title, setTitle, id, setId, assignmentI
             // }
         } catch (err) {
             console.error('error calculating final score', err);
-        }finally {
-                setIsSubmitting(false); //stop loading regardless of success/failure
-            }
+        } finally {
+            setIsSubmitting(false); //stop loading regardless of success/failure
+        }
     }
 
     return (
@@ -208,20 +205,22 @@ function LabPreview({ blocks, setBlocks, title, setTitle, id, setId, assignmentI
                 {/* LIST BLOCKS AND DISPLAY */}
                 {blocks.map((block, i) => (
                     <div key={block.id || i} className="mb-6">
-
-                        {/* DISPLAY A MATERIAL */}
-                        {block.blockType === "material" ? (
-                            <MaterialBlock content={block.content} />
-                        ) : (
-                            // DISPLAY A QUESTION OR SUBQUESTION
-                            <QuestionBlock
-                                block={block}
-                                setResponses={setResponses}
-                                responses={responses}
-                                gradedResults={gradedResults}
-                                finalResults={finalResults}
-                            />
-                        )}
+                        {/* bordered block wrapper */}
+                        <div className="rounded-lg border-2 border-slate-900 bg-white p-4 shadow-sm">
+                            {/* DISPLAY A MATERIAL */}
+                            {block.blockType === "material" ? (
+                                <MaterialBlock content={block.content} />
+                            ) : (
+                                // DISPLAY A QUESTION OR SUBQUESTION
+                                <QuestionBlock
+                                    block={block}
+                                    setResponses={setResponses}
+                                    responses={responses}
+                                    gradedResults={gradedResults}
+                                    finalResults={finalResults}
+                                />
+                            )}
+                        </div>
                     </div>
                 ))}
                 <button

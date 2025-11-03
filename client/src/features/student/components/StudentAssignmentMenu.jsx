@@ -2,12 +2,20 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import { formatDate, isPastDue } from '../../../utils/dateUtils';
 
-const AssignmentMenu = ({
+const StudentAssignmentMenu = ({
     setSelectedAssignmentId,
     selectedAssignmentId,
     assignments,
-    assignmentType
+    setAssignmentType
 }) => {
+
+//PASS THE ASSIGNMENT TYPE BACK
+    useEffect(()=>{
+        if(selectedAssignmentId){
+            const type = assignments.find(a=>a.id === selectedAssignmentId)?.type;
+            setAssignmentType(type);
+        }
+    },[selectedAssignmentId])
 
     return (<>
         <div style={{
@@ -45,11 +53,7 @@ const AssignmentMenu = ({
                 >
                     <option value="">Select an Assignment</option>
                     {/* filter by assignmentType */}
-                    {assignments.filter(a=>{
-                        if(!assignmentType) return true;
-                        return a.type === assignmentType;
-                    // then map assignment options
-                    }).map(ass => (
+                    {assignments.map(ass => (
                         <option key={ass.id} 
                                 value={ass.id}
                                 style={{ color: isPastDue(ass.dueDate) ? 'red' : 'black' }}
@@ -63,4 +67,4 @@ const AssignmentMenu = ({
     </>);
 }
 
-export default AssignmentMenu;
+export default StudentAssignmentMenu;

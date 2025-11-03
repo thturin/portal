@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Spinner from '../../../shared/Spinner';
 import Button from '../../../shared/Button';
-import AssignmentMenu from './AssignmentMenu';
+import AssignmentMenu from './StudentAssignmentMenu';
 
 const apiUrl = process.env.REACT_APP_API_HOST;
 //set global axios defaults
@@ -10,7 +10,7 @@ const apiUrl = process.env.REACT_APP_API_HOST;
 //MAKE SURE AXIOS IS SEENDING SESSION COOKIES TO BACKEND
 axios.defaults.withCredentials = true;
 
-const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
+const StudentSubmitGithub = ({ onNewSubmission, username, userId, submissions }) => {
 
     const [url, setUrl] = useState('');
     const [selectedAssignmentId, setSelectedAssignmentId] = useState(''); //the current assignment
@@ -45,7 +45,7 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
     const verifyGithubOwnership = async (url) => {
         const res = await axios.post(`${apiUrl}/verify-github-ownership`, {
             url: url,
-            githubUsername: user.githubUsername
+            githubUsername: username
         });
         //return {success: false, output:"yay"}
         return res.data;
@@ -89,13 +89,12 @@ const StudentSubmitGithub = ({ onNewSubmission, user, submissions }) => {
                 sub => String(sub.assignmentId) === String(selectedAssignmentId)
             );
 
-
             const selectedAssignment = assignments.find(a=>String(a.id)===String(selectedAssignmentId));
             
             const data = {
                 url,
                 assignmentId: selectedAssignmentId,
-                userId: user.id,
+                userId,
                 submissionType: 'github',
                 assignmentTitle: selectedAssignment?.title,
                 dueDate: existingSubmission ? selectedAssignment?.dueDate : new Date(selectedAssignment?.dueDate).toISOString()

@@ -1,10 +1,17 @@
 import React from 'react';
 
-const StudentSubmitLab = (user, submissions, setSubmissions,assignments) => {
+const StudentSubmitLab = (userId, username, submissions, setSubmissions,assignments) => {
     return (
         <div className="user-lab-work">
-            <h2>User Lab Work</h2>
-            {/* Add your lab work content here */}
+                    {/* ASSIGNMENT OPTION  */}
+                <AssignmentMenu 
+                    setSelectedAssignmentId={setSelectedAssignmentId}
+                    selectedAssignmentId={selectedAssignmentId}
+                    assignments={assignments}
+                    assignmentType={assignmentType}
+                />
+            
+
         </div>
     );
 };
