@@ -1,12 +1,10 @@
-export const createSession = ()=> (
+export const createSession = (labTitle="null",username="null", userId=null, labId=null)=> (
     {
-        labInfo: {
-            title: "",
-            username:"thturin",
-            studentId: "1234",
-            lastModified: new Date().toISOString(),
-            status: "in-progress"
-        },
+        labTitle,
+        username,
+        userId, //required in schema
+        labId, //required in schema
+        lastModified: new Date().toISOString(),
         responses:{},
         gradedResults:{},
         finalScore:{

@@ -14,29 +14,40 @@ const StudentDashboard = ({ user, onLogout }) => {
 
     const [submissions, setSubmissions] = useState([]);
     const [assignments, setAssignments] = useState([]);
-    const [assignmentTitle,setAssignmentTitle] = useState('');
     const [selection, setSelection] = useState(); //work, submit, late or create, a, create l , test
     const [selectedAssignmentId, setSelectedAssignmentId] = useState();
     const [assignmentType, setAssignmentType] = useState('');
 
-    //GET ALL ASSIGNMENTS AND SUBMISSIONS
+//GET ALL ASSIGNMENTS and  SUBMISSIONS
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_HOST}/submissions`).then(res => {
-            const userSubs = res.data.filter(sub => sub.userId === user.id);
-            setSubmissions(userSubs);
-        });
+        const fetchData = async () => {
+            try {
+                const subRes = await axios.get(`${process.env.REACT_APP_API_HOST}/submissions`);
+                const userSubs = subRes.data.filter(sub => sub.userId === user.id);
+                setSubmissions(userSubs);
 
-        axios.get(`${process.env.REACT_APP_API_HOST}/assignments`).then(res => {
-            setAssignments(res.data);
-        });
+                const assignRes = await axios.get(`${process.env.REACT_APP_API_HOST}/assignments`);
+                setAssignments(assignRes.data);
+
+            } catch (err) {
+                console.error('Error fetching data:', err);
+            }
+        };
+        fetchData();
     }, [user.id]);
-
-    // useEffect(()=>{
-    //     if(selectedAssignmentObj) setAssignmentTitle(selectedAssignmentObj.title);
-    // },[selectedAssignmentId]);
 
     //FIND SELECTED ASSIGNMENT OBJECT 
     const selectedAssignmentObj = assignments.find(a => a.id === Number(selectedAssignmentId));
+    //SET LAB TITLE 
+    useEffect(()=>{
+        if(selectedAssignmentObj?.labId){
+            setTitle(selectedAssignmentObj.title || 'Untitled Lab');
+        }else{
+            setTitle('NULL');
+        }
+
+    },[selectedAssignmentObj]);
+
 
     //UPDATE SUBMISSIONS
     const updateSubmissions = (childData) => {
@@ -56,11 +67,11 @@ const StudentDashboard = ({ user, onLogout }) => {
             padding: '24px'
         }}>
             {/* ✨ Navbar at the top */}
-            <Navbar 
-                user={user} 
-                onSelect={setSelection} 
-                onLogout={onLogout} 
-                assignmentTitle={selectedAssignmentObj?.title}  
+            <Navbar
+                user={user}
+                onSelect={setSelection}
+                onLogout={onLogout}
+                assignmentTitle={selectedAssignmentObj?.title}
                 assignmentType={selectedAssignmentObj?.type ?? ''}
             />
 
@@ -76,14 +87,14 @@ const StudentDashboard = ({ user, onLogout }) => {
             }}>
 
                 {selection === 'github' && user && (
-                        <div style={{ width: '100%', maxWidth: 900 }}>
-                            <StudentSubmitGithub
-                                username={user.username}
-                                userId={user.userId}
-                                onNewSubmission={updateSubmissions}
-                                submissions={submissions}
-                            />
-                        </div>
+                    <div style={{ width: '100%', maxWidth: 900 }}>
+                        <StudentSubmitGithub
+                            username={user.username}
+                            userId={user.userId}
+                            onNewSubmission={updateSubmissions}
+                            submissions={submissions}
+                        />
+                    </div>
 
                 )}
 
@@ -95,9 +106,9 @@ const StudentDashboard = ({ user, onLogout }) => {
                         title={title}
                         setTitle={setTitle}
                         assignmentId={selectedAssignmentId}
-                        userId={user.userId}
+                        userId={user.id}
                         username={user.username}
-
+                        labId={selectedAssignmentObj?.labId ?? null}
                     />
                 )}
 

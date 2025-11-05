@@ -123,7 +123,8 @@ const AdminDashboard = ({ user, onLogout }) => {
                             title={title}
                             setTitle={setTitle}
                             mode='admin'
-                            userId='12345'
+                            userId={user.id}
+                            assignmentId={selectedAssignmentId}
                         />
                 </div>
             )}

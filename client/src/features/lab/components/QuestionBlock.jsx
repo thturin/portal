@@ -4,16 +4,14 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 
-const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults, finalResults }) => (
-    <>
+const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults, finalResults }) => {
+    return(
+        <>
         <ReactQuill
             theme="snow"
             value={responses[blockId] || ''}
             onChange={content => {
-                setResponses(prev => ({
-                    ...prev,
-                    [blockId]: content
-                }));
+                setResponses(blockId, content);
             }}
             className="w-full mb-2"
             placeholder="Your answer..."
@@ -24,7 +22,8 @@ const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults,
             questionId={blockId}
         />
     </>
-);
+    );
+};
 
 const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, finalResults }) => (
     <div key={question.id} className="mb-4">
@@ -36,10 +35,7 @@ const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, f
             theme="snow"
             value={responses[question.id] || ''}
             onChange={content => {
-                setResponses(prev => ({
-                    ...prev,
-                    [question.id]: content
-                }));
+                setResponses(question.id, content);
             }}
             className="w-full mb-2"
             placeholder="Your answer..."
@@ -53,6 +49,8 @@ const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, f
 );
 
 const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalResults }) => {
+
+    
     return (
         <div>
             <div 

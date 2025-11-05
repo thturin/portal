@@ -174,7 +174,7 @@ function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
     )
 }
 
-function LabBuilder({ blocks, setBlocks, title, setTitle, id, setId, assignmentId }) {
+function LabBuilder({ blocks, setBlocks, title, setTitle, id, assignmentId }) {
 
     useEffect(()=>{
         loadLab();
@@ -216,10 +216,11 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, id, setId, assignmentI
     }
 
     const saveLab = async () => {
-        const lab = { title: title, blocks, assignmentId};
+        console.log('here is the assignmentId!!!!!!!!!!', assignmentId);
+        const lab = { title, blocks, assignmentId};
         // console.log(lab);
         const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/lab/upsert-lab`, lab);
-        console.log('Lab saved: ', response.data);
+
         // localStorage.setItem("labData", JSON.stringify(lab));
         // console.log("Lab JSON:", lab);
         //alert("Lab saved! Check console for JSON.");
@@ -228,7 +229,11 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, id, setId, assignmentI
     const loadLab = async () => {
         
         try {
-            console.log('here are the param->',id, title);
+            // const lab = await import('./U1T6.json');
+            // setTitle(lab.default.title || "");
+            // setBlocks(lab.default.blocks || []);
+            // console.log('Lab loaded from lab.json');
+   
             //search for the lab by the assignment Id
             const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/lab/load-lab`, {
                 params: { assignmentId, title:title || 'Untitled'}
