@@ -40,8 +40,8 @@ const StudentAssignmentMenu = ({
                 <select
                     value={selectedAssignmentId} //value that gets passed is not the text but assignment id
                     onChange={e => {
-                        //handleAssignmentChange(e.target.value);
-                        setSelectedAssignmentId(e.target.value);
+                        const value = e.target.value
+                        setSelectedAssignmentId(Number(value) || -1);
                     }}
                     style={{
                         width: '100%',

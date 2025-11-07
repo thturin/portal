@@ -32,7 +32,7 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
                         value={q.prompt}
                         rows={3}
                         onChange={(value) => update("prompt", value)}
-                        theme="snow"   
+                        theme="snow"
                     />
                 </div>
 
@@ -176,9 +176,9 @@ function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
 
 function LabBuilder({ blocks, setBlocks, title, setTitle, id, assignmentId }) {
 
-    useEffect(()=>{
+    useEffect(() => {
         loadLab();
-    },[assignmentId]);
+    }, [assignmentId]);
 
     const deleteBlock = (id) => {
         setBlocks(blocks.filter(b => b.id !== id)); //remove block with id
@@ -190,7 +190,7 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, id, assignmentId }) {
             createMaterial()
         ]);
     }
-    
+
     const addQuestionBlock = () => {
         setBlocks([
             ...blocks,
@@ -216,33 +216,43 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, id, assignmentId }) {
     }
 
     const saveLab = async () => {
-        console.log('here is the assignmentId!!!!!!!!!!', assignmentId);
-        const lab = { title, blocks, assignmentId};
-        // console.log(lab);
-        const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/lab/upsert-lab`, lab);
-
-        // localStorage.setItem("labData", JSON.stringify(lab));
-        // console.log("Lab JSON:", lab);
-        //alert("Lab saved! Check console for JSON.");
+        const lab = { title, blocks, assignmentId };
+        try {
+            await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/lab/upsert-lab`, lab);
+            console.log('Lab saved');
+        } catch (err) {
+            console.error('Error trying to upsert (save) lab to api', err);
+        }
     };
 
     const loadLab = async () => {
-        
+
         try {
             // const lab = await import('./U1T6.json');
             // setTitle(lab.default.title || "");
             // setBlocks(lab.default.blocks || []);
             // console.log('Lab loaded from lab.json');
-   
+
             //search for the lab by the assignment Id
             const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/lab/load-lab`, {
-                params: { assignmentId, title:title || 'Untitled'}
+                params: { assignmentId, title: title || 'Untitled' }
             });
-            console.log('lab loaded! ',response.data);
+            console.log('lab loaded! ', response.data);
             setBlocks(response.data.blocks);
             setId(response.data.id);
         } catch (err) {
             console.error('Lab did not load from labController successfully', err.message);
+        }
+    }
+
+    const loadLabFromFile = async () => {
+        try {
+            const lab = await import('./U1T6.json');
+            setTitle(lab.default.title || "");
+            setBlocks(lab.default.blocks || []);
+            console.log('Lab loaded from lab.json');
+        } catch (err) {
+            console.error('Lab did not load from file successfully', err.message);
         }
     }
 
@@ -340,10 +350,10 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, id, assignmentId }) {
                 💾 Save
             </button>
             <button
-                onClick={loadLab}
+                onClick={loadLabFromFile}
                 className="bg-yellow-600 text-white px-4 py-2 rounded mr-2"
             >
-                📂 Load
+                📂 Load From File
             </button>
             <button
                 onClick={exportLabToFolder}

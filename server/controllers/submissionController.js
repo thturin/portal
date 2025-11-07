@@ -1,14 +1,13 @@
-const { format, formatDistanceToNow, parseISO } = require('date-fns');
+const {  parseISO } = require('date-fns');
 const { cloneRepo } = require('../services/gitService');
 const { gradeJavaSubmission } = require('../services/gradingService');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const axios = require('axios');
 require('dotenv').config();
 
-let assignmentPrefix;
 
 const verifyGithubOwnership = async (req, res) => {
+    let assignmentPrefix;
     try {
         const { url, githubUsername } = req.body;
 
@@ -44,7 +43,7 @@ const verifyGithubOwnership = async (req, res) => {
         const assignmentPrefixMatch = repoName.match(/u\d+[pt]\d+/i); //case insensitive
 
         assignmentPrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
-     
+
         return res.json({
             success: isOwner,
             output: isOwner ? `✅ You are the owner of this repository (${githubUsername})`
@@ -80,10 +79,9 @@ const calculateLateScore = (submissionDate, dueDateString, score) => {
     }
 };
 
-const scoreSubmission = async (url, path, assignmentTitle, submissionType, submittedAt, dueDate) => { //clone student's repo pasted into submission portal
+const scoreGithubSubmission = async (url, path, assignmentTitle, submittedAt, dueDate) => { //clone student's repo pasted into submission portal
     //confirm that both the submission type and url verify that it is a googledoc
-    console.log('-----Score Submission---------');
-
+    console.log('-----Score Github Submission---------');
     try {
         ///DETEREMINE IF TITLE IN GITHUB URL MATCHES ASSIGNMENT NAME 
         //Example : U1T1-printlnVsPrint --> [U1T1]
@@ -110,7 +108,7 @@ const scoreSubmission = async (url, path, assignmentTitle, submissionType, submi
     try {
         let results = await gradeJavaSubmission(path);
         let finalScore = calculateLateScore(submittedAt, dueDate, results.score);
-        results = { 
+        results = {
             ...results, //keep original results (output)
             score: finalScore
         }
@@ -124,47 +122,89 @@ const scoreSubmission = async (url, path, assignmentTitle, submissionType, submi
     }
 };
 
-const createSubmission = async (req, res) => {
+const upsertGithubSubmission = async (req, res) => {
+    const { submissionId, url, assignmentId, userId, assignmentTitle, dueDate } = req.body;
+    let result = { score: -1, output: 'null' };
+    const submittedAt = new Date(); //create the submission date
+    const path = `./uploads/${Date.now()}`; //where repo will be cloned to locally
+
+    result = await scoreGithubSubmission(url, path, assignmentTitle, submittedAt, dueDate);
+
     try {
-        let result = { score: -100, output: '' };
-        //console.log(`Request from handleSubmission -> ${req.body}`);
-        let { url, assignmentId, userId, assignmentTitle, submissionType, dueDate } = req.body;
-        const path = `./uploads/${Date.now()}`; //where repo will be cloned to locally
-
-        const submittedAt = new Date(); //create the submission date
-
-        result = await scoreSubmission(url, path, assignmentTitle, submissionType, submittedAt, dueDate);
-
-        let language = submissionType === 'github' ? 'java' : 'none';
-
-        const newSub = await prisma.submission.create({
-            data: {
-                url,
-                language,
+        const submission = await prisma.submission.upsert({
+            where: {
+                id: Number(submissionId) || -1 //undefined will throw an error but -1 will execute the create 
+            },
+            create: {
+                language: 'java',
                 score: result.score,
-                assignmentId,
-                userId,
-                submittedAt: new Date()
+                url,
+                assignmentId: Number(assignmentId),
+                userId: Number(userId),
+                submittedAt
+            },
+            update: {
+                score: result.score,
+                url,
+                submittedAt
             }
+        });
 
-        });
-        //return both the submission data AND output
         res.json({
-            ...newSub,
-            output: result.output // add output to response
-        });
-        //this res.json() will return something like this 
-        //   assignmentI:8
-        //   languageL"java"
-        //   score:50,
-        //   output:.././
+            ...submission,
+            result
+        }); // return the updated or new submission along with the result (message and score)
 
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to create submission' });
+        console.error('Error in upsertGithubSubmission: ', err);
+        res.status(500).json({ error: 'Failed to save submission' });
     }
 };
 
+const scoreLabSubmission = async (submittedAt, dueDate, score) => { //clone student's repo pasted into submission portal
+    //confirm that both the submission type and url verify that it is a googledoc
+    console.log('-----Score Lab Submission---------');
+    //returns the score and output 
+    let finalScore = calculateLateScore(submittedAt, dueDate, score);
+    return finalScore;
+};
+
+const upsertLabSubmission = async (req, res) => {
+    const { submissionId, assignmentId, userId, dueDate } = req.body;
+    let result = -1;
+    const submittedAt = new Date(); //create the submission date
+
+    result = await scoreLabSubmission(submittedAt, dueDate, score);
+
+    try {
+        const submission = await prisma.submission.upsert({
+            where: {
+                id: Number(submissionId) || -1 //undefined will throw an error but -1 will execute the create 
+            },
+            create: {
+                score: result,
+                assignmentId: Number(assignmentId),
+                userId: Number(userId),
+                submittedAt
+            },
+            update: {
+                score: result,
+                submittedAt
+            }
+        });
+        res.json({
+            ...submission,
+            result
+        }); // return the updated or new submission along with the result (message and score)
+
+    } catch (err) {
+        console.error('Error in upsertGithubSubmission: ', err);
+        res.status(500).json({ error: 'Failed to save submission' });
+    }
+
+};
+
+//admin manual override
 const updateSubmissionGrade = async (req, res) => {
     try {
         const { submissionId, score } = req.body;
@@ -181,41 +221,6 @@ const updateSubmissionGrade = async (req, res) => {
         console.error('Error updating submission grade: ', err);
         res.status(500).json({ error: 'Failed to update grade' });
     }
-};
-
-const updateSubmission = async (req, res) => {
-    try {
-        const { id } = req.params; //ID pulled from the parameters 
-        const { url, assignmentId, userId, submissionType, assignmentTitle, dueDate } = req.body
-        //console.log('Look here', id, req.body);
-        const path = `./uploads/${Date.now()}`; //where repo will be cloned to locally
-        let result = { score: -100, output: '' };
-        const submissionDate = new Date();
-
-        try {
-            result = await scoreSubmission(url, path, assignmentTitle, submissionType, submissionDate, dueDate);
-        } catch (err) {
-            result = {
-                score: 0,
-                output: `❌ Scoring failed: ${err.message}`
-            }
-        }
-        const updated = await prisma.submission.update({
-            where: { id: Number(id) },
-            data: { url, assignmentId, userId, score: result.score, submittedAt: new Date() }
-        });
-
-        res.json({
-            ...updated, //using ... so the object isn't returned but all of the contents within the object is returned 
-            output: result.output //add output to response
-        });
-
-
-    } catch (err) {
-        console.error('PUT /submission error', err);
-        res.status(400).json({ error: 'Failed to update submission' });
-    }
-
 };
 
 const getSubmission = async (req, res) => {
@@ -258,10 +263,10 @@ const getAllSubmissions = async (req, res) => {
 module.exports = {
     verifyGithubOwnership,
     getAllSubmissions,
-    createSubmission,
     getSubmission,
-    updateSubmission,
-    updateSubmissionGrade
+    updateSubmissionGrade,
+    upsertLabSubmission,
+    upsertGithubSubmission
 };
 
 

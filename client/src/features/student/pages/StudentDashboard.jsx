@@ -15,9 +15,14 @@ const StudentDashboard = ({ user, onLogout }) => {
     const [submissions, setSubmissions] = useState([]);
     const [assignments, setAssignments] = useState([]);
     const [selection, setSelection] = useState(); //work, submit, late or create, a, create l , test
-    const [selectedAssignmentId, setSelectedAssignmentId] = useState();
+    const [selectedAssignmentId, setSelectedAssignmentId] = useState(-1);
     const [assignmentType, setAssignmentType] = useState('');
 
+    // useEffect(()=>{
+    //     console.log('on start up ');
+    //     console.log(selectedAssignmentId);
+    //     console.log(assignmentType);
+    // },[]);
 //GET ALL ASSIGNMENTS and  SUBMISSIONS
     useEffect(() => {
         const fetchData = async () => {
@@ -73,6 +78,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 onLogout={onLogout}
                 assignmentTitle={selectedAssignmentObj?.title}
                 assignmentType={selectedAssignmentObj?.type ?? ''}
+                assignmentId={selectedAssignmentId}
             />
 
             {/* ✨ Main Content Layout */}

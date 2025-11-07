@@ -4,7 +4,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 
-const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults, finalResults }) => {
+const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults, finalScore }) => {
     return(
         <>
         <ReactQuill
@@ -17,7 +17,7 @@ const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults,
             placeholder="Your answer..."
         />
         <ScoreDisplay
-            finalResults={finalResults}
+            finalScore={finalScore}
             gradedResults={gradedResults}
             questionId={blockId}
         />
@@ -25,7 +25,7 @@ const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults,
     );
 };
 
-const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, finalResults }) => (
+const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, finalScore }) => (
     <div key={question.id} className="mb-4">
         <div 
             className="font-semibold mb-1" 
@@ -41,16 +41,14 @@ const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, f
             placeholder="Your answer..."
         />
         <ScoreDisplay
-            finalResults={finalResults}
+            finalScore={finalScore}
             gradedResults={gradedResults}
             questionId={question.id}
         />
     </div>
 );
 
-const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalResults }) => {
-
-    
+const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalScore }) => {
     return (
         <div>
             <div 
@@ -66,7 +64,7 @@ const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalRes
                             responses={responses}
                             setResponses={setResponses}
                             gradedResults={gradedResults}
-                            finalResults={finalResults}
+                            finalScore={finalScore}
                         />
                     ))}
                 </div>
@@ -76,7 +74,7 @@ const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalRes
                     responses={responses}
                     setResponses={setResponses}
                     gradedResults={gradedResults}
-                    finalResults={finalResults}
+                    finalScore={finalScore}
                 />
             )}
         </div>

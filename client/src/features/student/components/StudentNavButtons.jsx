@@ -1,9 +1,17 @@
 import React from 'react';
 import Button from '../../../shared/Button';
 
-const StudentNavButtons = ({ onSelect, assignmentTitle, assignmentType }) => {
-    const githubDisabled = assignmentType === 'lab';
-    const labDisabled = assignmentType === 'github';
+const StudentNavButtons = ({ onSelect, assignmentTitle, assignmentType, assignmentId }) => {
+    let githubDisabled;
+    let labDisabled;
+
+    if(assignmentId === -1){ //no assignment selected
+      githubDisabled = true;
+      labDisabled = true;
+    }else{
+      githubDisabled = assignmentType === 'lab';
+      labDisabled = assignmentType === 'github';
+    }
 
     return (
         <>
@@ -26,7 +34,7 @@ const StudentNavButtons = ({ onSelect, assignmentTitle, assignmentType }) => {
             </Button>
 
             <Button color="primary" onClick={() => onSelect('view')}>
-              👀 View
+              👀 Select/View
             </Button>
 
             <Button color="secondary" onClick={() => onSelect('late')}>

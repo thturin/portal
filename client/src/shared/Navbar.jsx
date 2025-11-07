@@ -3,7 +3,7 @@ import AdminNavButtons from '../features/admin/components/AdminNavButtons';
 import StudentNavButtons from '../features/student/components/StudentNavButtons';
 
 
-const Navbar = ({ user, onSelect, onLogout, assignmentTitle, assignmentType }) => {
+const Navbar = ({ user, onSelect, onLogout, assignmentTitle, assignmentType, assignmentId }) => {
     const isAdmin = user.role === 'admin';
 
     return (
@@ -28,7 +28,7 @@ const Navbar = ({ user, onSelect, onLogout, assignmentTitle, assignmentType }) =
                 {/* Navigation Buttons */}
                 {isAdmin ? 
                     <AdminNavButtons onSelect={onSelect} assignmentTitle={assignmentTitle}/>
-                    : <StudentNavButtons onSelect={onSelect} assignmentTitle={assignmentTitle} assignmentType={assignmentType}/>
+                    : <StudentNavButtons onSelect={onSelect} assignmentTitle={assignmentTitle} assignmentType={assignmentType} assignmentId={assignmentId}/>
                 }
             </div>
             {/* Logout Button */}

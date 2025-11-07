@@ -1,6 +1,6 @@
 const express = require('express');//load express
 const router = express.Router(); //create a new router object  (mini express app -> for handling routes)
-const {verifyGithubOwnership,updateSubmission,createSubmission, getAllSubmissions, verifyDocOwnership,getSubmission,updateSubmissionGrade} = require('../controllers/submissionController'); //call the handleSubmission function from submissionController 
+const {upsertGithubSubmission,upsertGithubSubmission,verifyGithubOwnership, getAllSubmissions,getSubmission,updateSubmissionGrade, upsertLabSubmission} = require('../controllers/submissionController'); //call the handleSubmission function from submissionController 
 
 
 // benefits of adding middleware
@@ -24,9 +24,9 @@ const ensureAuthenticated = (req,res,next)=>{
 //ROOT / ISS LOCALHOST:5000/API
 router.get('/submissions', getAllSubmissions); //this pathway is relative to the base path set in app.js (api/submit)
 router.get('/submissions/:id',getSubmission);
-router.put('/submissions/:id',updateSubmission);
+router.post('/submissions/upsertLab',upsertLabSubmission);
+router.post('/submissions/upsertGithubSubmission',upsertGithubSubmission);
 router.post('/submissions/update-grade',updateSubmissionGrade)
-router.post('/submit',createSubmission);
 router.post('/verify-github-ownership',verifyGithubOwnership);
 
 

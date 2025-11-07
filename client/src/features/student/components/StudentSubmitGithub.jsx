@@ -51,15 +51,15 @@ const StudentSubmitGithub = ({ onNewSubmission, username, userId, submissions })
         return res.data;
     };
 
-    const updateSubmission = async (existingSubmission, data) => {
-        const res = await axios.put(`${apiUrl}/submissions/${existingSubmission.id}`, data);
-        return res.data;
-    }
+    // const updateSubmission = async (existingSubmission, data) => {
+    //     const res = await axios.put(`${apiUrl}/submissions/${existingSubmission.id}`, data);
+    //     return res.data;
+    // }
 
-    const createSubmission = async (data) => {
-        const res = await axios.post(`${apiUrl}/submit`, data);
-        return res.data;
-    }
+    // const createSubmission = async (data) => {
+    //     const res = await axios.post(`${apiUrl}/submit`, data);
+    //     return res.data;
+    // }
 
     const handleSubmit = async (e) => { //on button click of form
         setSubmissionExists(false);
@@ -83,8 +83,6 @@ const StudentSubmitGithub = ({ onNewSubmission, username, userId, submissions })
             }
 
     //CHECK FOR EXISTING SUBMISSION
-    //you probably don't need to look through all of the submissions 
-    //future, setSubmisisons to user submisisons only
             const existingSubmission = submissions.find(
                 sub => String(sub.assignmentId) === String(selectedAssignmentId)
             );
@@ -93,25 +91,24 @@ const StudentSubmitGithub = ({ onNewSubmission, username, userId, submissions })
             
             const data = {
                 url,
+                submissionId:existingSubmission.id,
                 assignmentId: selectedAssignmentId,
                 userId,
-                submissionType: 'github',
                 assignmentTitle: selectedAssignment?.title,
                 dueDate: existingSubmission ? selectedAssignment?.dueDate : new Date(selectedAssignment?.dueDate).toISOString()
             };
-            //---------UPDATE SUBMISSION------------
-            let result;
-            if (existingSubmission) { //go to the ssubmission and update it
-                setSubmissionExists(true);
-                result = await updateSubmission(existingSubmission, data);
-            } else {
-                //-=-----CREATE NEW SUBMISSION-------
-                result = await createSubmission(data);
+//---------UPDATE OR CREATE SUBMISSION------------
+            let response;
+            try{
+                response = await axios.post(`${apiUrl}/submissions/upsertGithubSubmission`,data);
+            }catch(err){
+                setError('Could not create or update github assignment');
+                console.error('errror in upsertGithubSubmission',err);
             }
-            setScore(result.score);
-            setGradleOutput(result.output);
-            //if property was passed in by component call in parent component, send the res.data as the value of pproperty
-            if (onNewSubmission) onNewSubmission(result);
+   
+            setScore(response.result.score);
+            setGradleOutput(response.result.output);
+
         } catch (err) {
             console.error(err);
             //if err.response exists -> if error.response.data exists, check the .error message

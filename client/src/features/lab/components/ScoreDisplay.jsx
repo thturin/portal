@@ -1,8 +1,8 @@
 import React from 'react';
 
-const ScoreDisplay = ({ finalResults, gradedResults, questionId }) => {
+const ScoreDisplay = ({ finalScore, gradedResults, questionId }) => {
     //no finalResults means no submissions. Do not show score and feedback
-    if(!finalResults) return null;
+    if(!finalScore) return null;
 
     let result = gradedResults[questionId];
     if(!result){

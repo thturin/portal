@@ -7,21 +7,20 @@ import QuestionBlock from './QuestionBlock';
 function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username, labId }) {
     const isAdmin = mode === 'admin';
 
-    const [session, setSession] = useState(createSession(title,username,userId,labId));
+    const [session, setSession] = useState(createSession(title, username, userId, labId));
     const [sessionLoaded, setSessionLoaded] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     //derive from session
     const responses = session.responses || {};
     const gradedResults = session.gradedResults;
-    const finalResults = session.finalScore || {};
-
+    const finalScore = session.finalScore || {};
 
     //update handler that modifies responses in session
-    const handleResponseChange = (questionId, value) =>{
-        setSession(prev=>({ //update the session and concatenate old data with new response for questionId an val
+    const handleResponseChange = (questionId, value) => {
+        setSession(prev => ({ //update the session and concatenate old data with new response for questionId an val
             ...prev,
-            responses:{...prev.responses,[questionId]:value}
+            responses: { ...prev.responses, [questionId]: value }
         }));
     }
 
@@ -34,12 +33,6 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
         // const result = arr.flatMap(x => x);
         // console.log(result); // [1, 2, 3, 4]
     ];
-
-    useEffect(()=>{
-        console.log('in lab preview session--->' , session);
-
-    },[]);
-
 
     //AT SOME POINT YOU NEED TO REPLACE THIS WITH THE LOADLAB.JS FUNCTION
     const loadLab = async () => {
@@ -56,14 +49,14 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
 
     const loadSession = async () => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/session/load-session/${labId}`,{
-                params:{userId, username, title}
+            const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/session/load-session/${labId}`, {
+                params: { userId, username, title }
             });
             if (response.error) {
                 console.log(response.error);
                 return;
             }
-            if(response.data.session) setSession(response.data.session);
+            if (response.data.session) setSession(response.data.session);
             setSessionLoaded(true);
         } catch (err) {
             console.error('Error in getResponse()', err);
@@ -71,15 +64,14 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
     }
 
     const saveSession = async () => {
-            if(!session) return
-            if (!title || !userId || !labId || !sessionLoaded) return; //if not title was created or studentId is not found, don't update
-            try{
-            const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/session/save-session`, {session});                
-            }catch(err){
-                console.error('Error saving session. Check backend',err);
-            }
-        };
-
+        if (!session) return
+        if (!title || !userId || !labId || !sessionLoaded) return; //if not title was created or studentId is not found, don't update
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/session/save-session`, { session });
+        } catch (err) {
+            console.error('Error saving session. Check backend', err);
+        }
+    };
 
     //LOAD SESSION and LAB
     useEffect(() => { //on  mount, load json 
@@ -97,94 +89,102 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
     }, [session, sessionLoaded]);
 
 
-    // const submitResponses = async () => {
-    //     setIsSubmitting(true);
-    //     let newGradedResults = { ...session.gradedResults };//create a new grade results to add empty
-    //     //LOOP THROUGH RESPONSES
-    //     for (const [questionId, userAnswer] of Object.entries(responses)) {
-    //         //questionId is a string
-    //         let answerKey = '';
-    //         let question = '';
-    //         let type = '';
-    //         //THIS ASSUMES SUB QUESTIONS DO NOT HAVE SUB QUESTIONS
-    //         //LOOP THROUGH BLOCKS AND ASSIGN ANSWERKEY, QUESTIOHN, TYPE
-    //         for (const block of blocks) { //FIND BLOCK 
-    //             if (block.blockType === 'question' &&
-    //                 block.subQuestions.length === 0 &&
-    //                 block.id === questionId) {
-    //                 answerKey = block.key;
-    //                 question = block.prompt;
-    //                 type = block.type;
-    //                 break;
-    //             }
-    //             if (block.blockType === 'question' && //FIND SUBQUESTION BLOCK
-    //                 block.subQuestions.length > 0) {
-    //                 for (const sq of block.subQuestions) {
-    //                     if (sq.id === questionId) {
-    //                         answerKey = sq.key;
-    //                         question = sq.prompt;
-    //                         type = sq.type;
-    //                         break;
-    //                     }
-    //                 }
-    //             }
-    //         }
+    const submitResponses = async () => {
+        setIsSubmitting(true);
+        let newGradedResults = { ...session.gradedResults };//create a new grade results to add empty
+        //LOOP THROUGH RESPONSES
+        for (const [questionId, userAnswer] of Object.entries(responses)) {
+            //questionId is a string
+            let answerKey = '';
+            let question = '';
+            let type = '';
+            //THIS ASSUMES SUB QUESTIONS DO NOT HAVE SUB QUESTIONS
+            //LOOP THROUGH BLOCKS AND ASSIGN ANSWERKEY, QUESTIOHN, TYPE
+            for (const block of blocks) { //FIND BLOCK 
+                if (block.blockType === 'question' &&
+                    block.subQuestions.length === 0 &&
+                    block.id === questionId) {
+                    answerKey = block.key;
+                    question = block.prompt;
+                    type = block.type;
+                    break;
+                }
+                if (block.blockType === 'question' && //FIND SUBQUESTION BLOCK
+                    block.subQuestions.length > 0) {
+                    for (const sq of block.subQuestions) {
+                        if (sq.id === questionId) {
+                            answerKey = sq.key;
+                            question = sq.prompt;
+                            type = sq.type;
+                            break;
+                        }
+                    }
+                }
+            }
+        //deepseek api request
+            try {
+                const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade`, {
+                    userAnswer,
+                    answerKey,
+                    question,
+                    questionType: type
+                });
+                //UPDATED GRADEDRESULTS 
+                newGradedResults = {
+                    ...newGradedResults,
+                    [questionId]: { //add or update current gradedResult with questionId
+                        score: response.data.score,
+                        feedback: response.data.feedback
+                    }
+                }
+            } catch (err) {
+                console.error("Error grading in LabPreview [LabPreview.jsx]");
+            }
+        } //END OF FOR LOOP
+        //FOR QUESTIONS THAT WERE LEFT BLANK, CREATE A NEW OBJECT IN GRADEDRESULTS 
+        //WITH SCORE 0 AND NO RESPONSE
+        allQuestions.forEach(q => {
+            //if new gradedResults does not contain this id,
+            if (!newGradedResults[q.id]) {
+                newGradedResults[q.id] = {
+                    score: 0,
+                    feedback: "no response"
+                }
+            }
+        });
 
-    //         try {
-    //             const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade`, {
-    //                 userAnswer,
-    //                 answerKey,
-    //                 question,
-    //                 questionType: type
-    //             });
-    //             //UPDATED GRADEDRESULTS 
-    //             newGradedResults = {
-    //                 ...newGradedResults,
-    //                 [questionId]: { //add or update current gradedResult with questionId
-    //                     score: response.data.score,
-    //                     feedback: response.data.feedback
-    //                 }
-    //             }
-    //         } catch (err) {
-    //             console.error("Error grading in LabPreview [LabPreview.jsx]");
-    //         }
-    //     } //END OF FOR LOOP
-    //     //FOR QUESTIONS THAT WERE LEFT BLANK, CREATE A NEW OBJECT IN GRADEDRESULTS 
-    //     //WITH SCORE 0 AND NO RESPONSE
-    //     allQuestions.forEach(q => {
-    //         //if new gradedResults does not contain this id,
-    //         if (!newGradedResults[q.id]) {
-    //             newGradedResults[q.id] = {
-    //                 score: 0,
-    //                 feedback: "no response"
-    //             }
-    //         }
-    //     });
+        //   "123": { score: 1, feedback: "Good!" },  
+        //CALCULATE FINAL SCORE 
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade/calculate-score`, {
+                gradedResults: newGradedResults, //use variable instead
+                labId,
+                userId
+            });
+            // {
+            //     "percent": null,
+            //     "maxScore": 0,
+            //     "totalScore": 0
+            // }
+            //update the session with gradedResults and finalScore
+            setSession(prev => ({
+                ...prev,
+                gradedResults: newGradedResults,
+                finalScore: response.data.session.finalScore
+            }));
+        } catch (err) {
+            console.error('error calculating final score', err);
+        } 
+    //push grade to portal api
+        try{
 
-    //     //   "123": { score: 1, feedback: "Good!" },  
-    //     //CALCULATE FINAL SCORE 
-    //     try {
-    //         const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade/calculate-score`, {
-    //             gradedResults: newGradedResults, //use variable instead
-    //             labId,
-    //             userId
-    //         });
-    //         // {
-    //         //     "percent": null,
-    //         //     "maxScore": 0,
-    //         //     "totalScore": 0
-    //         // }
-    //         setSession(prev=>({
-    //             ...prev,
-    //             gradedResults:newGradedResults,
-    //             finalScore:response.data.session.finalScore
-    //         }));
-    //     } catch (err) {
-    //         console.error('error calculating final score', err);
-    //     } finally {
-    //         setIsSubmitting(false); //stop loading regardless of success/failure
-    //     }
-    // }
+
+        } catch(err){
+
+        }finally {
+            setIsSubmitting(false); //stop loading regardless of success/failure
+        }
+    }
 
     return (
         <>
@@ -211,14 +211,14 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                                     setResponses={handleResponseChange}
                                     responses={responses}
                                     gradedResults={gradedResults}
-                                    finalResults={finalResults}
+                                    finalScore={finalScore}
                                 />
                             )}
                         </div>
                     </div>
                 ))}
                 <button
-                    onClick={()=>console.log('hello world')}
+                    onClick={submitResponses}
                     disabled={isSubmitting}
                     className={`bg-purple-600 text-white px-4 py-2 rounded mt-4 flex items-center ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
                         }`}
@@ -236,10 +236,10 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                     )}
                 </button>
                 {/*OUTPUT FINAL SCORE */}
-                {gradedResults && finalResults && (
+                {Object.keys(gradedResults).length > 0 && (
                     <div className="mb-6 p-4 border rounded bg-blue-50">
-                        <h3 className="font-bold mb-2">Score</h3>
-                        Total Score: {parseFloat(finalResults.totalScore).toFixed(2)} / {finalResults.maxScore}----{finalResults.percent}%
+                        <h3 className="font-bold mb-2">Score 📊</h3>
+                        Total Score: {parseFloat(finalScore.totalScore).toFixed(2)} / {finalScore.maxScore}<br />{finalScore.percent}%
                     </div>
                 )}
             </div>
