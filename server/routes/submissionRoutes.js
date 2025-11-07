@@ -1,6 +1,11 @@
 const express = require('express');//load express
 const router = express.Router(); //create a new router object  (mini express app -> for handling routes)
-const {upsertGithubSubmission,upsertGithubSubmission,verifyGithubOwnership, getAllSubmissions,getSubmission,updateSubmissionGrade, upsertLabSubmission} = require('../controllers/submissionController'); //call the handleSubmission function from submissionController 
+const {upsertGithubSubmission, 
+    upsertLabSubmission,
+    verifyGithubOwnership, 
+    getAllSubmissions,
+    getSubmission,
+    updateSubmissionGrade} = require('../controllers/submissionController'); //call the handleSubmission function from submissionController 
 
 
 // benefits of adding middleware

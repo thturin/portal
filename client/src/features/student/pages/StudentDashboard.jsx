@@ -38,6 +38,8 @@ const StudentDashboard = ({ user, onLogout }) => {
                 console.error('Error fetching data:', err);
             }
         };
+        console.log('-----------github username',user.githubUsername);
+        console.log('-----------user ird',user.id);
         fetchData();
     }, [user.id]);
 
@@ -95,10 +97,11 @@ const StudentDashboard = ({ user, onLogout }) => {
                 {selection === 'github' && user && (
                     <div style={{ width: '100%', maxWidth: 900 }}>
                         <StudentSubmitGithub
-                            username={user.username}
-                            userId={user.userId}
-                            onNewSubmission={updateSubmissions}
+                            githubUsername={user.githubUsername}
+                            userId={user.id}
+                            onUpdateSubmission={updateSubmissions}
                             submissions={submissions}
+                            selectedAssignmentId={selectedAssignmentId}
                         />
                     </div>
 

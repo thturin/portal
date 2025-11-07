@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Spinner from '../../../shared/Spinner';
 import Button from '../../../shared/Button';
-import AssignmentMenu from './StudentAssignmentMenu';
+import StudentAssignmentMenu from './StudentAssignmentMenu';
 
 const apiUrl = process.env.REACT_APP_API_HOST;
 //set global axios defaults
@@ -10,10 +10,9 @@ const apiUrl = process.env.REACT_APP_API_HOST;
 //MAKE SURE AXIOS IS SEENDING SESSION COOKIES TO BACKEND
 axios.defaults.withCredentials = true;
 
-const StudentSubmitGithub = ({ onNewSubmission, username, userId, submissions }) => {
+const StudentSubmitGithub = ({ onUpdateSubmission, githubUsername, userId, submissions, selectedAssignmentId }) => {
 
     const [url, setUrl] = useState('');
-    const [selectedAssignmentId, setSelectedAssignmentId] = useState(''); //the current assignment
     const [assignments, setAssignments] = useState([]); //assignment list 
     const [assignmentType, setAssignmentType] = useState('');
     const [score, setScore] = useState(null);
@@ -38,28 +37,17 @@ const StudentSubmitGithub = ({ onNewSubmission, username, userId, submissions })
         }
         fetchAssignments();
         setAssignmentType('github');
-    
-    
+        console.log('githubUsernaem',githubUsername);
+
     }, []); //happens on the mount [] are the dependencies which means the function will run only when those dependencies change
 
     const verifyGithubOwnership = async (url) => {
         const res = await axios.post(`${apiUrl}/verify-github-ownership`, {
-            url: url,
-            githubUsername: username
+            url,
+            githubUsername
         });
-        //return {success: false, output:"yay"}
         return res.data;
     };
-
-    // const updateSubmission = async (existingSubmission, data) => {
-    //     const res = await axios.put(`${apiUrl}/submissions/${existingSubmission.id}`, data);
-    //     return res.data;
-    // }
-
-    // const createSubmission = async (data) => {
-    //     const res = await axios.post(`${apiUrl}/submit`, data);
-    //     return res.data;
-    // }
 
     const handleSubmit = async (e) => { //on button click of form
         setSubmissionExists(false);
@@ -91,24 +79,24 @@ const StudentSubmitGithub = ({ onNewSubmission, username, userId, submissions })
             
             const data = {
                 url,
-                submissionId:existingSubmission.id,
+                submissionId:existingSubmission?.id,
                 assignmentId: selectedAssignmentId,
                 userId,
                 assignmentTitle: selectedAssignment?.title,
-                dueDate: existingSubmission ? selectedAssignment?.dueDate : new Date(selectedAssignment?.dueDate).toISOString()
+                dueDate: selectedAssignment?.dueDate
             };
 //---------UPDATE OR CREATE SUBMISSION------------
             let response;
             try{
                 response = await axios.post(`${apiUrl}/submissions/upsertGithubSubmission`,data);
+                console.log('success', response.data);
             }catch(err){
                 setError('Could not create or update github assignment');
                 console.error('errror in upsertGithubSubmission',err);
             }
-   
-            setScore(response.result.score);
-            setGradleOutput(response.result.output);
-
+            setScore(response.data.result.score);
+            setGradleOutput(response.data.result.output);
+            onUpdateSubmission(response.data);
         } catch (err) {
             console.error(err);
             //if err.response exists -> if error.response.data exists, check the .error message
@@ -120,18 +108,10 @@ const StudentSubmitGithub = ({ onNewSubmission, username, userId, submissions })
     };
 
     return (
-        <div className="submit-form">
+        <div className="submit-form" style={{ marginTop: '80px' }}>
             <h3>Submit a Github Repository</h3>
             <form onSubmit={handleSubmit}>
 
-                {/* ASSIGNMENT OPTION  */}
-                <AssignmentMenu 
-                    setSelectedAssignmentId={setSelectedAssignmentId}
-                    selectedAssignmentId={selectedAssignmentId}
-                    assignments={assignments}
-                    assignmentType={assignmentType}
-                />
-                {/*  LINK BOX */}
                 <label>
                     GitHub Repository URL
                 </label>

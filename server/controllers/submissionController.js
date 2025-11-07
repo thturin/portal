@@ -5,12 +5,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 require('dotenv').config();
 
+let assignmentPrefix;
 
 const verifyGithubOwnership = async (req, res) => {
-    let assignmentPrefix;
     try {
         const { url, githubUsername } = req.body;
-
+        console.log('HELLO WORLDDD');
         if (!url) {
             return res.status(400).json({
                 error: 'GitHub URL is required'
@@ -41,8 +41,8 @@ const verifyGithubOwnership = async (req, res) => {
         //if username contains '-'... find prefix first u1p1-calculator
         const isOwner = repoName.toLowerCase().includes(githubUsername.toLowerCase());
         const assignmentPrefixMatch = repoName.match(/u\d+[pt]\d+/i); //case insensitive
-
         assignmentPrefix = assignmentPrefixMatch ? assignmentPrefixMatch[0] : '';
+
 
         return res.json({
             success: isOwner,
@@ -133,7 +133,10 @@ const upsertGithubSubmission = async (req, res) => {
     try {
         const submission = await prisma.submission.upsert({
             where: {
-                id: Number(submissionId) || -1 //undefined will throw an error but -1 will execute the create 
+               userId_assignmentId:{
+                    userId:Number(userId), 
+                    assignmentId:Number(assignmentId)
+                }
             },
             create: {
                 language: 'java',
