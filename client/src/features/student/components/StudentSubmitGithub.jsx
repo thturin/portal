@@ -88,7 +88,7 @@ const StudentSubmitGithub = ({ onUpdateSubmission, githubUsername, userId, submi
 //---------UPDATE OR CREATE SUBMISSION------------
             let response;
             try{
-                response = await axios.post(`${apiUrl}/submissions/upsertGithubSubmission`,data);
+                response = await axios.post(`${apiUrl}/submissions/upsertGithub`,data);
                 console.log('success', response.data);
             }catch(err){
                 setError('Could not create or update github assignment');

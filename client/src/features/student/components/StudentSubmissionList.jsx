@@ -113,7 +113,8 @@ const StudentSubmissionList = ({ submissions, assignments }) => (
                                       fontSize: '14px',
                                       color: '#374151'
                                   }}>
-                                      {formatDate(sub.submittedAt)}
+                                      {formatDate(sub.submittedAt,1)}<br/>
+                                      {formatDate(sub.submittedAt,2)}
                                   </div>
                               </div>
 
@@ -133,7 +134,8 @@ const StudentSubmissionList = ({ submissions, assignments }) => (
                                           fontSize: '14px',
                                           color: '#374151'
                                       }}>
-                                          {formatDate(assignment.dueDate)}
+                                          {formatDate(assignment.dueDate,1)}<br/>
+                                          {formatDate(assignment.dueDate,2)}
                                       </div>
                                   </div>
                               )}

@@ -4,7 +4,7 @@ import { createSession } from '../models/session';
 import MaterialBlock from './MaterialBlock';
 import QuestionBlock from './QuestionBlock';
 
-function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username, labId }) {
+function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username, labId, selectedAssignmentDueDate, onUpdateSubmission}) {
     const isAdmin = mode === 'admin';
 
     const [session, setSession] = useState(createSession(title, username, userId, labId));
@@ -87,6 +87,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
         const timeoutId = setTimeout(saveSession, 1000); //add 1 second delay 
         return () => clearTimeout(timeoutId);
     }, [session, sessionLoaded]);
+
 
 
     const submitResponses = async () => {
@@ -177,10 +178,17 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
         } 
     //push grade to portal api
         try{
-
-
+            const response = await axios.post(`${process.env.REACT_APP_API_HOST}/submissions/upsertLab`,{
+                assignmentId,
+                userId,
+                dueDate:selectedAssignmentDueDate,
+                score:finalScore.percent
+            });
+            console.log('look here',response.data);
+            //SESSION SCORE DOES NTO GET UPDATED
+            onUpdateSubmission(response.data);
         } catch(err){
-
+            console.error('error upsertingLab ',err);
         }finally {
             setIsSubmitting(false); //stop loading regardless of success/failure
         }

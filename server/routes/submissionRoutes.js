@@ -30,7 +30,7 @@ const ensureAuthenticated = (req,res,next)=>{
 router.get('/submissions', getAllSubmissions); //this pathway is relative to the base path set in app.js (api/submit)
 router.get('/submissions/:id',getSubmission);
 router.post('/submissions/upsertLab',upsertLabSubmission);
-router.post('/submissions/upsertGithubSubmission',upsertGithubSubmission);
+router.post('/submissions/upsertGithub',upsertGithubSubmission);
 router.post('/submissions/update-grade',updateSubmissionGrade)
 router.post('/verify-github-ownership',verifyGithubOwnership);
 

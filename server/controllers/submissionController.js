@@ -173,31 +173,31 @@ const scoreLabSubmission = async (submittedAt, dueDate, score) => { //clone stud
 };
 
 const upsertLabSubmission = async (req, res) => {
-    const { submissionId, assignmentId, userId, dueDate } = req.body;
-    let result = -1;
+    const {assignmentId, userId, dueDate, score} = req.body;
     const submittedAt = new Date(); //create the submission date
-
-    result = await scoreLabSubmission(submittedAt, dueDate, score);
+    let finalPercent = await scoreLabSubmission(submittedAt, dueDate, score);
 
     try {
         const submission = await prisma.submission.upsert({
-            where: {
-                id: Number(submissionId) || -1 //undefined will throw an error but -1 will execute the create 
+             where: {
+               userId_assignmentId:{
+                    userId:Number(userId), 
+                    assignmentId:Number(assignmentId)
+                }
             },
             create: {
-                score: result,
+                score: Number(finalPercent),
                 assignmentId: Number(assignmentId),
                 userId: Number(userId),
                 submittedAt
             },
             update: {
-                score: result,
+                score: Number(finalPercent),
                 submittedAt
             }
         });
         res.json({
-            ...submission,
-            result
+            ...submission
         }); // return the updated or new submission along with the result (message and score)
 
     } catch (err) {
