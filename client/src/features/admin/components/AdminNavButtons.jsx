@@ -1,17 +1,44 @@
 import React from 'react';
 import Button from '../../../shared/Button';
+import {useEffect } from 'react';
 
-const AdminNavButtons = ({ onSelect, assignmentTitle}) => {
+const AdminNavButtons = ({ onSelect, assignmentTitle, assignmentId, assignmentType}) => {
+    let viewDisabled = false;
+    let submissionsDisabled = false;
+    if(assignmentId === -1){
+        viewDisabled = true;
+        submissionsDisabled = true;
+    }
+
+    if(assignmentType === 'code'){
+        viewDisabled = true;
+    }
+
+
+
     return (
          <>                  
          {/* //(OnSelect wrapped in function prevents function from executing immediately. Only on click */}
-            <Button color="secondary" onClick={() => onSelect('review')}>
+            <Button 
+                color="secondary" 
+                onClick={() => onSelect('review')}
+                style={submissionsDisabled ? { opacity: 0.5 } : undefined}
+                disabled={submissionsDisabled}
+            >
             👁️ Submissions 
             </Button>
-            <Button color="secondary" onClick={() => onSelect('manage')}>
+            <Button 
+                color="secondary" 
+                onClick={() => onSelect('manage')}
+                style={viewDisabled ? { opacity: 0.5 } : undefined} 
+                disabled={viewDisabled}       
+            >
             ✅ Manage/Preview 
             </Button>
-            <Button color="primary" onClick={() => onSelect('create')}>
+            <Button 
+                color="primary" 
+                onClick={() => onSelect('create')}
+            >
             🔨 Create/Edit
             </Button>
                       {/* Fake button for assignment title */}

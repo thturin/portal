@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import CreateAssignment from './CreateAssignment';
 import EditAssignment from './EditAssignment';
 
-const AssignmentMenu = ({
+const AdminAssignmentMenu = ({
     setSelectedAssignmentId,
     selectedAssignmentId,
     assignments,
@@ -13,6 +13,8 @@ const AssignmentMenu = ({
 }) => {
     const [showCreateAssignment, setShowCreateAssignment] = useState(false);
     
+
+//handle new assignment (show lab builder) in parent component
     const handleAssignmentChange = (val) => {
         if (val === "__new__") {
             setShowCreateAssignment(true);
@@ -20,6 +22,12 @@ const AssignmentMenu = ({
             setShowCreateAssignment(false);
         }
     }
+
+    
+        useEffect(()=>{
+        console.log('here is the assignmet id in adminAssignmentMenu',selectedAssignmentId);
+    });
+    
 
     return (<>
         <div style={{
@@ -45,7 +53,8 @@ const AssignmentMenu = ({
                     value={selectedAssignmentId} //value that gets passed is not the text but assignment id
                     onChange={e => {
                         handleAssignmentChange(e.target.value);
-                        setSelectedAssignmentId(e.target.value);
+                        //if there is no target value because nothing has been selected, return -1
+                        setSelectedAssignmentId(e.target.value || -1);
                         //setTitle to the assignment list selection
                         if(e.target.value!=="__new__") setTitle(assignments.find(a=>String(a.id)==String(e.target.value))?.title ?? '');
                     }}
@@ -77,4 +86,4 @@ const AssignmentMenu = ({
     </>);
 }
 
-export default AssignmentMenu;
+export default AdminAssignmentMenu;

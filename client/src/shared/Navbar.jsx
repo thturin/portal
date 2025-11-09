@@ -27,7 +27,7 @@ const Navbar = ({ user, onSelect, onLogout, assignmentTitle, assignmentType, ass
                 </div>
                 {/* Navigation Buttons */}
                 {isAdmin ? 
-                    <AdminNavButtons onSelect={onSelect} assignmentTitle={assignmentTitle}/>
+                    <AdminNavButtons onSelect={onSelect} assignmentTitle={assignmentTitle} assignmentType={assignmentType} assignmentId={assignmentId}/>
                     : <StudentNavButtons onSelect={onSelect} assignmentTitle={assignmentTitle} assignmentType={assignmentType} assignmentId={assignmentId}/>
                 }
             </div>

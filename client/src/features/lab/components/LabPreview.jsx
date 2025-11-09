@@ -4,7 +4,7 @@ import { createSession } from '../models/session';
 import MaterialBlock from './MaterialBlock';
 import QuestionBlock from './QuestionBlock';
 
-function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username, labId, selectedAssignmentDueDate, onUpdateSubmission}) {
+function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username, labId, selectedAssignmentDueDate, onUpdateSubmission }) {
     const isAdmin = mode === 'admin';
 
     const [session, setSession] = useState(createSession(title, username, userId, labId));
@@ -49,6 +49,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
 
     const loadSession = async () => {
         try {
+            console.log('KFJKLFJ',labId);
             const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/session/load-session/${labId}`, {
                 params: { userId, username, title }
             });
@@ -122,7 +123,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                     }
                 }
             }
-        //deepseek api request
+            //deepseek api request
             try {
                 const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade`, {
                     userAnswer,
@@ -175,23 +176,27 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
             }));
         } catch (err) {
             console.error('error calculating final score', err);
-        } 
-    //push grade to portal api
-        try{
-            const response = await axios.post(`${process.env.REACT_APP_API_HOST}/submissions/upsertLab`,{
-                assignmentId,
-                userId,
-                dueDate:selectedAssignmentDueDate,
-                score:finalScore.percent
-            });
-            console.log('look here',response.data);
-            //SESSION SCORE DOES NTO GET UPDATED
-            onUpdateSubmission(response.data);
-        } catch(err){
-            console.error('error upsertingLab ',err);
-        }finally {
-            setIsSubmitting(false); //stop loading regardless of success/failure
+        }finally{
+            if(isAdmin) setIsSubmitting(false);
         }
+        //push grade to portal api only if student is submitting
+        if (!isAdmin) {
+            try {
+                const response = await axios.post(`${process.env.REACT_APP_API_HOST}/submissions/upsertLab`, {
+                    assignmentId,
+                    userId,
+                    dueDate: selectedAssignmentDueDate,
+                    score: finalScore.percent
+                });
+                //SESSION SCORE DOES NTO GET UPDATED with late penalty
+                onUpdateSubmission(response.data);
+            } catch (err) {
+                console.error('error upsertingLab ', err);
+            } finally {
+                setIsSubmitting(false); //stop loading regardless of success/failure
+            }
+        }
+
     }
 
     return (
