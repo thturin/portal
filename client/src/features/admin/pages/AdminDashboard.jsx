@@ -51,13 +51,11 @@ const AdminDashboard = ({ user, onLogout }) => {
         axios.get(`${process.env.REACT_APP_API_HOST}/sections`).then(res => setSections(res.data));
     }, []);
 
-    //when user selects assignment, find the labId from selected assignment obj
-    // useEffect(()=>{
-    //     if(selectedAssignmentObj){
-    //         setSelectedLabId(selectedAssignmentObj.labId);
-    //     }
-
-    // },[selectedAssignmentObj]);
+    //you are curredntly working on updating the assignmetn
+    const onAssignmentUpdate = (updatedAssignment)=>{
+        //gt previous assignments->map it and compare each assignment id to updatedAssignment Id. change that assignment when found
+        setAssignments(prev=> prev.map(ass=>ass.id === updatedAssignment.id? updatedAssignment:ass));
+    }
 
     const handleTabSelect = (tab) => {
         console.log(`current tab is ${currentTab}`);
@@ -121,6 +119,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                             setAssignments={setAssignments}
                             selectedAssignmentObj={selectedAssignmentObj}
                             setTitle={setTitle}
+                            onAssignmentUpdate={onAssignmentUpdate}
                         />
                         {selectedAssignmentObj?.type === 'lab' && (
                             <LabBuilder

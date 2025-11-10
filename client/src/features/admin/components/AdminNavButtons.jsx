@@ -10,7 +10,7 @@ const AdminNavButtons = ({ onSelect, assignmentTitle, assignmentId, assignmentTy
         submissionsDisabled = true;
     }
 
-    if(assignmentType === 'code'){
+    if(assignmentType === 'github'){
         viewDisabled = true;
     }
 

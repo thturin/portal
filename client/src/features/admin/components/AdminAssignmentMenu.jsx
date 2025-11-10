@@ -9,7 +9,8 @@ const AdminAssignmentMenu = ({
     assignments,
     setAssignments,
     selectedAssignmentObj,
-    setTitle
+    setTitle,
+    onAssignmentUpdate
 }) => {
     const [showCreateAssignment, setShowCreateAssignment] = useState(false);
     

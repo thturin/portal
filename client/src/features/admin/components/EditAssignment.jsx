@@ -19,8 +19,7 @@ const EditAssignment = ({ selectedAssignmentObj }) => {
         try {
             const response = await axios.put(`${process.env.REACT_APP_API_HOST}/assignments/${selectedAssignmentObj.id}`, {
                 title,
-                dueDate,
-                type
+                dueDate
             });
             if(response.data){
                 setHasChanges(false);
@@ -39,20 +38,29 @@ const EditAssignment = ({ selectedAssignmentObj }) => {
             borderRadius: '8px',
             backgroundColor: '#f9f9f9'
         }}>
-            <h3 style={{ textAlign: 'center', marginTop: 0 }}>Assignment Details</h3>
+            <h3 style={{ textAlign: 'center', marginTop: 0 }}>Edit Assignment Details</h3>
 
             <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Title:</label>
                 <input
-                    type="string"
+                    type="text"  // Changed from "string" to "text"
                     value={title}
                     onChange={(e) => {
                         setTitle(e.target.value);
                         setHasChanges(true);
                     }}
+                    style={{
+                        width: '100%',
+                        padding: '8px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        fontSize: '14px'
+                    }}
                 />
             </div>
 
             <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Due Date:</label>
                 <input
                     type="date"
                     value={new Date(dueDate).toISOString().split('T')[0]}
@@ -60,26 +68,22 @@ const EditAssignment = ({ selectedAssignmentObj }) => {
                         setDueDate(e.target.value)
                         setHasChanges(true);
                     }}
-                />
-            </div>
-
-            <div style={{ marginBottom: '10px' }}>
-                <select
-                    value={type}
-                    onChange={(e) => {
-                        setType(e.target.value);
-                        setHasChanges(true);
-                    }}
                     style={{
+                        width: '100%',
                         padding: '8px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px'
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        fontSize: '14px'
                     }}
                 >
-                    <option value="lab">Lab</option>
-                    <option value="code">Code</option>
-                </select>
+       
+                
+                </input>
             </div>
+            <div style={{ marginBottom: '10px' }}>
+                <p>Assignment Type: {selectedAssignmentObj.type}</p>
+            </div>
+
 
             {/* UPDATE BUTTON */}
             {hasChanges && (
