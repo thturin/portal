@@ -1,4 +1,4 @@
-const {  parseISO } = require('date-fns');
+const { parseISO } = require('date-fns');
 const { cloneRepo } = require('../services/gitService');
 const { gradeJavaSubmission } = require('../services/gradingService');
 const { PrismaClient } = require('@prisma/client');
@@ -122,6 +122,7 @@ const scoreGithubSubmission = async (url, path, assignmentTitle, submittedAt, du
     }
 };
 
+//UPDATE GITHUB SUBMISSION WHEN SUBMITTING
 const upsertGithubSubmission = async (req, res) => {
     const { submissionId, url, assignmentId, userId, assignmentTitle, dueDate } = req.body;
     let result = { score: -1, output: 'null' };
@@ -133,9 +134,9 @@ const upsertGithubSubmission = async (req, res) => {
     try {
         const submission = await prisma.submission.upsert({
             where: {
-               userId_assignmentId:{
-                    userId:Number(userId), 
-                    assignmentId:Number(assignmentId)
+                userId_assignmentId: {
+                    userId: Number(userId),
+                    assignmentId: Number(assignmentId)
                 }
             },
             create: {
@@ -172,17 +173,18 @@ const scoreLabSubmission = async (submittedAt, dueDate, score) => { //clone stud
     return finalScore;
 };
 
+//UPDATE OR CREATE LAB SUBMISSION WHEN SUBMITTING
 const upsertLabSubmission = async (req, res) => {
-    const {assignmentId, userId, dueDate, score} = req.body;
+    const { assignmentId, userId, dueDate, score } = req.body;
     const submittedAt = new Date(); //create the submission date
     let finalPercent = await scoreLabSubmission(submittedAt, dueDate, score);
 
     try {
         const submission = await prisma.submission.upsert({
-             where: {
-               userId_assignmentId:{
-                    userId:Number(userId), 
-                    assignmentId:Number(assignmentId)
+            where: {
+                userId_assignmentId: {
+                    userId: Number(userId),
+                    assignmentId: Number(assignmentId)
                 }
             },
             create: {
@@ -263,13 +265,32 @@ const getAllSubmissions = async (req, res) => {
 };
 
 
+//will only delete submissions by assignmentId
+const deleteSubmissions = async (req, res) => {
+    const { assignmentId } = req.params;
+    if (!assignmentId) return res.status(400).json({ error: 'Missing assignmentId' });
+
+    try {
+        await prisma.submission.deleteMany({
+            where: { assignmentId: Number(assignmentId) }
+        });
+        return res.json({ message: 'Submissions deleted successfully' });
+
+    } catch (err) {
+        console.log('error in deleteSubmissions', err.message);
+        return res.status(500).json({ error: 'Failed to fetch' });
+    }
+}
+
+
 module.exports = {
     verifyGithubOwnership,
     getAllSubmissions,
     getSubmission,
     updateSubmissionGrade,
     upsertLabSubmission,
-    upsertGithubSubmission
+    upsertGithubSubmission,
+    deleteSubmissions
 };
 
 

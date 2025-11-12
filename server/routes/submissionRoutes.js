@@ -5,7 +5,8 @@ const {upsertGithubSubmission,
     verifyGithubOwnership, 
     getAllSubmissions,
     getSubmission,
-    updateSubmissionGrade} = require('../controllers/submissionController'); //call the handleSubmission function from submissionController 
+    updateSubmissionGrade,
+    deleteSubmissions} = require('../controllers/submissionController'); //call the handleSubmission function from submissionController 
 
 
 // benefits of adding middleware
@@ -26,13 +27,14 @@ const ensureAuthenticated = (req,res,next)=>{
 }
 //router.get('/submissions', ensureAuthenticated, getAllSubmissions); // 
 
-//ROOT / ISS LOCALHOST:5000/API
+//ROOT / ISS LOCALHOST:5000/api
 router.get('/submissions', getAllSubmissions); //this pathway is relative to the base path set in app.js (api/submit)
 router.get('/submissions/:id',getSubmission);
 router.post('/submissions/upsertLab',upsertLabSubmission);
 router.post('/submissions/upsertGithub',upsertGithubSubmission);
 router.post('/submissions/update-grade',updateSubmissionGrade)
 router.post('/verify-github-ownership',verifyGithubOwnership);
+router.delete('/submissions/delete-submissions/:assignmentId',deleteSubmissions);
 
 
 module.exports = router; //export router object so your main server file can use it

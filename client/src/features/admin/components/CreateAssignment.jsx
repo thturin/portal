@@ -1,19 +1,14 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 
-const CreateAssignment=({updateAssignments})=>{
+const CreateAssignment=({onAssignmentCreate})=>{
     const apiUrl = process.env.REACT_APP_API_HOST;
     const [title, setTitle] = useState('');
-    const [dueDate, setDueDate] = useState('');
+    const [dueDate, setDueDate] = useState(''); 
     const [type, setType] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    useEffect(()=>{
-        console.log(`look here! ${type}`);
-    },[type]);
-
-    
 
     const handleSubmit = async (e) =>{
         e.preventDefault();
@@ -21,7 +16,7 @@ const CreateAssignment=({updateAssignments})=>{
         setSuccess('');
         try{
             //make a request to post data to assignments api
-            const res = await axios.post(`${apiUrl}/assignments`,{
+            const response = await axios.post(`${apiUrl}/assignments`,{
                 title,
                 dueDate,
                 type
@@ -29,8 +24,8 @@ const CreateAssignment=({updateAssignments})=>{
             setSuccess('Assignment Created');
             setTitle('');//clear the title and due date after POST
             setDueDate('');
-            //setType('');
-            if(updateAssignments) updateAssignments(res.data);
+            console.log('create assignment->>',response.data);
+            if(onAssignmentCreate) onAssignmentCreate(response.data);
         }catch(err){
             setError(err.response?.data?.error || 'Failed to create assignment');
         }

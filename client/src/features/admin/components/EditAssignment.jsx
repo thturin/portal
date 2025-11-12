@@ -3,27 +3,40 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 
-const EditAssignment = ({ selectedAssignmentObj }) => {
+const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssignmentDelete, onAssignmentUpdate }) => {
     const [hasChanges, setHasChanges] = useState(false);
     const [title, setTitle] = useState(selectedAssignmentObj.title);
     const [dueDate, setDueDate] = useState(selectedAssignmentObj.dueDate);
     const [type, setType] = useState(selectedAssignmentObj.type);
 
-    useEffect(()=>{
+    useEffect(() => {
         setTitle(selectedAssignmentObj.title);
         setDueDate(selectedAssignmentObj.dueDate);
         setType(selectedAssignmentObj.type);
         setHasChanges(false);
-    },[selectedAssignmentObj]); //when selection changes, update field in assignment details
+    }, [selectedAssignmentObj]); //when selection changes, update field in assignment details
+
+    const handleDelete = async()=>{
+        try{
+            const response = await axios.delete(`${process.env.REACT_APP_API_HOST}/assignments/delete-assignment/${selectedAssignmentObj.id}`);
+            console.log('Assignment Deleted!');
+            setSelectedAssignmentId(-1);
+            if(onAssignmentDelete) onAssignmentDelete(response.data);
+        }catch(err){
+            console.error('Error in deleteAssignment',err.message);
+        }
+    }
+
     const handleUpdate = async () => {
         try {
             const response = await axios.put(`${process.env.REACT_APP_API_HOST}/assignments/${selectedAssignmentObj.id}`, {
                 title,
                 dueDate
             });
-            if(response.data){
+            if (response.data) {
                 setHasChanges(false);
             }
+            if(onAssignmentUpdate) onAssignmentUpdate(response.data);
         } catch (err) {
             console.error('error in AssignmentDetails handleUpdate->', err);
         }
@@ -75,25 +88,23 @@ const EditAssignment = ({ selectedAssignmentObj }) => {
                         borderRadius: '4px',
                         fontSize: '14px'
                     }}
-                >
-       
-                
-                </input>
+                />
             </div>
+
             <div style={{ marginBottom: '10px' }}>
-                <p>Assignment Type: {selectedAssignmentObj.type}</p>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Assignment Type: </label>
+                <p>{selectedAssignmentObj.type}</p>
             </div>
-
-
+ 
             {/* UPDATE BUTTON */}
             {hasChanges && (
                 <div style={{
-                    display: 'flex',
+                    display: 'left',
                     justifyContent: 'flex-end',
                     marginTop: '10px'
                 }}>
                     <button
-                        onClick={handleUpdate} 
+                        onClick={handleUpdate}
                         style={{
                             padding: '8px 16px',
                             backgroundColor: '#28a745',
@@ -102,13 +113,35 @@ const EditAssignment = ({ selectedAssignmentObj }) => {
                             borderRadius: '4px',
                             cursor: 'pointer'
                         }}
-                    > 
+                    >
                         Update Assignment
                     </button>
-
                 </div>
-                )
-            }
+            )}
+                       <br></br>
+
+            {/* 
+            DELETE BUTTON  */}
+            <div style={{
+                display: 'center',
+                justifyContent: 'flex-end',
+                marginTop: '10px'
+            }}>
+                <button
+                    onClick={handleDelete}
+                    style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#c7173aff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    Delete Assignment
+                </button>
+
+            </div>
         </div>
     );
 };

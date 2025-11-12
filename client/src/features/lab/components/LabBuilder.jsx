@@ -174,7 +174,7 @@ function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
     )
 }
 
-function LabBuilder({ blocks, setBlocks, title, setTitle, id, assignmentId }) {
+function LabBuilder({ blocks, setBlocks, title,  assignmentId }) {
 
     useEffect(() => {
         loadLab();
@@ -239,7 +239,6 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, id, assignmentId }) {
             });
             console.log('lab loaded! ', response.data);
             setBlocks(response.data.blocks);
-            setId(response.data.id);
         } catch (err) {
             console.error('Lab did not load from labController successfully', err.message);
         }
@@ -273,20 +272,6 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, id, assignmentId }) {
             <h1 className="text-2xl font-bold mb-4" style={{ whiteSpace: "pre-line" }}>
                 {title}
             </h1>
-            <textarea
-                type="text"
-                className="w-full border p-3 text-xl font-semibold mb-6"
-                placeholder="Enter lab title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        saveLab();
-                    }
-                }}
-            />
-
             {/* DISPLAY BLOCKS */}
             {blocks.map((block, i) => (
                 <div key={block.id || i} className="mb-6 flex items-start">

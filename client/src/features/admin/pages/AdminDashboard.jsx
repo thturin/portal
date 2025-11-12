@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '../../../shared/Navbar';
 import AdminAssignmentMenu from '../components/AdminAssignmentMenu';
 import SubmissionList from '../components/SubmissionList';
@@ -13,7 +13,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     //for lab-builder/preview
     const [blocks, setBlocks] = useState([]);
     const [title, setTitle] = useState('');
-    const [selectedLabId, setSelectedLabId] = useState(null);
+
 
     const [assignments, setAssignments] = useState([]);
     const [submissions, setSubmissions] = useState([]);
@@ -24,9 +24,8 @@ const AdminDashboard = ({ user, onLogout }) => {
     const [hasChanges, setHasChanges] = useState(false);
     const [currentTab, setCurrentTab] = useState('');
 
-    useEffect(() => {
-        console.log('assignmentId in AdminDashboard', selectedAssignmentId);
-    })
+
+    
 
     const selectedAssignmentObj = assignments.find(  //this will execute on any render
         ass => ass.id === Number(selectedAssignmentId)
@@ -45,7 +44,6 @@ const AdminDashboard = ({ user, onLogout }) => {
 
     //fetch assignmenbts, submissions, and sections
     useEffect(() => {
-        console.log('fetching assignments, submissions on mount');
         axios.get(`${process.env.REACT_APP_API_HOST}/assignments`).then(res => setAssignments(res.data));
         axios.get(`${process.env.REACT_APP_API_HOST}/submissions`).then(res => setSubmissions(res.data));
         axios.get(`${process.env.REACT_APP_API_HOST}/sections`).then(res => setSections(res.data));
@@ -54,11 +52,23 @@ const AdminDashboard = ({ user, onLogout }) => {
     //you are curredntly working on updating the assignmetn
     const onAssignmentUpdate = (updatedAssignment)=>{
         //gt previous assignments->map it and compare each assignment id to updatedAssignment Id. change that assignment when found
-        setAssignments(prev=> prev.map(ass=>ass.id === updatedAssignment.id? updatedAssignment:ass));
+        setAssignments(prev => prev.map(ass => {
+            return ass.id === updatedAssignment.id ? updatedAssignment : ass;
+        }));
+
+    }
+
+    const onAssignmentCreate = (newAssignment)=>{
+        setAssignments(prev=>[...prev,newAssignment]);
+    }
+
+    const onAssignmentDelete = (deleteAssignment)=>{
+        //filter out assignments and submissiuons the old assignment
+        setAssignments(prev=> prev.filter(ass=>ass.id!==deleteAssignment.id));
+        setSubmissions(prev=>prev.filter(ass=>ass.assignmentId!==deleteAssignment.id));
     }
 
     const handleTabSelect = (tab) => {
-        console.log(`current tab is ${currentTab}`);
         setCurrentTab(tab);
     }
 
@@ -120,6 +130,8 @@ const AdminDashboard = ({ user, onLogout }) => {
                             selectedAssignmentObj={selectedAssignmentObj}
                             setTitle={setTitle}
                             onAssignmentUpdate={onAssignmentUpdate}
+                            onAssignmentDelete={onAssignmentDelete}
+                            onAssignmentCreate={onAssignmentCreate}
                         />
                         {selectedAssignmentObj?.type === 'lab' && (
                             <LabBuilder
@@ -127,12 +139,9 @@ const AdminDashboard = ({ user, onLogout }) => {
                                 setBlocks={setBlocks}
                                 title={title}
                                 setTitle={setTitle}
-                                mode='admin'
-                                userId={user.id}
                                 assignmentId={selectedAssignmentId}
                             />)
                         }
-
                     </div>
                 )}
 

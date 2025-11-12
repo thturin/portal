@@ -16,6 +16,23 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
     const gradedResults = session.gradedResults;
     const finalScore = session.finalScore || {};
 
+    
+    useEffect(() => {
+        console.log('LabPreview parameters:', {
+            blocks,
+            setBlocks,
+            title,
+            setTitle,
+            assignmentId,
+            mode,
+            userId,
+            username,
+            labId,
+            selectedAssignmentDueDate,
+            onUpdateSubmission
+        });
+    }, []);
+
     //update handler that modifies responses in session
     const handleResponseChange = (questionId, value) => {
         setSession(prev => ({ //update the session and concatenate old data with new response for questionId an val
@@ -49,16 +66,13 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
 
     const loadSession = async () => {
         try {
-            console.log('KFJKLFJ',labId);
             const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/session/load-session/${labId}`, {
                 params: { userId, username, title }
             });
-            if (response.error) {
-                console.log(response.error);
-                return;
-            }
+
             if (response.data.session) setSession(response.data.session);
             setSessionLoaded(true);
+            console.log('Session Loaded!');
         } catch (err) {
             console.error('Error in getResponse()', err);
         };
@@ -179,7 +193,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
         }finally{
             if(isAdmin) setIsSubmitting(false);
         }
-        //push grade to portal api only if student is submitting
+        //CREATE A LAB TYPE SUBMISSION ONLY IF IT IS A STUDENT
         if (!isAdmin) {
             try {
                 const response = await axios.post(`${process.env.REACT_APP_API_HOST}/submissions/upsertLab`, {

@@ -7,14 +7,14 @@ const AdminAssignmentMenu = ({
     setSelectedAssignmentId,
     selectedAssignmentId,
     assignments,
-    setAssignments,
     selectedAssignmentObj,
     setTitle,
-    onAssignmentUpdate
+    onAssignmentUpdate,
+    onAssignmentDelete,
+    onAssignmentCreate
 }) => {
-    const [showCreateAssignment, setShowCreateAssignment] = useState(false);
-    
 
+    const [showCreateAssignment, setShowCreateAssignment] = useState(false);
 //handle new assignment (show lab builder) in parent component
     const handleAssignmentChange = (val) => {
         if (val === "__new__") {
@@ -25,10 +25,7 @@ const AdminAssignmentMenu = ({
     }
 
     
-        useEffect(()=>{
-        console.log('here is the assignmet id in adminAssignmentMenu',selectedAssignmentId);
-    });
-    
+
 
     return (<>
         <div style={{
@@ -78,10 +75,10 @@ const AdminAssignmentMenu = ({
             </div>
 
             {showCreateAssignment && <CreateAssignment
-                updateAssignments={childData => setAssignments(oldAssignments => [...oldAssignments, childData])} />}
+                onAssignmentCreate={onAssignmentCreate} />}
 
             {/* DISPLAY SELECTED ASSIGNMENT (DUE DATE, TITLE, TYPE ) */}
-            {selectedAssignmentObj && (<EditAssignment selectedAssignmentObj={selectedAssignmentObj} />)}
+            {selectedAssignmentObj && (<EditAssignment setSelectedAssignmentId={setSelectedAssignmentId} selectedAssignmentObj={selectedAssignmentObj} onAssignmentDelete={onAssignmentDelete} onAssignmentUpdate={onAssignmentUpdate} />)}
 
         </div>
     </>);
