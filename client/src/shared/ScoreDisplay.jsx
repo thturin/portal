@@ -23,7 +23,7 @@ const ScoreDisplay = ({ score }) => {
                 fontWeight: '700',
                 color: getScoreColor(score)
             }}>
-                {score}%
+                {score || 0}%
             </span>
         </div>
     );

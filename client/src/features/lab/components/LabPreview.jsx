@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { createSession } from '../models/session';
 import MaterialBlock from './MaterialBlock';
 import QuestionBlock from './QuestionBlock';
+import "../styles/Lab.css";
 
 function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username, labId, selectedAssignmentDueDate, onUpdateSubmission }) {
     const isAdmin = mode === 'admin';

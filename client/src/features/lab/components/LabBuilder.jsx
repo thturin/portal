@@ -2,21 +2,26 @@ import { useState, useRef, useEffect } from "react";
 import { createQuestion, createMaterial } from "../models/block";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import "../styles/Lab.css";
 import axios from "axios";
-
 
 function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
     //onChange passed down from the parent so everything stays in sync
+    //INFINITE LOOP OCCURRING EVERY KEYSTROKE TRIGGERS ONCHANGE
+    //DO NOT UPDATE IF VALUE HASN'T CHANGED
     const update = (field, value) => {
         //ONCHANGE CREATES A NEW QUESTION OBJECT WITH UQPDATED FIELD  VALUE
-        onQuestionChange({ ...q, [field]: value }); //field is the placeholder for any property
-        //properties of questionBlock blockType, type, prompt, desc
+        if (q[field] !== value) {
+            onQuestionChange({ ...q, [field]: value }); //field is the placeholder for any property
+            //properties of questionBlock blockType, type, prompt, desc
+        }
+
     };
 
     const modules = {
         toolbar: [
             ['bold', 'italic', 'underline'],
-            ['code-block'], // ✅ Add code block support
+            ['code-block'],
             ['clean']
         ]
     }
@@ -31,7 +36,11 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
                         className="w-full border p-2 mb-2"
                         value={q.prompt}
                         rows={3}
-                        onChange={(value) => update("prompt", value)}
+                        onChange={(value) => {
+                            if (value !== q.prompt) { //do not update if value hasn't changed
+                                update("prompt", value)
+                            }
+                        }}
                         theme="snow"
                     />
                 </div>
@@ -118,14 +127,19 @@ function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
     const quillRef = useRef();
     const update = (field, value) => {
         //ONCHANGE CREATES A NEW BLOCK OBJECT WITH UPDATED FIELD AND TYPE VALUES 
-        let updatedBlock = { ...block, [field]: value };
-        //extract images from content when it changes
-        if (field === 'content') {
-            const images = extractImagesFromHTML(value);
-            updatedBlock.images = images;
-        }
-        onMaterialChange(updatedBlock);
+        //only update if value actually changed
+        if (block[field] !== value) {
+            let updatedBlock = { ...block, [field]: value };
+            //extract images from content when it changes
+            if (field === 'content') {
+                const images = extractImagesFromHTML(value);
+                updatedBlock.images = images;
+            }
+            onMaterialChange(updatedBlock);
         //text image block properties blockType, type, content, images
+        }
+
+        
     };
 
     const extractImagesFromHTML = (html) => { //extracts image url from html
@@ -161,8 +175,8 @@ function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
                 modules={modules}
             />
 
-            <div className="mt-2 p-2 border bg-gray-50"
-                dangerouslySetInnerHTML={{ __html: block.content }} />
+            {/* <div className="mt-2 p-2 border bg-gray-50"
+                dangerouslySetInnerHTML={{ __html: block.content }} /> */}
 
             <button
                 onClick={onMaterialDelete}
@@ -174,7 +188,7 @@ function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
     )
 }
 
-function LabBuilder({ blocks, setBlocks, title,  assignmentId }) {
+function LabBuilder({ blocks, setBlocks, title, assignmentId }) {
 
     useEffect(() => {
         loadLab();
@@ -247,13 +261,32 @@ function LabBuilder({ blocks, setBlocks, title,  assignmentId }) {
     const loadLabFromFile = async () => {
         try {
             const lab = await import('./U1T6.json');
-            setTitle(lab.default.title || "");
+            //setTitle(lab.default.title || "");
             setBlocks(lab.default.blocks || []);
             console.log('Lab loaded from lab.json');
         } catch (err) {
             console.error('Lab did not load from file successfully', err.message);
         }
     }
+
+    const loadLabFromUserFile = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const labData = JSON.parse(e.target.result);
+                    setBlocks(labData.blocks || []);
+                    // If you want to set title from file, uncomment:
+                    // setTitle(labData.title || "");
+                    console.log('Lab loaded from user file');
+                } catch (err) {
+                    console.error('Error parsing JSON file:', err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+    };
 
     const exportLabToFolder = () => {
         const lab = { title, blocks };
@@ -270,7 +303,8 @@ function LabBuilder({ blocks, setBlocks, title,  assignmentId }) {
     return (
         <div className="max-w-7xl mx-auto p-10">
             <h1 className="text-2xl font-bold mb-4" style={{ whiteSpace: "pre-line" }}>
-                {title}
+                Lab Builder <br></br>
+                {title || "No Title"}
             </h1>
             {/* DISPLAY BLOCKS */}
             {blocks.map((block, i) => (
@@ -340,6 +374,13 @@ function LabBuilder({ blocks, setBlocks, title,  assignmentId }) {
             >
                 📂 Load From File
             </button>
+            <input
+                type="file"
+                accept=".json"
+                onChange={loadLabFromUserFile}
+                className="bg-yellow-600 text-white px-4 py-2 rounded mr-2"
+                style={{ display: 'inline-block' }}
+            />
             <button
                 onClick={exportLabToFolder}
                 className="bg-blue-600 text-white px-4 py-2 rounded ml-2"
