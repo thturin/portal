@@ -39,7 +39,7 @@ const AdminNavButtons = ({ onSelect, assignmentTitle, assignmentId, assignmentTy
                 color="primary" 
                 onClick={() => onSelect('create')}
             >
-            🔨 Create/Edit
+            🔨 Select/Build
             </Button>
                       {/* Fake button for assignment title */}
             <Button color="default" style={{ cursor: 'default', pointerEvents: 'none', marginLeft: '8px', opacity: 0.7 }}>

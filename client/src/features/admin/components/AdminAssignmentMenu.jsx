@@ -14,19 +14,11 @@ const AdminAssignmentMenu = ({
     onAssignmentCreate
 }) => {
 
-    const [showCreateAssignment, setShowCreateAssignment] = useState(false);
-//handle new assignment (show lab builder) in parent component
-    const handleAssignmentChange = (val) => {
-        if (val === "__new__") {
-            setShowCreateAssignment(true);
-        } else {
-            setShowCreateAssignment(false);
-        }
-    }
+  
+
+    const showCreateAssignment = selectedAssignmentId === -2;
 
     
-
-
     return (<>
         <div style={{
             maxWidth: '600px',
@@ -50,11 +42,11 @@ const AdminAssignmentMenu = ({
                 <select
                     value={selectedAssignmentId} //value that gets passed is not the text but assignment id
                     onChange={e => {
-                        handleAssignmentChange(e.target.value);
                         //if there is no target value because nothing has been selected, return -1
-                        setSelectedAssignmentId(e.target.value || -1);
+                        const val = Number(e.target.value);
+                        setSelectedAssignmentId(val || -1);
                         //setTitle to the assignment list selection
-                        if(e.target.value!=="__new__") setTitle(assignments.find(a=>String(a.id)==String(e.target.value))?.title ?? '');
+                        if(e.target.value!=="-2") setTitle(assignments.find(a=>a.id==val)?.title ?? '');
                     }}
                     style={{
                         width: '100%',
@@ -64,8 +56,8 @@ const AdminAssignmentMenu = ({
                         fontSize: '14px'
                     }}
                 >
-                    <option value="">Select an Assignment</option>
-                    <option value="__new__">➕ Create New Assignment</option>
+                    <option value="-1">Select an Assignment</option>
+                    <option value="-2">➕ Create New Assignment</option>
                     {assignments.map(ass => (
                         <option key={ass.id} value={ass.id}>
                             {ass.title}

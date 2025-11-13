@@ -25,11 +25,16 @@ const AdminDashboard = ({ user, onLogout }) => {
     const [currentTab, setCurrentTab] = useState('');
 
 
-    
+
 
     const selectedAssignmentObj = assignments.find(  //this will execute on any render
         ass => ass.id === Number(selectedAssignmentId)
     );
+
+        
+    useEffect(()=>{
+        console.log('LAB ID IN ADMIN DASHBOARD->',selectedAssignmentObj?.labId);
+    },[selectedAssignmentObj]);
 
     const filteredSubs = submissions.filter(
         sub => {
@@ -59,6 +64,8 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
 
     const onAssignmentCreate = (newAssignment)=>{
+        //default to the newly created assignment as the slelectedAssignmentId
+        setSelectedAssignmentId(newAssignment.id);
         setAssignments(prev=>[...prev,newAssignment]);
     }
 
