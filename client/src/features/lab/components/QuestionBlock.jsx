@@ -1,10 +1,22 @@
 import React from 'react';
 import ScoreDisplay from './ScoreDisplay';
+import Explanation from './Explanation';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 
-const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults, finalScore }) => {
+
+const hasGradedResultForBlock =  (block, gradedResults) =>{ //used for showing explanation 
+    console.log(!gradedResults);
+    if(!gradedResults) return false;
+    if(block.blockType !=='question') return false;
+    return Boolean(gradedResults[block.id]);
+}
+
+const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults, finalScore, block }) => {
+    const isScored = block.isScored;
+    const showExplanation = hasGradedResultForBlock(block, gradedResults);
+    
     return(
         <>
         <ReactQuill
@@ -16,37 +28,52 @@ const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults,
             className="w-full mb-2"
             placeholder="Your answer..."
         />
+
+    { isScored && 
         <ScoreDisplay
-            finalScore={finalScore}
-            gradedResults={gradedResults}
-            questionId={blockId}
-        />
+                finalScore={finalScore}
+                gradedResults={gradedResults}
+                questionId={blockId}
+            />
+    }
+        
+    {showExplanation &&(<Explanation content={block.explanation} />)}
+        
     </>
     );
 };
 
-const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, finalScore }) => (
-    <div key={question.id} className="mb-4">
-        <div 
-            className="font-semibold mb-1" 
-            dangerouslySetInnerHTML={{ __html: question.prompt }} 
-        />
-        <ReactQuill
-            theme="snow"
-            value={responses[question.id] || ''}
-            onChange={content => {
-                setResponses(question.id, content);
-            }}
-            className="w-full mb-2"
-            placeholder="Your answer..."
-        />
-        <ScoreDisplay
-            finalScore={finalScore}
-            gradedResults={gradedResults}
-            questionId={question.id}
-        />
-    </div>
-);
+const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, finalScore }) => {
+    const isScored = question.isScored;
+    const showExplanation = hasGradedResultForBlock(question, gradedResults);
+    
+    return (
+        <div key={question.id} className="mb-4">
+            <div 
+                className="font-semibold mb-1" 
+                dangerouslySetInnerHTML={{ __html: question.prompt }} 
+            />
+            <ReactQuill
+                theme="snow"
+                value={responses[question.id] || ''}
+                onChange={content => {
+                    setResponses(question.id, content);
+                }}
+                className="w-full mb-2"
+                placeholder="Your answer..."
+            />
+            { isScored && 
+            <ScoreDisplay
+                    finalScore={finalScore}
+                    gradedResults={gradedResults}
+                    questionId={blockId}
+                />
+            }
+            
+            {showExplanation &&(<Explanation content={block.explanation} />)}
+        </div>
+    );
+};
 
 const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalScore }) => {
     return (
@@ -75,9 +102,14 @@ const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalSco
                     setResponses={setResponses}
                     gradedResults={gradedResults}
                     finalScore={finalScore}
+                    block={block}
+                    showExplanation={hasGradedResultForBlock(block)}
+                    isScored={block.isScored}
+                    explanation={block.explanation}
                 />
             )}
-        </div>
+
+    </div>
     );
 };
 

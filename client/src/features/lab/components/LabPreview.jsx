@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { createSession } from '../models/session';
 import MaterialBlock from './MaterialBlock';
 import QuestionBlock from './QuestionBlock';
+import ScoreDisplay from "./ScoreDisplay";
+import Explanation from './Explanation';
 import "../styles/Lab.css";
 
 function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username, labId, selectedAssignmentDueDate, onUpdateSubmission }) {
@@ -16,25 +18,25 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
     const responses = session.responses || {};
     const gradedResults = session.gradedResults;
     const finalScore = session.finalScore || {};
-
-    
-    useEffect(() => {
-        console.log('LabPreview parameters:', {
-            blocks,
-            setBlocks,
-            title,
-            setTitle,
-            assignmentId,
-            mode,
-            userId,
-            username,
-            labId,
-            selectedAssignmentDueDate,
-            onUpdateSubmission
-        });
-    }, []);
+    // useEffect(() => {
+    //     console.log('LabPreview parameters:', {
+    //         blocks,
+    //         setBlocks,
+    //         title,
+    //         setTitle,
+    //         assignmentId,
+    //         mode,
+    //         userId,
+    //         username,
+    //         labId,
+    //         selectedAssignmentDueDate,
+    //         onUpdateSubmission
+    //     });
+    // }, []);
 
     //update handler that modifies responses in session
+    
+   
     const handleResponseChange = (questionId, value) => {
         setSession(prev => ({ //update the session and concatenate old data with new response for questionId an val
             ...prev,
@@ -118,7 +120,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
             //THIS ASSUMES SUB QUESTIONS DO NOT HAVE SUB QUESTIONS
             //LOOP THROUGH BLOCKS AND ASSIGN ANSWERKEY, QUESTIOHN, TYPE
             for (const block of blocks) { //FIND BLOCK 
-                if (block.blockType === 'question' &&
+                if (block.blockType === 'question' && block.isScored &&
                     block.subQuestions.length === 0 &&
                     block.id === questionId) {
                     answerKey = block.key;
@@ -126,7 +128,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                     type = block.type;
                     break;
                 }
-                if (block.blockType === 'question' && //FIND SUBQUESTION BLOCK
+                if (block.blockType === 'question' && block.isScored && //FIND SUBQUESTION BLOCK
                     block.subQuestions.length > 0) {
                     for (const sq of block.subQuestions) {
                         if (sq.id === questionId) {
@@ -160,17 +162,15 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
         } //END OF FOR LOOP
         //FOR QUESTIONS THAT WERE LEFT BLANK, CREATE A NEW OBJECT IN GRADEDRESULTS 
         //WITH SCORE 0 AND NO RESPONSE
-        allQuestions.forEach(q => {
-            //if new gradedResults does not contain this id,
-            if (!newGradedResults[q.id]) {
-                newGradedResults[q.id] = {
-                    score: 0,
-                    feedback: "no response"
-                }
-            }
-        });
-
-        //   "123": { score: 1, feedback: "Good!" },  
+        // allQuestions.forEach(q => {
+        //     //if new gradedResults does not contain this id,
+        //     if (!newGradedResults[q.id]) {
+        //         newGradedResults[q.id] = {
+        //             score: 0,
+        //             feedback: "no response"
+        //         }
+        //     }
+        // });
         //CALCULATE FINAL SCORE 
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade/calculate-score`, {
@@ -178,12 +178,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                 labId,
                 userId
             });
-            // {
-            //     "percent": null,
-            //     "maxScore": 0,
-            //     "totalScore": 0
-            // }
-            //update the session with gradedResults and finalScore
+
             setSession(prev => ({
                 ...prev,
                 gradedResults: newGradedResults,
@@ -191,8 +186,8 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
             }));
         } catch (err) {
             console.error('error calculating final score', err);
-        }finally{
-            if(isAdmin) setIsSubmitting(false);
+        } finally {
+            if (isAdmin) setIsSubmitting(false);
         }
         //CREATE A LAB TYPE SUBMISSION ONLY IF IT IS A STUDENT
         if (!isAdmin) {
@@ -234,13 +229,13 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                                 <MaterialBlock content={block.content} />
                             ) : (
                                 // DISPLAY A QUESTION OR SUBQUESTION
-                                <QuestionBlock
-                                    block={block}
-                                    setResponses={handleResponseChange}
-                                    responses={responses}
-                                    gradedResults={gradedResults}
-                                    finalScore={finalScore}
-                                />
+                                    <QuestionBlock
+                                        block={block}
+                                        setResponses={handleResponseChange}
+                                        responses={responses}
+                                        gradedResults={gradedResults}
+                                        finalScore={finalScore}
+                                    />
                             )}
                         </div>
                     </div>
