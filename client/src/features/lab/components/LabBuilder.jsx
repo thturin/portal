@@ -1,193 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import {useEffect} from "react";
 import { createQuestion, createMaterial } from "../models/block";
-import ReactQuill from "react-quill";
+import QuestionEditor from "./QuestionEditor";
+import MaterialEditor from "./MaterialEditor";
 import "react-quill/dist/quill.snow.css";
 import "../styles/Lab.css";
 import axios from "axios";
 
-function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
-    //onChange passed down from the parent so everything stays in sync
-    //INFINITE LOOP OCCURRING EVERY KEYSTROKE TRIGGERS ONCHANGE
-    //DO NOT UPDATE IF VALUE HASN'T CHANGED
-    const update = (field, value) => {
-        //ONCHANGE CREATES A NEW QUESTION OBJECT WITH UQPDATED FIELD  VALUE
-        if (q[field] !== value) {
-            onQuestionChange({ ...q, [field]: value }); //field is the placeholder for any property
-            //properties of questionBlock blockType, type, prompt, desc
-        }
-
-    };
-
-    const modules = {
-        toolbar: [
-            ['bold', 'italic', 'underline'],
-            ['code-block'],
-            ['clean']
-        ]
-    }
-    //DISPLAY PROMPT TEXT BOX
-    return (
-        <div className="p-4 border rounded mb-4 bg-white shadow">
-            <div className="flex items-start gap-4">
-                <div className="flex-1">
-                    <ReactQuill
-                        type="text"
-                        placeholder="Prompt"
-                        className="w-full border p-2 mb-2"
-                        value={q.prompt}
-                        rows={3}
-                        onChange={(value) => {
-                            if (value !== q.prompt) { //do not update if value hasn't changed
-                                update("prompt", value)
-                            }
-                        }}
-                        theme="snow"
-                    />
-                </div>
-
-                {/*DISPLAY ANSWER KEY. If q has subquestions, don't render*/}
-                {q.subQuestions.length === 0 && (
-                    <div className="w-64">
-                        <label className="block font-semibold mb-1">Answer Key</label>
-                        <ReactQuill
-                            placeholder="Admin Key"
-                            className="w-full border mb-2"
-                            value={q.key || ""}
-                            onChange={value => update("key", value)}
-                            modules={modules}
-                            theme="snow"
-                        />
-                    </div>
-                )}
-
-            </div>
-
-            {/* DISPLAY SUB QUESTIONS */}
-            {q.subQuestions && q.subQuestions.length > 0 && (
-                <div className="ml-4 border-l-2 pl-2">
-                    {q.subQuestions.map((sq, i) => (
-                        <QuestionEditor
-                            key={sq.id}
-                            q={sq}
-                            onQuestionChange={
-                                //pass the updated Sub Q from child to parent in
-                                //updatedSubQ
-                                updatedSubQ => {
-                                    const updatedSubs = q.subQuestions.map((sub, idx) =>
-                                        idx === i ? updatedSubQ : sub
-                                    );
-                                    // Call parent's onQuestionChange to update the parent question
-                                    onQuestionChange({ ...q, subQuestions: updatedSubs });
-                                }}
-                            onQuestionDelete={() => {
-                                //filter everything but the q to delete
-                                const updatedSubs = q.subQuestions.filter((_, idx) => idx !== i);
-                                onQuestionChange({ ...q, subQuestions: updatedSubs });
-                            }}
-                        />
-                    ))}
-                </div>
-            )}
-
-            <select
-                className="border p-2"
-                value={q.type}
-                onChange={(e) => update("type", e.target.value)}
-            >
-                <option value="short">Short Answer</option>
-                <option value="textarea">Paragraph</option>
-                <option value="code">Code Response</option>
-            </select>
-
-            <button
-                onClick={() => {
-                    const nextIndex = (q.subQuestions?.length || 0);
-                    const nextLetter = String.fromCharCode(97 + nextIndex); //97=a
-                    const newSubQ = createQuestion();
-                    newSubQ.prompt = `${nextLetter}.`;
-                    const updatedSubs = [...(q.subQuestions || []), newSubQ];
-                    onQuestionChange({ ...q, subQuestions: updatedSubs }); //send to parent updated  q's and subQuestions
-                }}
-                className="bg-green-600 text-white px-4 py-2 rounded"
-            >
-                Add Sub Question
-            </button>
-            <button
-                onClick={onQuestionDelete}
-                className="bg-red-600 text-white px-2 py-1 rounded ml-2"
-            >
-                Delete
-            </button>
-
-        </div>
-    );
-}
-
-function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
-    const quillRef = useRef();
-    const update = (field, value) => {
-        //ONCHANGE CREATES A NEW BLOCK OBJECT WITH UPDATED FIELD AND TYPE VALUES 
-        //only update if value actually changed
-        if (block[field] !== value) {
-            let updatedBlock = { ...block, [field]: value };
-            //extract images from content when it changes
-            if (field === 'content') {
-                const images = extractImagesFromHTML(value);
-                updatedBlock.images = images;
-            }
-            onMaterialChange(updatedBlock);
-        //text image block properties blockType, type, content, images
-        }
-
-        
-    };
-
-    const extractImagesFromHTML = (html) => { //extracts image url from html
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        const imgs = div.querySelectorAll('img');
-        return Array.from(imgs).map(img => img.src);
-    };
-
-    const modules = {
-        toolbar: [
-            ['bold', 'italic', 'underline'],
-            ['image'],//default quill image handler
-            ['clean']
-        ]
-
-    };
-
-
-    return (
-        <div className="p-4 border rounded mb-4 bg-white shadow">
-            <ReactQuill
-                ref={quillRef}
-                placeholder="Paste image or write here"
-                rows={8}
-                className="w-full border p-2 font-mono mb-2"
-                value={block.content}
-                // onChange handler doesn't receive a DOM event object, gives you content value directly
-                //in other words, you dont need to use e=>e.target.value
-                onChange={value => {
-                    update("content", value);
-                }}
-                modules={modules}
-            />
-
-            {/* <div className="mt-2 p-2 border bg-gray-50"
-                dangerouslySetInnerHTML={{ __html: block.content }} /> */}
-
-            <button
-                onClick={onMaterialDelete}
-                className="bg-red-600 text-white px-2 py-1 rounded ml-2"
-            >
-                Delete
-            </button>
-        </div>
-    )
-}
-
+ 
 function LabBuilder({ blocks, setBlocks, title, assignmentId }) {
 
     useEffect(() => {
@@ -199,6 +18,7 @@ function LabBuilder({ blocks, setBlocks, title, assignmentId }) {
     }
 
     const addMaterialBlock = () => { //type can be text, or image?
+        console.log('eee');
         setBlocks([
             ...blocks,
             createMaterial()
@@ -306,6 +126,7 @@ function LabBuilder({ blocks, setBlocks, title, assignmentId }) {
                 Lab Builder <br></br>
                 {title || "No Title"}
             </h1>
+
             {/* DISPLAY BLOCKS */}
             {blocks.map((block, i) => (
                 <div key={block.id || i} className="mb-6 flex items-start">
@@ -317,7 +138,7 @@ function LabBuilder({ blocks, setBlocks, title, assignmentId }) {
                             className="bg-gray-300 text-black px-2 py-1 rounded mb-1"
                             title="Move Up"
                         >
-                            ↑
+
                         </button>
                         <button
                             disabled={i === blocks.length - 1}

@@ -138,7 +138,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                     }
                 }
             }
-            //deepseek api request
+            //DEEPSEEK API REQUEST
             try {
                 const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade`, {
                     userAnswer,
@@ -245,6 +245,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                         </div>
                     </div>
                 ))}
+                {/* BUTTON SUBMIT RESPONSE */}
                 <button
                     onClick={submitResponses}
                     disabled={isSubmitting}

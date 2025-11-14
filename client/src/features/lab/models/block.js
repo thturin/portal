@@ -1,12 +1,14 @@
 export const createQuestion = () => ({
   id: Date.now().toString(),
   blockType: "question",
-  type: "short", //defaults to short
+  type: "short", //defaults to short but can change
   prompt: "",
   desc: "",
   key: "",
+  explanation:"",
   aiPrompt:"",
-  subQuestions: []
+  subQuestions: [],
+  isScored:true
 });
 
 export const createMaterial = () => ({

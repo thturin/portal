@@ -73,3 +73,27 @@ ul, ol, li, blockquote, table, td, th {
 .ml-8, .ml-8 * {
     text-align: left !important;
 }
+
+/* Set Courier as default font for ReactQuill editors */
+.ql-editor {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    text-align: left !important;
+}
+
+/* Ensure all content in editor uses Courier */
+.ql-editor * {
+    font-family: 'Courier New', Courier, monospace !important;
+    text-align: left !important;
+}
+
+/* Apply same font to preview content */
+.preview-content,
+.material-block,
+div[dangerouslySetInnerHTML] {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    text-align: left !important;
+}
