@@ -165,6 +165,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                         userId={user.id}
                         username={user.username}
                         labId={selectedAssignmentObj.labId}
+                        showExplanations={selectedAssignmentObj.showExplanations}
                     />
                     //</div>
                 )}

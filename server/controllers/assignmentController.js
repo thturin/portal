@@ -74,13 +74,14 @@ const getAssignment = async (req, res) => {
 
 const updateAssignment = async (req, res) => {
     const { id } = req.params;
-    const { title, dueDate } = req.body;
+    const { title, dueDate, showExplanations } = req.body;
     try {
         const updatedAssignment = await prisma.assignment.update({
             where: { id: Number(id) },
             data: {
                 title,
-                dueDate: new Date(dueDate)
+                dueDate: new Date(dueDate),
+                showExplanations
             }
         });
 

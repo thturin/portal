@@ -8,6 +8,7 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
     const [title, setTitle] = useState(selectedAssignmentObj.title);
     const [dueDate, setDueDate] = useState(selectedAssignmentObj.dueDate);
     const [type, setType] = useState(selectedAssignmentObj.type);
+    const [showExplanations, setShowExplanations] = useState(selectedAssignmentObj.showExplanations);
 
     useEffect(() => {
         setTitle(selectedAssignmentObj.title);
@@ -31,7 +32,8 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
         try {
             const response = await axios.put(`${process.env.REACT_APP_API_HOST}/assignments/${selectedAssignmentObj.id}`, {
                 title,
-                dueDate
+                dueDate,
+                showExplanations
             });
             if (response.data) {
                 setHasChanges(false);
@@ -91,10 +93,27 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
                 />
             </div>
 
+        {/* SHOW ASSIGNMENT TYPE  */}
             <div style={{ marginBottom: '10px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Assignment Type: </label>
                 <p>{selectedAssignmentObj.type}</p>
             </div>
+
+
+        {/* SHOW EXPLANATIONS CHECK BOX */}
+            <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Show Explanations to students:</label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                        type="checkbox"
+                        checked={showExplanations}
+                        onChange={(e) => { setShowExplanations(e.target.checked); setHasChanges(true); }}
+                    />
+                    <span style={{ fontSize: '14px' }}>{showExplanations ? 'Enabled' : 'Disabled'}</span>
+                </label>
+            </div>
+
+
  
             {/* UPDATE BUTTON */}
             {hasChanges && (

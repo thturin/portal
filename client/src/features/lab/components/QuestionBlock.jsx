@@ -6,16 +6,15 @@ import 'react-quill/dist/quill.snow.css';
 
 
 
-const hasGradedResultForBlock =  (block, gradedResults) =>{ //used for showing explanation 
-    console.log(!gradedResults);
-    if(!gradedResults) return false;
-    if(block.blockType !=='question') return false;
-    return Boolean(gradedResults[block.id]);
-}
+// const hasGradedResultForBlock =  (block, gradedResults) =>{ //used for showing explanation 
+//     if(!gradedResults) return false;
+//     if(block.blockType !=='question') return false;
+//     return Boolean(gradedResults[block.id]);
+// }
 
-const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults, finalScore, block }) => {
+const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults, finalScore, block, showExplanations }) => {
     const isScored = block.isScored;
-    const showExplanation = hasGradedResultForBlock(block, gradedResults);
+    //const showExplanation = !isScored || hasGradedResultForBlock(block, gradedResults);
     
     return(
         <>
@@ -37,16 +36,16 @@ const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults,
             />
     }
         
-    {showExplanation &&(<Explanation content={block.explanation} />)}
+    {showExplanations  &&(<Explanation content={block.explanation} />)}
         
     </>
     );
 };
 
-const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, finalScore }) => {
+const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, finalScore, showExplanations }) => {
     const isScored = question.isScored;
-    const showExplanation = hasGradedResultForBlock(question, gradedResults);
-    
+    //const showExplanation = !isScored || hasGradedResultForBlock(question, gradedResults);
+
     return (
         <div key={question.id} className="mb-4">
             <div 
@@ -70,12 +69,13 @@ const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, f
                 />
             }
             
-            {showExplanation &&(<Explanation content={block.explanation} />)}
+            //SHOW THE EXPLANATION IF NO GRADED RESULT EXISTS OR ADMIN IS NOT SCORING IT 
+            {showExplanations &&(<Explanation content={block.explanation} />)}
         </div>
     );
 };
 
-const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalScore }) => {
+const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalScore, showExplanations }) => {
     return (
         <div>
             <div 
@@ -92,6 +92,7 @@ const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalSco
                             setResponses={setResponses}
                             gradedResults={gradedResults}
                             finalScore={finalScore}
+                            showExplanations={showExplanations}
                         />
                     ))}
                 </div>
@@ -103,9 +104,9 @@ const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalSco
                     gradedResults={gradedResults}
                     finalScore={finalScore}
                     block={block}
-                    showExplanation={hasGradedResultForBlock(block)}
                     isScored={block.isScored}
                     explanation={block.explanation}
+                    showExplanations={showExplanations}
                 />
             )}
 

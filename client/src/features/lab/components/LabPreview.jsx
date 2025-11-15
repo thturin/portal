@@ -7,7 +7,7 @@ import ScoreDisplay from "./ScoreDisplay";
 import Explanation from './Explanation';
 import "../styles/Lab.css";
 
-function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username, labId, selectedAssignmentDueDate, onUpdateSubmission }) {
+function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username, labId, selectedAssignmentDueDate, onUpdateSubmission,showExplanations }) {
     const isAdmin = mode === 'admin';
 
     const [session, setSession] = useState(createSession(title, username, userId, labId));
@@ -161,6 +161,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
             }
         } //END OF FOR LOOP
         //FOR QUESTIONS THAT WERE LEFT BLANK, CREATE A NEW OBJECT IN GRADEDRESULTS 
+
         //WITH SCORE 0 AND NO RESPONSE
         // allQuestions.forEach(q => {
         //     //if new gradedResults does not contain this id,
@@ -235,6 +236,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                                         responses={responses}
                                         gradedResults={gradedResults}
                                         finalScore={finalScore}
+                                        showExplanations={showExplanations}
                                     />
                             )}
                         </div>
