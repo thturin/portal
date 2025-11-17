@@ -23,18 +23,21 @@ const AdminDashboard = ({ user, onLogout }) => {
     const [editedScores, setEditedScores] = useState({});
     const [hasChanges, setHasChanges] = useState(false);
     const [currentTab, setCurrentTab] = useState('');
+    const [selectedSubmissionId, setSelectedSubmissionId] = useState(null);
 
 
-
+    const selectedSubmission = submissions.find(
+        sub => sub.id === Number(selectedSubmissionId)
+    );
 
     const selectedAssignmentObj = assignments.find(  //this will execute on any render
         ass => ass.id === Number(selectedAssignmentId)
     );
 
-        
-    useEffect(()=>{
-        console.log('LAB ID IN ADMIN DASHBOARD->',selectedAssignmentObj?.labId);
-    },[selectedAssignmentObj]);
+
+    // useEffect(()=>{
+    //     console.log('HERE IS THE USER INFORMATION',JSON.stringify(user));
+    // },[user]);
 
     const filteredSubs = submissions.filter(
         sub => {
@@ -55,24 +58,23 @@ const AdminDashboard = ({ user, onLogout }) => {
     }, []);
 
     //you are curredntly working on updating the assignmetn
-    const onAssignmentUpdate = (updatedAssignment)=>{
+    const onAssignmentUpdate = (updatedAssignment) => {
         //gt previous assignments->map it and compare each assignment id to updatedAssignment Id. change that assignment when found
         setAssignments(prev => prev.map(ass => {
             return ass.id === updatedAssignment.id ? updatedAssignment : ass;
         }));
-
     }
 
-    const onAssignmentCreate = (newAssignment)=>{
+    const onAssignmentCreate = (newAssignment) => {
         //default to the newly created assignment as the slelectedAssignmentId
         setSelectedAssignmentId(newAssignment.id);
-        setAssignments(prev=>[...prev,newAssignment]);
+        setAssignments(prev => [...prev, newAssignment]);
     }
 
-    const onAssignmentDelete = (deleteAssignment)=>{
+    const onAssignmentDelete = (deleteAssignment) => {
         //filter out assignments and submissiuons the old assignment
-        setAssignments(prev=> prev.filter(ass=>ass.id!==deleteAssignment.id));
-        setSubmissions(prev=>prev.filter(ass=>ass.assignmentId!==deleteAssignment.id));
+        setAssignments(prev => prev.filter(ass => ass.id !== deleteAssignment.id));
+        setSubmissions(prev => prev.filter(ass => ass.assignmentId !== deleteAssignment.id));
     }
 
     const handleTabSelect = (tab) => {
@@ -122,7 +124,25 @@ const AdminDashboard = ({ user, onLogout }) => {
                                 setHasChanges={setHasChanges}
                                 hasChanges={hasChanges}
                                 setSubmissions={setSubmissions}
+                                setSelectedSubmissionId={setSelectedSubmissionId}
+                                selectedSubmissionId={selectedSubmissionId}
                             />
+                            {selectedSubmission && selectedAssignmentObj?.type === 'lab' && (
+                                <LabPreview
+                                    blocks={blocks}
+                                    setBlocks={setBlocks}
+                                    title={title}
+                                    setTitle={setTitle}
+                                    assignmentId={selectedAssignmentId}
+                                    mode='admin'
+                                    userId={selectedSubmission.userId}
+                                    username={selectedSubmission.user.username}
+                                    labId={selectedAssignmentObj.labId}
+                                    showExplanations={selectedAssignmentObj.showExplanations}
+                                    readOnly={true}
+                                />
+                            )}
+
                         </div>
                     </>
                 )}
@@ -160,7 +180,6 @@ const AdminDashboard = ({ user, onLogout }) => {
                         title={title}
                         setTitle={setTitle}
                         assignmentId={selectedAssignmentId}
-                        setAssignmentId={setSelectedAssignmentId}
                         mode='admin'
                         userId={user.id}
                         username={user.username}

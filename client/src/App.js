@@ -45,7 +45,6 @@ function App() {
 
       {!user && (
         <div>
-          <h2>LOG IN</h2>
           <LoginBar onLogin={handleLogin} />
         </div>
       )}
