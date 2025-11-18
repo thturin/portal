@@ -1,4 +1,4 @@
-import {useEffect} from "react";
+import {useEffect, useCallback} from "react";
 import { createQuestion, createMaterial } from "../models/block";
 import QuestionEditor from "./QuestionEditor";
 import MaterialEditor from "./MaterialEditor";
@@ -7,7 +7,7 @@ import "../styles/Lab.css";
 import axios from "axios";
 
  
-function LabBuilder({ blocks, setBlocks, title, assignmentId }) {
+function LabBuilder({ blocks, setBlocks, title, setTitle, assignmentId }) {
 
     useEffect(() => {
         loadLab();
@@ -49,37 +49,33 @@ function LabBuilder({ blocks, setBlocks, title, assignmentId }) {
         setBlocks(updatedBlocks);
     }
 
-    const saveLab = async () => {
-        const lab = { title, blocks, assignmentId };
+    //useCallBack memoizes (cashes) and only recreates it when its dependencies change 
+    const saveLab = useCallback(async () => {
+        const lab = { title, blocks, assignmentId }; //without useCallBack, will only capture initial empty blocks
         try {
             await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/lab/upsert-lab`, lab);
-            console.log('Lab saved');
         } catch (err) {
             console.error('Error trying to upsert (save) lab to api', err);
         }
-    };
+    },[title,blocks,assignmentId]);
 
     useEffect(()=>{
         const id = setInterval(()=>{
-            saveLab();
+            saveLab(); //witout useCallBack would always use the initial empty blocks
             console.log('autosaved!');
         },60000); //autosave every 60 sec
         return ()=> clearInterval(id);
-    },[]);
+    },[saveLab]);
 
     const loadLab = async () => {
 
         try {
-            // const lab = await import('./U1T6.json');
-            // setTitle(lab.default.title || "");
-            // setBlocks(lab.default.blocks || []);
-            // console.log('Lab loaded from lab.json');
-
             //search for the lab by the assignment Id
             const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/lab/load-lab`, {
                 params: { assignmentId, title: title || 'Untitled' }
             });
             console.log('lab loaded! ', response.data);
+            setTitle(response.data.title);
             setBlocks(response.data.blocks);
         } catch (err) {
             console.error('Lab did not load from labController successfully', err.message);
@@ -172,6 +168,7 @@ function LabBuilder({ blocks, setBlocks, title, assignmentId }) {
                                 q={block}
                                 onQuestionChange={(updatedBlock) => updateBlock(block.id, updatedBlock)}
                                 onQuestionDelete={() => deleteBlock(block.id)}
+                                level={0}
                             />
                         )}
                     </div>

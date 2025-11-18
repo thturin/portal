@@ -3,7 +3,7 @@ import { createQuestion } from "../models/block";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
-function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
+function QuestionEditor({ q, onQuestionChange, onQuestionDelete, level = 0 }) {
     //onChange passed down from the parent so everything stays in sync
     //INFINITE LOOP OCCURRING EVERY KEYSTROKE TRIGGERS ONCHANGE
     //DO NOT UPDATE IF VALUE HASN'T CHANGED
@@ -13,8 +13,8 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
             onQuestionChange({ ...q, [field]: value }); //field is the placeholder for any property
             //properties of questionBlock blockType, type, prompt, desc
         }
-
     };
+
 
     const modules = {
         toolbar: [
@@ -55,7 +55,7 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
                             modules={modules}
                             theme="snow"
                         />
-                         <label className="block font-semibold mb-1">Explanation</label>
+                        <label className="block font-semibold mb-1">Explanation</label>
                         <ReactQuill
                             placeholder="Explanation for Student"
                             className="w-full border mb-2"
@@ -76,6 +76,7 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
                         <QuestionEditor
                             key={sq.id}
                             q={sq}
+                            level={level + 1}
                             onQuestionChange={
                                 //pass the updated Sub Q from child to parent in
                                 //updatedSubQ
@@ -96,7 +97,7 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
                 </div>
             )}
 
-        {/* TYPE OF ANSWER CHOICE */}
+            {/* TYPE OF ANSWER CHOICE */}
             <select
                 className="border p-2"
                 value={q.type}
@@ -107,19 +108,29 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
                 <option value="code">Code Response</option>
             </select>
             {/* ADD SUB QUESTION BUTTON */}
-            <button
-                onClick={() => {
-                    const nextIndex = (q.subQuestions?.length || 0);
-                    const nextLetter = String.fromCharCode(97 + nextIndex); //97=a
-                    const newSubQ = createQuestion();
-                    newSubQ.prompt = `${nextLetter}.`;
-                    const updatedSubs = [...(q.subQuestions || []), newSubQ];
-                    onQuestionChange({ ...q, subQuestions: updatedSubs }); //send to parent updated  q's and subQuestions
-                }}
-                className="bg-green-600 text-white px-4 py-2 rounded"
-            >
-                Add Sub Question
-            </button>
+
+            {level === 0 && (
+                <button
+                    onClick={() => {
+                        const nextIndex = (q.subQuestions?.length || 0);
+                        const nextLetter = String.fromCharCode(97 + nextIndex); //97=a
+                        const newSubQ = createQuestion();
+                        newSubQ.prompt = `${nextLetter}.`;
+                        const updatedSubs = [...(q.subQuestions || []), newSubQ];
+                        onQuestionChange({ //updaste current question with new sub questions and since there are sub q's make the isScored for parent q false
+                            ...q,
+                            subQuestions:updatedSubs,
+                            isScored:false
+                        });
+                    }}
+                    className="bg-green-600 text-white px-4 py-2 rounded"
+                >
+                    Add Sub Question
+                </button>
+
+            )}
+
+
             {/* DELETE BUTTON  */}
             <button
                 onClick={onQuestionDelete}
@@ -128,8 +139,12 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
                 Delete
             </button>
 
-        {/* SCORE CHECK BOX */}
-      
+
+            {/* SCORE CHECK BOX */
+                //if there are no sub questions and we are at level 0 
+                // OR it is a sub question (level == 1) -> SHOW THE isScored button 
+            }
+            {((level === 0 && q.subQuestions.length === 0) || level === 1) && (
                 <label className="flex items-center cursor-pointer p-2 border rounded bg-white hover:bg-gray-50">
                     <input
                         type="checkbox"
@@ -139,6 +154,9 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete }) {
                     />
                     <span className="font-semibold text-sm">Include in Score</span>
                 </label>
+
+            )}
+
         </div>
     );
 }

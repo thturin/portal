@@ -112,7 +112,6 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
         setIsSubmitting(true);
         let newGradedResults = { ...session.gradedResults };//create a new grade results to add empty
         //LOOP THROUGH RESPONSES
-        console.log('RESPONSES',responses);
         for (const [questionId, userAnswer] of Object.entries(responses)) {
             //questionId is a string
             let answerKey = '';
@@ -121,7 +120,6 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
             //THIS ASSUMES SUB QUESTIONS DO NOT HAVE SUB QUESTIONS
             //LOOP THROUGH BLOCKS AND ASSIGN ANSWERKEY, QUESTIOHN, TYPE
             for (const block of blocks) { //FIND BLOCK 
-                console.log('here is a block',block);
                 if (block.blockType === 'question' && block.isScored &&
                     block.subQuestions.length === 0 &&
                     block.id === questionId) {

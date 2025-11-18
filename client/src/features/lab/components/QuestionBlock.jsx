@@ -6,11 +6,6 @@ import 'react-quill/dist/quill.snow.css';
 
 
 
-// const hasGradedResultForBlock =  (block, gradedResults) =>{ //used for showing explanation 
-//     if(!gradedResults) return false;
-//     if(block.blockType !=='question') return false;
-//     return Boolean(gradedResults[block.id]);
-// }
 
 const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults, finalScore, block, showExplanations }) => {
     const isScored = block.isScored;
@@ -65,11 +60,10 @@ const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, f
             <ScoreDisplay
                     finalScore={finalScore}
                     gradedResults={gradedResults}
-                    questionId={blockId}
+                    questionId={question.id}
                 />
             }
             
-            //SHOW THE EXPLANATION IF NO GRADED RESULT EXISTS OR ADMIN IS NOT SCORING IT 
             {showExplanations &&(<Explanation content={block.explanation} />)}
         </div>
     );

@@ -35,10 +35,6 @@ const AdminDashboard = ({ user, onLogout }) => {
     );
 
 
-    // useEffect(()=>{
-    //     console.log('HERE IS THE USER INFORMATION',JSON.stringify(user));
-    // },[user]);
-
     const filteredSubs = submissions.filter(
         sub => {
             if (!selectedAssignmentId) return false;
