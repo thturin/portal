@@ -12,7 +12,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
     const [sessionLoaded, setSessionLoaded] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    //derive from session
+    //derive from session/setSession
     const responses = session.responses || {};
     const gradedResults = session.gradedResults;
     const finalScore = session.finalScore || {};
@@ -42,17 +42,19 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
         }));
     }
 
+    //all questions that are being scored. questions that are not being scored are ignored
     const allQuestions = [
         //filter questions without subquestions
-        ...blocks.filter(b => b.blockType === "question" && (!b.subQuestions || b.subQuestions.length === 0))
+        ...blocks.filter(b => b.blockType === "question" && b.isScored && (!b.subQuestions || b.subQuestions.length === 0))
         //filter questions with subquestions
-        , ...blocks.filter(b => b.blockType === "question" && b.subQuestions.length > 0).flatMap(b => b.subQuestions)
+        , ...blocks.filter(b => b.blockType === "question" &&  b.isScored && b.subQuestions.length > 0).flatMap(b => b.subQuestions)
         // const arr = [[1, 2], [3, 4]];
         // const result = arr.flatMap(x => x);
         // console.log(result); // [1, 2, 3, 4]
     ];
 
     //AT SOME POINT YOU NEED TO REPLACE THIS WITH THE LOADLAB.JS FUNCTION
+    
     const loadLab = async () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/lab/load-lab`, {
@@ -110,6 +112,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
         setIsSubmitting(true);
         let newGradedResults = { ...session.gradedResults };//create a new grade results to add empty
         //LOOP THROUGH RESPONSES
+        console.log('RESPONSES',responses);
         for (const [questionId, userAnswer] of Object.entries(responses)) {
             //questionId is a string
             let answerKey = '';
@@ -118,6 +121,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
             //THIS ASSUMES SUB QUESTIONS DO NOT HAVE SUB QUESTIONS
             //LOOP THROUGH BLOCKS AND ASSIGN ANSWERKEY, QUESTIOHN, TYPE
             for (const block of blocks) { //FIND BLOCK 
+                console.log('here is a block',block);
                 if (block.blockType === 'question' && block.isScored &&
                     block.subQuestions.length === 0 &&
                     block.id === questionId) {
@@ -147,6 +151,8 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                     questionType: type
                 });
                 //UPDATED GRADEDRESULTS 
+                console.log('here is the response in deepseek api request',response);
+              
                 newGradedResults = {
                     ...newGradedResults,
                     [questionId]: { //add or update current gradedResult with questionId
@@ -159,17 +165,16 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
             }
         } //END OF FOR LOOP
         //FOR QUESTIONS THAT WERE LEFT BLANK, CREATE A NEW OBJECT IN GRADEDRESULTS 
-
         //WITH SCORE 0 AND NO RESPONSE
-        // allQuestions.forEach(q => {
-        //     //if new gradedResults does not contain this id,
-        //     if (!newGradedResults[q.id]) {
-        //         newGradedResults[q.id] = {
-        //             score: 0,
-        //             feedback: "no response"
-        //         }
-        //     }
-        // });
+        allQuestions.forEach(q => {
+            //if new gradedResults does not contain this id,
+            if (!newGradedResults[q.id]) {
+                newGradedResults[q.id] = {
+                    score: 0,
+                    feedback: "left blank"
+                }
+            }
+        });
         //CALCULATE FINAL SCORE 
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade/calculate-score`, {

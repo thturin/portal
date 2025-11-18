@@ -59,6 +59,14 @@ function LabBuilder({ blocks, setBlocks, title, assignmentId }) {
         }
     };
 
+    useEffect(()=>{
+        const id = setInterval(()=>{
+            saveLab();
+            console.log('autosaved!');
+        },60000); //autosave every 60 sec
+        return ()=> clearInterval(id);
+    },[]);
+
     const loadLab = async () => {
 
         try {

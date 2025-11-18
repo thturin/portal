@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
-import LabPreview from '../../lab/components/LabPreview';
+
 
 const SubmissionList = ({
     selectedAssignmentObj,
@@ -18,9 +18,7 @@ const SubmissionList = ({
     const [sortDir, setSortDir] = useState('desc'); // 'asc' | 'desc'
  
 
-    useEffect(()=>{
-        console.log('selectedSubmission ->',selectedSubmissionId);
-    },[selectedSubmissionId]);
+
     const toggleSort = (col) => {
         if (sortBy === col) {
             setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
@@ -29,7 +27,6 @@ const SubmissionList = ({
             setSortDir('asc');
         }
     };
-
 
 
     //sorting submission processing heavy so only re-render when needed and use sorted list in cache when nothing has changed. 
@@ -192,7 +189,7 @@ const SubmissionList = ({
                                 <td style={{ border: '1px solid #ccc', padding: '4px' }}>
                                     <input
                                         type="number"
-                                        value={editedScores[sub.id] !== undefined ? editedScores[sub.id] : sub.score}
+                                        value={editedScores[sub.id] !== undefined ? editedScores[sub.id] : (sub.score ?? 0)}
                                         onChange={(e) => {
                                             setEditedScores(prev => ({
                                                 ...prev,

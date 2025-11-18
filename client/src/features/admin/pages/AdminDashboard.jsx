@@ -20,8 +20,8 @@ const AdminDashboard = ({ user, onLogout }) => {
     const [selectedAssignmentId, setSelectedAssignmentId] = useState(-1);
     const [sections, setSections] = useState([]);
     const [selectedSection, setSelectedSection] = useState('');
-    const [editedScores, setEditedScores] = useState({});
-    const [hasChanges, setHasChanges] = useState(false);
+    const [editedScores, setEditedScores] = useState({}); //for editing scores on submission list
+    const [hasChanges, setHasChanges] = useState(false);  //for submissionLIst when updating scores. 
     const [currentTab, setCurrentTab] = useState('');
     const [selectedSubmissionId, setSelectedSubmissionId] = useState(null);
 
@@ -96,7 +96,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 {currentTab === 'review' && (
                     <>
                         <div style={{
-                            maxWidth: '600px',
+                            maxWidth: '1000px',
                             margin: '20px auto',
                             padding: '20px',
                             border: '1px solid #ddd',
@@ -104,11 +104,13 @@ const AdminDashboard = ({ user, onLogout }) => {
                             backgroundColor: '#f9f9f9'
                         }}>
                             {/* JUPITER EXPORT BUTTON */}
-                            <JupiterExportButton
-                                selectedAssignmentId={selectedAssignmentId}
-                                filteredSubsLength={filteredSubs.length}
-                                selectedSection={selectedSection}
-                            />
+                            <div style={{ display: 'inline-block', transform: 'scale(0.8)', transformOrigin: 'top left' }}>
+                                <JupiterExportButton
+                                    selectedAssignmentId={selectedAssignmentId}
+                                    filteredSubsLength={filteredSubs.length}
+                                    selectedSection={selectedSection}
+                                />
+                            </div>
                             {/* DROP DOWN MENU FOR SECTION */}
                             <SectionSelection
                                 setSelectedSection={setSelectedSection}
@@ -127,20 +129,86 @@ const AdminDashboard = ({ user, onLogout }) => {
                                 setSelectedSubmissionId={setSelectedSubmissionId}
                                 selectedSubmissionId={selectedSubmissionId}
                             />
+                            {/* SHOW LAB PREVIEW OF SELECTED SUBMISSION */}
                             {selectedSubmission && selectedAssignmentObj?.type === 'lab' && (
-                                <LabPreview
-                                    blocks={blocks}
-                                    setBlocks={setBlocks}
-                                    title={title}
-                                    setTitle={setTitle}
-                                    assignmentId={selectedAssignmentId}
-                                    mode='admin'
-                                    userId={selectedSubmission.userId}
-                                    username={selectedSubmission.user.username}
-                                    labId={selectedAssignmentObj.labId}
-                                    showExplanations={selectedAssignmentObj.showExplanations}
-                                    readOnly={true}
-                                />
+                                <div style={{
+                                    maxWidth: '900px',
+                                    margin: '20px auto',
+                                    padding: '20px',
+                                    border: '2px solid #007bff',
+                                    borderRadius: '8px',
+                                    backgroundColor: '#f8f9fa'
+                                }}>
+                                    <h3 style={{ color: '#007bff', marginTop: 0 }}>
+                                        Viewing: {selectedSubmission.user?.name || 'Unknown'}'s Submission
+                                    </h3>
+                                    <p style={{ color: '#666', margin: '0 0 20px 0' }}>
+                                        Score: {selectedSubmission.score ?? 'Not graded'} |
+                                        Submitted: {selectedSubmission.submittedAt ? new Date(selectedSubmission.submittedAt).toLocaleString() : 'Unknown'}
+                                    </p>
+                                    <LabPreview
+                                        blocks={blocks}
+                                        setBlocks={setBlocks}
+                                        title={title}
+                                        setTitle={setTitle}
+                                        assignmentId={selectedAssignmentId}
+                                        mode='admin'
+                                        userId={selectedSubmission.userId}
+                                        username={selectedSubmission.user.username}
+                                        labId={selectedAssignmentObj.labId}
+                                        showExplanations={selectedAssignmentObj.showExplanations}
+                                        readOnly={true}
+                                    />
+                                </div>
+                            )}
+                        {/* IF ASSIGNMENT IS GITHUB THEN OPEN REPOSITORY LINK */}
+                            {selectedSubmission && selectedAssignmentObj?.type === 'github' && (
+                                <div style={{
+                                    maxWidth: '900px',
+                                    margin: '20px auto',
+                                    padding: '20px',
+                                    border: '2px solid #28a745',
+                                    borderRadius: '8px',
+                                    backgroundColor: '#f8fff9'
+                                }}>
+                                    <h3 style={{ color: '#28a745', marginTop: 0 }}>
+                                        Viewing: {selectedSubmission.user?.name || 'Unknown'}'s GitHub Submission
+                                    </h3>
+                                    <p style={{ color: '#666', margin: '0 0 12px 0' }}>
+                                        Score: {selectedSubmission.score ?? 'Not graded'} |
+                                        Submitted: {selectedSubmission.submittedAt ? new Date(selectedSubmission.submittedAt).toLocaleString() : 'Unknown'}
+                                    </p>
+                                    {selectedSubmission.url ? (
+                                        <>
+                                            <a
+                                                href={selectedSubmission.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    display: 'inline-block',
+                                                    backgroundColor: '#007bff',
+                                                    color: '#fff',
+                                                    padding: '8px 14px',
+                                                    borderRadius: '6px',
+                                                    textDecoration: 'none',
+                                                    fontWeight: 600
+                                                }}
+                                            >
+                                                Open Repository
+                                            </a>
+                                            <div style={{ marginTop: 12 }}>
+                                                <small style={{ color: '#666' }}>
+                                                    URL:&nbsp;
+                                                    <span style={{ wordBreak: 'break-all', color: '#333' }}>
+                                                        {selectedSubmission.url}
+                                                    </span>
+                                                </small>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <span style={{ color: '#999' }}>No URL provided</span>
+                                    )}
+                                </div>
                             )}
 
                         </div>
