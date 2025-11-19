@@ -117,6 +117,7 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete, level = 0 }) {
                         const newSubQ = createQuestion();
                         newSubQ.prompt = `${nextLetter}.`;
                         const updatedSubs = [...(q.subQuestions || []), newSubQ];
+
                         onQuestionChange({ //updaste current question with new sub questions and since there are sub q's make the isScored for parent q false
                             ...q,
                             subQuestions:updatedSubs,

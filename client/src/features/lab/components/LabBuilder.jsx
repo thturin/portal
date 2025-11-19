@@ -189,7 +189,13 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, assignmentId }) {
                 ➕ Add Question
             </button>
             <button
-                onClick={saveLab}
+                // onClick={saveLab}
+                onClick={(e)=>{
+                    saveLab();
+                    const originalText = e.target.textContent;
+                    e.target.textContent = '✅ Saved!';
+                    setTimeout(()=>e.target.textContent = originalText,1500);
+                }}
                 className="bg-blue-600 text-white px-4 py-2 rounded"
             >
                 💾 Save

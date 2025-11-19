@@ -11,10 +11,10 @@ function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
         if (block[field] !== value) {
             let updatedBlock = { ...block, [field]: value };
             //extract images from content when it changes
-            if (field === 'content') {
-                const images = extractImagesFromHTML(value);
-                updatedBlock.images = images;
-            }
+            // if (field === 'content') {
+            //     const images = extractImagesFromHTML(value);
+            //     updatedBlock.images = images;
+            // }
             onMaterialChange(updatedBlock);
             //text image block properties blockType, type, content, images
         }

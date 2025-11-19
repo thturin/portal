@@ -3,10 +3,8 @@ export const createQuestion = () => ({
   blockType: "question",
   type: "short", //defaults to short but can change
   prompt: "",
-  desc: "",
   key: "",
   explanation:"",
-  aiPrompt:"",
   subQuestions: [],
   isScored:true
 });
