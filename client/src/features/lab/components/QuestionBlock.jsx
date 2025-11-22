@@ -3,6 +3,7 @@ import ScoreDisplay from './ScoreDisplay';
 import Explanation from './Explanation';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { getImageUrlsFromHtml } from './fetchImages';
 
 
 
@@ -45,7 +46,7 @@ const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, f
         <div key={question.id} className="mb-4">
             <div 
                 className="font-semibold mb-1" 
-                dangerouslySetInnerHTML={{ __html: question.prompt }} 
+                dangerouslySetInnerHTML={{ __html: getImageUrlsFromHtml(question.prompt) }} 
             />
             <ReactQuill
                 theme="snow"
@@ -64,7 +65,7 @@ const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, f
                 />
             }
             
-            {showExplanations &&(<Explanation content={block.explanation} />)}
+            {showExplanations &&(<Explanation content={question.explanation} />)}
         </div>
     );
 };
@@ -74,7 +75,7 @@ const QuestionBlock = ({ block, setResponses, responses, gradedResults, finalSco
         <div>
             <div 
                 className="font-semibold mb-1" 
-                dangerouslySetInnerHTML={{ __html: block.prompt }} 
+                dangerouslySetInnerHTML={{ __html: getImageUrlsFromHtml(block.prompt) }} 
             />
             {block.subQuestions.length > 0 ? (
                 <div className="ml-4 border-l-2 pl-2">
