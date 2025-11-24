@@ -1,3 +1,6 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
+
 const express = require('express');
 const cors = require('cors');
 const submissionRoutes = require('./routes/submissionRoutes');
@@ -7,11 +10,11 @@ const sectionRoutes = require('./routes/sectionRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
 const {PrismaClient} = require('@prisma/client');
-require('dotenv').config(); //load environment variables from .env
-
+//require('dotenv').config(); //load environment variables from .env
+//use .env in root
 
 const app = express();
-const prisma = new PrismaClient();
+
 
 //you are already using an authentication method so you ca * origin accept any 
 app.use(cors({
@@ -58,8 +61,15 @@ if(process.env.NODE_ENV!=='production'){
     });
 }
 
+
+//THIS WILL BOOT THE BULLMQ WORKER ALONGSIDE THE API WHENEVER THE SERVER STARTS
+if(process.env.RUN_ASSIGNMENT_WORKER!=='false'){
+    require('./workers/assignmentDeletionWorker');
+}
+
+
 //app.use required middleware function session()
-app.use(session(sessionOptions));
+//app.use(session(sessionOptions));
 
 //middleware
 app.use('/api/', (req, res, next) => {
@@ -93,8 +103,7 @@ app.get('/health-debug', (req, res) => {
                 PORT: process.env.PORT,
                 SESSION_SECRET: process.env.SESSION_SECRET ? 'SET' : 'MISSING',
                 DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'MISSING',
-                FLASK_ENV: process.env.FLASK_ENV,
-                FLASK_API_URL : process.env.FLASK_API_URL
+
 
             },
             request: {

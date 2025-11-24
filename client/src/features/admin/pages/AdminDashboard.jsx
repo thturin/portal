@@ -34,7 +34,6 @@ const AdminDashboard = ({ user, onLogout }) => {
         ass => ass.id === Number(selectedAssignmentId)
     );
 
-
     const filteredSubs = submissions.filter(
         sub => {
             if (!selectedAssignmentId) return false;
@@ -46,6 +45,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         }
     );
 
+
     //fetch assignmenbts, submissions, and sections
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_HOST}/assignments`).then(res => setAssignments(res.data));
@@ -53,7 +53,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         axios.get(`${process.env.REACT_APP_API_HOST}/sections`).then(res => setSections(res.data));
     }, []);
 
-    //you are curredntly working on updating the assignmetn
+
     const onAssignmentUpdate = (updatedAssignment) => {
         //gt previous assignments->map it and compare each assignment id to updatedAssignment Id. change that assignment when found
         setAssignments(prev => prev.map(ass => {

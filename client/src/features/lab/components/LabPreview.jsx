@@ -16,21 +16,21 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
     const responses = session.responses || {};
     const gradedResults = session.gradedResults;
     const finalScore = session.finalScore || {};
-    // useEffect(() => {
-    //     console.log('LabPreview parameters:', {
-    //         blocks,
-    //         setBlocks,
-    //         title,
-    //         setTitle,
-    //         assignmentId,
-    //         mode,
-    //         userId,
-    //         username,
-    //         labId,
-    //         selectedAssignmentDueDate,
-    //         onUpdateSubmission
-    //     });
-    // }, []);
+    useEffect(() => {
+        console.log('LabPreview parameters:', {
+            blocks,
+            setBlocks,
+            title,
+            setTitle,
+            assignmentId,
+            mode,
+            userId,
+            username,
+            labId,
+            selectedAssignmentDueDate,
+            onUpdateSubmission
+        });
+    }, []);
 
     //update handler that modifies responses in session
 

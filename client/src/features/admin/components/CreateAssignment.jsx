@@ -1,37 +1,54 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 
-const CreateAssignment=({onAssignmentCreate})=>{
+//WHEN CREATING A NEW ASSIGNMENT, ALSO CREATE A NEW, EMPTY LAB
+
+
+const CreateAssignment = ({ onAssignmentCreate }) => {
     const apiUrl = process.env.REACT_APP_API_HOST;
     const [title, setTitle] = useState('');
-    const [dueDate, setDueDate] = useState(''); 
+    const [dueDate, setDueDate] = useState('');
     const [type, setType] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
 
-    const handleSubmit = async (e) =>{
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
-        try{
-            //make a request to post data to assignments api
-            const response = await axios.post(`${apiUrl}/assignments`,{
+        //CREATE NEW ASSIGNMENT AND BLANK LAB
+        try {
+            //CREATE A NEW ASSIGNMENT
+            const assignment = await axios.post(`${apiUrl}/assignments`, {
                 title,
                 dueDate,
                 type
             });
+      
+            try {
+                const lab = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/lab/upsert-lab`, {
+                    title,
+                    blocks: [],
+                    assignmentId: assignment.data.id
+                });
+
+                await axios.put(`${apiUrl}/assignments/${assignment.data.id}`, {
+                    labId: Number(lab.id)
+                });
+            } catch (err) {
+                console.error('Error trying to upsert lab to api (lab upsert) or updating assignment', err.message);
+            }
             setSuccess('Assignment Created');
             setTitle('');//clear the title and due date after POST
             setDueDate('');
-            console.log('create assignment->>',response.data);
-            if(onAssignmentCreate) onAssignmentCreate(response.data);
-        }catch(err){
+            if (onAssignmentCreate) onAssignmentCreate(assignment.data);
+        } catch (err) {
             setError(err.response?.data?.error || 'Failed to create assignment');
         }
     };
 
-    return(
+    return (
         <div style={{
             maxWidth: '600px',
             margin: '20px auto',
@@ -41,26 +58,26 @@ const CreateAssignment=({onAssignmentCreate})=>{
             backgroundColor: '#f9f9f9'
         }}>
             <h3 style={{ textAlign: 'center', marginTop: 0 }}>Create New Assignment</h3>
-            
+
             <form onSubmit={handleSubmit}>
                 {/* ✅ Title Field */}
                 <div style={{ marginBottom: '15px' }}>
-                    <label style={{ 
-                        display: 'block', 
-                        marginBottom: '5px', 
-                        fontWeight: 'bold' 
+                    <label style={{
+                        display: 'block',
+                        marginBottom: '5px',
+                        fontWeight: 'bold'
                     }}>
                         Assignment Title:
                     </label>
-                    <input 
+                    <input
                         type="text"
                         placeholder="Enter assignment title (e.g., Java Basics)"
                         value={title}
                         onChange={e => setTitle(e.target.value)}
                         required
-                        style={{ 
-                            width: '100%', 
-                            padding: '8px', 
+                        style={{
+                            width: '100%',
+                            padding: '8px',
                             border: '1px solid #ccc',
                             borderRadius: '4px',
                             fontSize: '14px'
@@ -70,21 +87,21 @@ const CreateAssignment=({onAssignmentCreate})=>{
 
                 {/* ✅ Due Date Field */}
                 <div style={{ marginBottom: '15px' }}>
-                    <label style={{ 
-                        display: 'block', 
-                        marginBottom: '5px', 
-                        fontWeight: 'bold' 
+                    <label style={{
+                        display: 'block',
+                        marginBottom: '5px',
+                        fontWeight: 'bold'
                     }}>
                         Due Date:
                     </label>
-                    <input 
+                    <input
                         type="datetime-local"
                         value={dueDate}
                         onChange={e => setDueDate(e.target.value)}
                         required
-                        style={{ 
-                            width: '100%', 
-                            padding: '8px', 
+                        style={{
+                            width: '100%',
+                            padding: '8px',
                             border: '1px solid #ccc',
                             borderRadius: '4px',
                             fontSize: '14px'
@@ -94,10 +111,10 @@ const CreateAssignment=({onAssignmentCreate})=>{
 
                 {/* ✅ Submission Type Field */}
                 <div style={{ marginBottom: '20px' }}>
-                    <label style={{ 
-                        display: 'block', 
-                        marginBottom: '5px', 
-                        fontWeight: 'bold' 
+                    <label style={{
+                        display: 'block',
+                        marginBottom: '5px',
+                        fontWeight: 'bold'
                     }}>
                         Submission Type:
                     </label>
@@ -106,9 +123,9 @@ const CreateAssignment=({onAssignmentCreate})=>{
                         value={type}
                         onChange={e => setType(e.target.value)}
                         required
-                        style={{ 
-                            width: '100%', 
-                            padding: '8px', 
+                        style={{
+                            width: '100%',
+                            padding: '8px',
                             border: '1px solid #ccc',
                             borderRadius: '4px',
                             fontSize: '14px'
@@ -131,8 +148,8 @@ const CreateAssignment=({onAssignmentCreate})=>{
                     fontSize: '16px'
                 }}>
                     Create
-                </button> 
-   
+                </button>
+
                 {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
                 {success && <div style={{ color: 'green', marginTop: 8 }}>{success}</div>}
 
