@@ -99,7 +99,6 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
                 <p>{selectedAssignmentObj.type}</p>
             </div>
 
-
         {/* SHOW EXPLANATIONS CHECK BOX */}
             <div style={{ marginBottom: '10px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Show Explanations to students:</label>
@@ -114,7 +113,6 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
             </div>
 
 
- 
             {/* UPDATE BUTTON */}
             {hasChanges && (
                 <div style={{

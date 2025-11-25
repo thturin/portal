@@ -68,9 +68,11 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
 
     const onAssignmentDelete = (deleteAssignment) => {
-        //filter out assignments and submissiuons the old assignment
-        setAssignments(prev => prev.filter(ass => ass.id !== deleteAssignment.id));
-        setSubmissions(prev => prev.filter(ass => ass.assignmentId !== deleteAssignment.id));
+        //deleteAssignment = {assignmentId:18}
+        setSubmissions(prev => prev.filter(ass => Number(ass.assignmentId) !== Number(deleteAssignment.assignmentId)));
+        setAssignments(prev => prev.filter(ass => Number(ass.id) !== Number(deleteAssignment.assignmentId)));
+        console.log(assignments);
+        console.log(submissions);
     }
 
     const handleTabSelect = (tab) => {

@@ -15,13 +15,3 @@ export const createSession = (labTitle="null",username="null", userId=null, labI
     }
 );
 
-
-export const updateSession = (currentSession, updates)=>({
-    ...currentSession, //copy everything from current session
-    ...updates, //overwrite any key:value pair that is updated
-    labInfo: { 
-        ...currentSession.labInfo, //keep existing lab info
-        ...updates.labInfo, // apply lab info updates
-        lastModified: new Date().toISOString()
-    } 
-});

@@ -1,23 +1,22 @@
-import React, {useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 
 
 const SubmissionList = ({
     selectedAssignmentObj,
     filteredSubs,
-    setEditedScores,
+    setEditedScores, 
     editedScores,
     setHasChanges,
     hasChanges,
-    setSubmissions,
-    selectedSubmissionId,
-    setSelectedSubmissionId
+    setSubmissions, //when you update the score
+    selectedSubmissionId,//for the lab preview in adminDashboard
+    setSelectedSubmissionId 
 }) => {
+
     // Sorting state
     const [sortBy, setSortBy] = useState('submittedAt');
     const [sortDir, setSortDir] = useState('desc'); // 'asc' | 'desc'
- 
-
 
     const toggleSort = (col) => {
         if (sortBy === col) {
@@ -27,7 +26,6 @@ const SubmissionList = ({
             setSortDir('asc');
         }
     };
-
 
     //sorting submission processing heavy so only re-render when needed and use sorted list in cache when nothing has changed. 
     const sortedSubs = useMemo(() => {
@@ -71,6 +69,13 @@ const SubmissionList = ({
         });
         return arr;
     }, [filteredSubs, sortBy, sortDir, editedScores]);
+
+    //i am not sure if this is even working.....
+    useEffect(() => {
+        if (!selectedSubmissionId && sortedSubs.length) {
+            setSelectedSubmissionId(sortedSubs[0].id);
+        }
+    }, []);
 
     const sortIndicator = (col) => (sortBy === col ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '');
 
@@ -206,14 +211,14 @@ const SubmissionList = ({
                                     />
                                 </td>
                                 <td style={{ border: '1px solid #ccc', padding: '4px' }}>
-                                       <input
-                                type="radio"
-                                value={sub.id}
-                                checked={Number(selectedSubmissionId)===sub.id}
-                                 // wrong — this calls the setter during render
-                                // onChange={ setSelectedSubmission(sub.id) }
-                                 onChange={(e)=>{setSelectedSubmissionId(Number(e.target.value))}}
-                               />
+                                    <input
+                                        type="radio"
+                                        value={sub.id}
+                                        checked={Number(selectedSubmissionId) === sub.id}
+                                        // wrong — this calls the setter during render
+                                        // onChange={ setSelectedSubmission(sub.id) }
+                                        onChange={(e) => { setSelectedSubmissionId(Number(e.target.value)) }}
+                                    />
                                 </td>
                             </tr>
                         ))

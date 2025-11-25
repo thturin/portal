@@ -14,7 +14,6 @@ const AdminAssignmentMenu = ({
     onAssignmentCreate
 }) => {
 
-  
 
     const showCreateAssignment = selectedAssignmentId === -2;
 

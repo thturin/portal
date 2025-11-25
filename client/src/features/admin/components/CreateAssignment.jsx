@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 
+
 //WHEN CREATING A NEW ASSIGNMENT, ALSO CREATE A NEW, EMPTY LAB
 
 
@@ -25,16 +26,18 @@ const CreateAssignment = ({ onAssignmentCreate }) => {
                 dueDate,
                 type
             });
-      
+
+            let lab;
+
             try {
-                const lab = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/lab/upsert-lab`, {
+                lab = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/lab/upsert-lab`, {
                     title,
                     blocks: [],
-                    assignmentId: assignment.data.id
+                    assignmentId: Number(assignment.data.id)
                 });
 
                 await axios.put(`${apiUrl}/assignments/${assignment.data.id}`, {
-                    labId: Number(lab.id)
+                    labId: Number(lab.data.id)
                 });
             } catch (err) {
                 console.error('Error trying to upsert lab to api (lab upsert) or updating assignment', err.message);
@@ -42,9 +45,16 @@ const CreateAssignment = ({ onAssignmentCreate }) => {
             setSuccess('Assignment Created');
             setTitle('');//clear the title and due date after POST
             setDueDate('');
-            if (onAssignmentCreate) onAssignmentCreate(assignment.data);
+       
+            const updatedAssignment = {
+                ...assignment.data,
+                labId: lab.data?.id
+            };
+
+            if(onAssignmentCreate) onAssignmentCreate(updatedAssignment);
+
         } catch (err) {
-            setError(err.response?.data?.error || 'Failed to create assignment');
+            setError(err.message || 'Failed to create assignment');
         }
     };
 

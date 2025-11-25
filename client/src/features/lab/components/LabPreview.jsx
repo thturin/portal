@@ -33,8 +33,6 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
     }, []);
 
     //update handler that modifies responses in session
-
-
     const handleResponseChange = (questionId, value) => {
         setSession(prev => ({ //update the session and concatenate old data with new response for questionId an val
             ...prev,
@@ -99,7 +97,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
         loadSession();
     }, []);
 
-    //SAVE SESSION - save 
+    // AUTO SAVE SESSION - save 
     useEffect(() => { //useeffect cannot be async
         saveSession();
         const timeoutId = setTimeout(saveSession, 1000); //add 1 second delay 
@@ -149,8 +147,6 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                     questionType: type
                 });
                 //UPDATED GRADEDRESULTS 
-                console.log('here is the response in deepseek api request',response);
-              
                 newGradedResults = {
                     ...newGradedResults,
                     [questionId]: { //add or update current gradedResult with questionId
@@ -173,7 +169,8 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                 }
             }
         });
-        //CALCULATE FINAL SCORE 
+        //CALCULATE FINAL SCORE
+        let newFinalScorePercent; 
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade/calculate-score`, {
                 gradedResults: newGradedResults, //use variable instead
@@ -181,6 +178,12 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                 userId
             });
 
+            //when upserting submission, use this value for percent insteado using session because 
+            //setSession is asynchronous so doesn't always update before upserting to lab 
+            newFinalScorePercent = response.data.session.finalScore.percent;
+
+            console.log('here is the response from calculate-score',response.data);
+            //don
             setSession(prev => ({
                 ...prev,
                 gradedResults: newGradedResults,
@@ -198,7 +201,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                     assignmentId,
                     userId,
                     dueDate: selectedAssignmentDueDate,
-                    score: finalScore.percent
+                    score: newFinalScorePercent
                 });
                 //SESSION SCORE DOES NTO GET UPDATED with late penalty
                 onUpdateSubmission(response.data);

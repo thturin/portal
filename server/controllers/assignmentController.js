@@ -54,24 +54,23 @@ const getAssignment = async (req, res) => {
 
 const updateAssignment = async (req, res) => {
     const { id } = req.params;
-    const { title, dueDate, showExplanations } = req.body;
+    const { title, dueDate, showExplanations, labId } = req.body;
+    const data = {};
     try {
-        const updatedAssignment = await prisma.assignment.update({
-            where: { id: Number(id) },
-            data: {
-                title,
-                dueDate: new Date(dueDate),
-                showExplanations
-            }
+        if (title !== undefined) data.title = title;
+        if (dueDate !== undefined) data.dueDate = new Date(dueDate);
+        if (showExplanations !== undefined) data.showExplanations = showExplanations;
+        if (labId !== undefined) data.labId = labId;
+        const updatedAssignment = await prisma.assignment.update({ 
+            where: { id: Number(id) }, 
+            data 
         });
-
         return res.json(updatedAssignment);
     } catch (err) {
         console.error('Update Assignment Error', err);
         return res.status(400).json({ error: 'Failed to update assignment' });
     }
 };
-
 
 const deleteAssignment = async (req, res) => {
     const { assignmentId } = req.params;
@@ -80,15 +79,15 @@ const deleteAssignment = async (req, res) => {
     try {
         //execute multiple prisma requests sequentially
         const assignment = await prisma.assignment.findUnique({
-            where:{id:Number(assignmentId)}
+            where: { id: Number(assignmentId) }
         });
-        if(!assignment) return res.status(404).json({error:'assignment not found'});
-        
-        await assignmentDeletionQueue.add('delete-assignment',{
-            assignmentId:assignment.id,
-            labId:assignment.labId
+        if (!assignment) return res.status(404).json({ error: 'assignment not found' });
+
+        await assignmentDeletionQueue.add('delete-assignment', {
+            assignmentId: assignment.id,
+            labId: assignment.labId
         });
-        
+
         return res.json({ assignmentId: assignment.id });
     } catch (err) {
         console.console.error('deleteAssignment enqueue Error', err);
