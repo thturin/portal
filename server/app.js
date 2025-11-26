@@ -15,7 +15,6 @@ const {PrismaClient} = require('@prisma/client');
 
 const app = express();
 
-
 //you are already using an authentication method so you ca * origin accept any 
 app.use(cors({
   origin: [
@@ -61,21 +60,14 @@ if(process.env.NODE_ENV!=='production'){
     });
 }
 
-
 //THIS WILL BOOT THE BULLMQ WORKER ALONGSIDE THE API WHENEVER THE SERVER STARTS
 if(process.env.RUN_ASSIGNMENT_WORKER!=='false'){
     require('./workers/assignmentDeletionWorker');
 }
 
+//app.use required MIDDLEWARE function session()
+app.use(session(sessionOptions));
 
-//app.use required middleware function session()
-//app.use(session(sessionOptions));
-
-//middleware
-app.use('/api/', (req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-    next();
-});
 
 app.get('/', (req, res)=>{
     res.send('Backend is running!');

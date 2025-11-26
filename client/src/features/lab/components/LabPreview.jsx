@@ -3,19 +3,29 @@ import { useState, useEffect } from 'react';
 import { createSession } from '../models/session';
 import MaterialBlock from './MaterialBlock';
 import QuestionBlock from './QuestionBlock';
+import AIPrompt from './AIPrompt';
 import "../styles/Lab.css";
 
-function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = 'student', userId, username, labId, selectedAssignmentDueDate, onUpdateSubmission, showExplanations, readOnly }) {
+function LabPreview({ blocks, setBlocks, title, setTitle, 
+    assignmentId, 
+    mode = 'student', userId, username, 
+    labId, 
+    selectedAssignmentDueDate, 
+    onUpdateSubmission, showExplanations, readOnly }) {
+    
     const isAdmin = mode === 'admin';
+    
 
     const [session, setSession] = useState(createSession(title, username, userId, labId));
     const [sessionLoaded, setSessionLoaded] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [aiPrompt, setAiPrompt] = useState();
 
     //derive from session/setSession
     const responses = session.responses || {};
     const gradedResults = session.gradedResults;
     const finalScore = session.finalScore || {};
+
     useEffect(() => {
         console.log('LabPreview parameters:', {
             blocks,
@@ -31,6 +41,19 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
             onUpdateSubmission
         });
     }, []);
+
+    const handleAiPromptChange = async () =>{
+        //update lab with new aiPrompt
+        if(!assignmentId) return;
+        try {
+            await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/lab/upsert-lab`, {
+                assignmentId,
+                aiPrompt
+            });
+        } catch (err) {
+            console.error('Failed to save AI prompt', err);
+        }
+    }
 
     //update handler that modifies responses in session
     const handleResponseChange = (questionId, value) => {
@@ -60,6 +83,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
             });
             setBlocks(response.data.blocks);
             setTitle(response.data.title);
+            setAiPrompt(response.data.aiPrompt);
         } catch (err) {
             console.error('Lab did not load from labController successfully', err.message);
         }
@@ -105,7 +129,6 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
     }, [session, sessionLoaded]);
 
 
-
     const submitResponses = async () => {
         setIsSubmitting(true);
         let newGradedResults = { ...session.gradedResults };//create a new grade results to add empty
@@ -144,7 +167,8 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                     userAnswer,
                     answerKey,
                     question,
-                    questionType: type
+                    questionType: type,
+                    AIPrompt:aiPrompt
                 });
                 //UPDATED GRADEDRESULTS 
                 newGradedResults = {
@@ -246,9 +270,12 @@ function LabPreview({ blocks, setBlocks, title, setTitle, assignmentId, mode = '
                         </div>
                     </div>
                 ))}
+                {mode==='admin' &&(
+                    <AIPrompt value={aiPrompt} onChange={handleAiPromptChange} />
+                )}
 
+                {/* //read only is for admin viewing in submission list */}
                 {!readOnly && (
-
                     <>
                     {/* BUTTON SUBMIT RESPONSE */ }
                     < button

@@ -51,10 +51,12 @@ model Assignment {
   id                  Int      @id @default(autoincrement())
   title               String
   dueDate             DateTime
-  type                String?
-  submissions         Submission[]
+  type                String
   labId               Int?
+  aiPrompt            String?
   showExplanations    Boolean @default(false)
+  isDraft             Boolean @default(false)
+  submissions         Submission[]
 }
 
 model Section{

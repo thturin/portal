@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import StudentSubmitGithub from '../components/StudentSubmitGithub.jsx';
 import StudentSubmissionList from '../components/StudentSubmissionList.jsx';
 import LatePolicyInfo from '../components/LatePolicyInfo.jsx';
@@ -18,11 +18,7 @@ const StudentDashboard = ({ user, onLogout }) => {
     const [selectedAssignmentId, setSelectedAssignmentId] = useState(-1);
     const [assignmentType, setAssignmentType] = useState('');
 
-    // useEffect(()=>{
-    //     console.log('on start up ');
-    //     console.log(selectedAssignmentId);
-    //     console.log(assignmentType);
-    // },[]);
+
 //GET ALL ASSIGNMENTS and  SUBMISSIONS
     useEffect(() => {
         const fetchData = async () => {
@@ -30,16 +26,16 @@ const StudentDashboard = ({ user, onLogout }) => {
                 const subRes = await axios.get(`${process.env.REACT_APP_API_HOST}/submissions`);
                 const userSubs = subRes.data.filter(sub => sub.userId === user.id);
                 setSubmissions(userSubs);
-
-                const assignRes = await axios.get(`${process.env.REACT_APP_API_HOST}/assignments`);
-                setAssignments(assignRes.data);
+                const assignments = await axios.get(`${process.env.REACT_APP_API_HOST}/assignments`,{
+                    role:user?.role
+                });
+                setAssignments(assignments.data);
 
             } catch (err) {
                 console.error('Error fetching data:', err);
             }
+
         };
-        console.log('-----------github username',user.githubUsername);
-        console.log('-----------user ird',user.id);
         fetchData();
     }, [user.id]);
 

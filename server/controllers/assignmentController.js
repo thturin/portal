@@ -29,8 +29,13 @@ const createAssignment = async (req, res) => {
 };
 
 const getAllAssignments = async (req, res) => {
+    const includeDrafts = req.session.user?.role === 'admin';
+
+
     try {
-        const assignments = await prisma.assignment.findMany();
+        const assignments = await prisma.assignment.findMany({
+            where: includeDrafts ? {} : {isDraft:false}
+        });
         return res.json(assignments);
     } catch (err) {
         console.log(err);
@@ -54,13 +59,14 @@ const getAssignment = async (req, res) => {
 
 const updateAssignment = async (req, res) => {
     const { id } = req.params;
-    const { title, dueDate, showExplanations, labId } = req.body;
+    const { title, dueDate, showExplanations, labId,isDraft } = req.body;
     const data = {};
     try {
         if (title !== undefined) data.title = title;
         if (dueDate !== undefined) data.dueDate = new Date(dueDate);
         if (showExplanations !== undefined) data.showExplanations = showExplanations;
         if (labId !== undefined) data.labId = labId;
+        if (isDraft!== undefined) data.isDraft = isDraft;
         const updatedAssignment = await prisma.assignment.update({ 
             where: { id: Number(id) }, 
             data 

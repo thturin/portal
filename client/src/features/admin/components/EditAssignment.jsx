@@ -9,11 +9,14 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
     const [dueDate, setDueDate] = useState(selectedAssignmentObj.dueDate);
     const [type, setType] = useState(selectedAssignmentObj.type);
     const [showExplanations, setShowExplanations] = useState(selectedAssignmentObj.showExplanations);
+    const [isDraft, setIsDraft] = useState(selectedAssignmentObj.isDraft);
 
     useEffect(() => {
         setTitle(selectedAssignmentObj.title);
         setDueDate(selectedAssignmentObj.dueDate);
         setType(selectedAssignmentObj.type);
+        setShowExplanations(selectedAssignmentObj.showExplanations);
+        setIsDraft(selectedAssignmentObj.isDraft);
         setHasChanges(false);
     }, [selectedAssignmentObj]); //when selection changes, update field in assignment details
 
@@ -33,7 +36,8 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
             const response = await axios.put(`${process.env.REACT_APP_API_HOST}/assignments/${selectedAssignmentObj.id}`, {
                 title,
                 dueDate,
-                showExplanations
+                showExplanations,
+                isDraft
             });
             if (response.data) {
                 setHasChanges(false);
@@ -108,7 +112,20 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
                         checked={showExplanations}
                         onChange={(e) => { setShowExplanations(e.target.checked); setHasChanges(true); }}
                     />
-                    <span style={{ fontSize: '14px' }}>{showExplanations ? 'Enabled' : 'Disabled'}</span>
+                    <span style={{ fontSize: '14px' }}>{showExplanations ? 'Explanations visible' : 'Click to show explanations'}</span>
+                </label>
+            </div>
+
+            {/* SHOW IS DRAFT */}
+            <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Show Assignment to students:</label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                        type="checkbox"
+                        checked={!isDraft}
+                        onChange={(e) => { setIsDraft(e.target.checked); setHasChanges(true); }}
+                    />
+                    <span style={{ fontSize: '14px' }}>{isDraft ? 'Click to publish' : 'Published'}</span>
                 </label>
             </div>
 

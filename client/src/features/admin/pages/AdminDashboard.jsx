@@ -9,6 +9,7 @@ import LabBuilder from '../../lab/components/LabBuilder';
 import LabPreview from '../../lab/components/LabPreview';
 
 
+
 const AdminDashboard = ({ user, onLogout }) => {
     //for lab-builder/preview
     const [blocks, setBlocks] = useState([]);
@@ -150,6 +151,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                                         title={title}
                                         setTitle={setTitle}
                                         assignmentId={selectedAssignmentId}
+                                        onAssignmentUpdate={onAssignmentUpdate}
                                         mode='admin'
                                         userId={selectedSubmission.userId}
                                         username={selectedSubmission.user.username}
@@ -239,7 +241,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 )}
 
                 {currentTab === 'manage' && (
-
+                
                     <LabPreview
                         blocks={blocks}
                         setBlocks={setBlocks}
@@ -250,9 +252,9 @@ const AdminDashboard = ({ user, onLogout }) => {
                         userId={user.id}
                         username={user.username}
                         labId={selectedAssignmentObj.labId}
-                        showExplanations={selectedAssignmentObj.showExplanations}
+                        showExpla
+                        nations={selectedAssignmentObj.showExplanations}
                     />
-                    //</div>
                 )}
             </div>
         </div>
