@@ -63,6 +63,7 @@ if(process.env.NODE_ENV!=='production'){
 //THIS WILL BOOT THE BULLMQ WORKER ALONGSIDE THE API WHENEVER THE SERVER STARTS
 if(process.env.RUN_ASSIGNMENT_WORKER!=='false'){
     require('./workers/assignmentDeletionWorker');
+    require('./workers/submissionRegradeWorker');
 }
 
 //app.use required MIDDLEWARE function session()

@@ -2,6 +2,7 @@ const { parseISO } = require('date-fns');
 const { cloneRepo } = require('../services/gitService');
 const { gradeJavaSubmission } = require('../services/gradingService');
 const { PrismaClient } = require('@prisma/client');
+const {submissionRegradeDueDateQueue} = require('../queues/submissionRegradeQueue');
 const prisma = new PrismaClient();
 require('dotenv').config();
 
@@ -110,13 +111,15 @@ const scoreGithubSubmission = async (url, path, assignmentTitle, submittedAt, du
         let finalScore = calculateLateScore(submittedAt, dueDate, results.score);
         results = {
             ...results, //keep original results (output)
-            score: finalScore
+            score: finalScore, //score with applied late penalty
+            rawScore:results.score //raw Score (no penalty applied)
         }
         return results;
     } catch (err) {
         console.error("Error grading submission:", err);
         return {
             score: 0,
+            rawScore:0,
             output: `❌ Failed to grade submission: ${err.message}`
         };
     }
@@ -141,14 +144,16 @@ const upsertGithubSubmission = async (req, res) => {
             },
             create: {
                 language: 'java',
-                score: result.score,
+                score: Number(result.score),
+                rawScore: Number(result.rawScore),
                 url,
                 assignmentId: Number(assignmentId),
                 userId: Number(userId),
                 submittedAt
             },
             update: {
-                score: result.score,
+                score: Number(result.score),
+                rawScore:Number(result.rawScore),
                 url,
                 submittedAt
             }
@@ -165,19 +170,12 @@ const upsertGithubSubmission = async (req, res) => {
     }
 };
 
-const scoreLabSubmission = async (submittedAt, dueDate, score) => { //clone student's repo pasted into submission portal
-    //confirm that both the submission type and url verify that it is a googledoc
-    console.log('-----Score Lab Submission---------');
-    //returns the score and output 
-    let finalScore = calculateLateScore(submittedAt, dueDate, score);
-    return finalScore;
-};
 
 //UPDATE OR CREATE LAB SUBMISSION WHEN SUBMITTING
 const upsertLabSubmission = async (req, res) => {
     const { assignmentId, userId, dueDate, score } = req.body;
     const submittedAt = new Date(); //create the submission date
-    let finalPercent = await scoreLabSubmission(submittedAt, dueDate, score);
+    let finalPercent = calculateLateScore(submittedAt,dueDate,score);
 
     try {
         const submission = await prisma.submission.upsert({
@@ -189,12 +187,14 @@ const upsertLabSubmission = async (req, res) => {
             },
             create: {
                 score: Number(finalPercent),
+                rawScore:Number(score),
                 assignmentId: Number(assignmentId),
                 userId: Number(userId),
                 submittedAt
             },
             update: {
                 score: Number(finalPercent),
+                rawScore:Number(score),
                 submittedAt
             }
         });
@@ -209,22 +209,30 @@ const upsertLabSubmission = async (req, res) => {
 
 };
 
-//admin manual override
-const updateSubmissionGrade = async (req, res) => {
+const requestSubmissionRegrade = async (req,res) =>{
+    const {assignmentId} = req.body; if (!assignmentId) return res.status(400).json({ error: 'assignmentId is required' });
+
+  await submissionRegradeDueDateQueue .add('submission-regrade-duedate', { assignmentId: Number(assignmentId) });
+  return res.json({ status: 'queued' });
+
+};
+
+//admin manual override will ignore the late penalty. it changes the score late penalty is applied to
+const manualUpdateSubmissionGrade = async (req, res) => {
     try {
         const { submissionId, score } = req.body;
         const updatedSubmission = await prisma.submission.update({
             where: {
                 id: Number(submissionId)
             },
-            data: {
+            data: { //a manual update 
                 score: Number(score)
             }
         });
-        res.json(updatedSubmission);
+        return res.json(updatedSubmission);
     } catch (err) {
         console.error('Error updating submission grade: ', err);
-        res.status(500).json({ error: 'Failed to update grade' });
+        return res.status(500).json({ error: 'Failed to update grade' });
     }
 };
 
@@ -287,10 +295,12 @@ module.exports = {
     verifyGithubOwnership,
     getAllSubmissions,
     getSubmission,
-    updateSubmissionGrade,
+    manualUpdateSubmissionGrade,
     upsertLabSubmission,
     upsertGithubSubmission,
-    deleteSubmissions
+    deleteSubmissions,
+    calculateLateScore,
+    requestSubmissionRegrade
 };
 
 

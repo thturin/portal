@@ -6,54 +6,28 @@ import QuestionBlock from './QuestionBlock';
 import AIPrompt from './AIPrompt';
 import "../styles/Lab.css";
 
-function LabPreview({ blocks, setBlocks, title, setTitle, 
-    assignmentId, 
-    mode = 'student', userId, username, 
-    labId, 
-    selectedAssignmentDueDate, 
-    onUpdateSubmission, showExplanations, readOnly }) {
-    
+function LabPreview({ blocks, setBlocks, 
+    title, setTitle,
+    assignmentId, selectedAssignmentDueDate,
+    mode = 'student', userId, username, readOnly,
+    labId,
+    aiPrompt, setAiPrompt, //for updating the ai prompt in lab
+    handleAiPromptChange,//admin
+    onUpdateSubmission, //student
+    showExplanations }) {
+
     const isAdmin = mode === 'admin';
-    
 
     const [session, setSession] = useState(createSession(title, username, userId, labId));
     const [sessionLoaded, setSessionLoaded] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [aiPrompt, setAiPrompt] = useState();
+
 
     //derive from session/setSession
     const responses = session.responses || {};
     const gradedResults = session.gradedResults;
     const finalScore = session.finalScore || {};
 
-    useEffect(() => {
-        console.log('LabPreview parameters:', {
-            blocks,
-            setBlocks,
-            title,
-            setTitle,
-            assignmentId,
-            mode,
-            userId,
-            username,
-            labId,
-            selectedAssignmentDueDate,
-            onUpdateSubmission
-        });
-    }, []);
-
-    const handleAiPromptChange = async () =>{
-        //update lab with new aiPrompt
-        if(!assignmentId) return;
-        try {
-            await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/lab/upsert-lab`, {
-                assignmentId,
-                aiPrompt
-            });
-        } catch (err) {
-            console.error('Failed to save AI prompt', err);
-        }
-    }
 
     //update handler that modifies responses in session
     const handleResponseChange = (questionId, value) => {
@@ -68,14 +42,11 @@ function LabPreview({ blocks, setBlocks, title, setTitle,
         //filter questions without subquestions
         ...blocks.filter(b => b.blockType === "question" && b.isScored && (!b.subQuestions || b.subQuestions.length === 0))
         //filter questions with subquestions
-        , ...blocks.filter(b => b.blockType === "question" &&  b.isScored && b.subQuestions.length > 0).flatMap(b => b.subQuestions)
-        // const arr = [[1, 2], [3, 4]];
-        // const result = arr.flatMap(x => x);
-        // console.log(result); // [1, 2, 3, 4]
+        , ...blocks.filter(b => b.blockType === "question" && b.isScored && b.subQuestions.length > 0).flatMap(b => b.subQuestions)
     ];
 
     //AT SOME POINT YOU NEED TO REPLACE THIS WITH THE LOADLAB.JS FUNCTION
-    
+
     const loadLab = async () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/lab/load-lab`, {
@@ -83,7 +54,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle,
             });
             setBlocks(response.data.blocks);
             setTitle(response.data.title);
-            setAiPrompt(response.data.aiPrompt);
+            if(mode==='admin') setAiPrompt(response.data.aiPrompt);
         } catch (err) {
             console.error('Lab did not load from labController successfully', err.message);
         }
@@ -168,7 +139,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle,
                     answerKey,
                     question,
                     questionType: type,
-                    AIPrompt:aiPrompt
+                    AIPrompt: aiPrompt
                 });
                 //UPDATED GRADEDRESULTS 
                 newGradedResults = {
@@ -179,7 +150,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle,
                     }
                 }
             } catch (err) {
-                console.error("Error grading in LabPreview [LabPreview.jsx]");
+                console.error("Error grading in LabPreview [LabPreview.jsx]",err.message);
             }
         } //END OF FOR LOOP
         //FOR QUESTIONS THAT WERE LEFT BLANK, CREATE A NEW OBJECT IN GRADEDRESULTS 
@@ -194,7 +165,7 @@ function LabPreview({ blocks, setBlocks, title, setTitle,
             }
         });
         //CALCULATE FINAL SCORE
-        let newFinalScorePercent; 
+        let newFinalScorePercent;
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade/calculate-score`, {
                 gradedResults: newGradedResults, //use variable instead
@@ -206,7 +177,6 @@ function LabPreview({ blocks, setBlocks, title, setTitle,
             //setSession is asynchronous so doesn't always update before upserting to lab 
             newFinalScorePercent = response.data.session.finalScore.percent;
 
-            console.log('here is the response from calculate-score',response.data);
             //don
             setSession(prev => ({
                 ...prev,
@@ -270,43 +240,43 @@ function LabPreview({ blocks, setBlocks, title, setTitle,
                         </div>
                     </div>
                 ))}
-                {mode==='admin' &&(
+                {mode === 'admin' && (
                     <AIPrompt value={aiPrompt} onChange={handleAiPromptChange} />
                 )}
 
                 {/* //read only is for admin viewing in submission list */}
                 {!readOnly && (
                     <>
-                    {/* BUTTON SUBMIT RESPONSE */ }
-                    < button
-                    onClick={submitResponses}
-                disabled={isSubmitting}
-                className={`bg-purple-600 text-white px-4 py-2 rounded mt-4 flex items-center ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
-                    }`}
-                >
-                {isSubmitting ? (
-                    <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Submitting...
+                        {/* BUTTON SUBMIT RESPONSE */}
+                        < button
+                            onClick={submitResponses}
+                            disabled={isSubmitting}
+                            className={`bg-purple-600 text-white px-4 py-2 rounded mt-4 flex items-center ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                                }`}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Submitting...
+                                </>
+                            ) : (
+                                'Submit'
+                            )}
+                        </button>
                     </>
-                ) : (
-                    'Submit'
-                )}
-            </button>
-            </>
                 )}
 
-            {/*OUTPUT FINAL SCORE */}
-            {Object.keys(gradedResults).length > 0 && (
-                <div className="mb-6 p-4 border rounded bg-blue-50">
-                    <h3 className="font-bold mb-2">Score 📊</h3>
-                    Total Score: {parseFloat(finalScore.totalScore).toFixed(2)} / {finalScore.maxScore}<br />{finalScore.percent}%
-                </div>
-            )}
-        </div >
+                {/*OUTPUT FINAL SCORE */}
+                {Object.keys(gradedResults).length > 0 && (
+                    <div className="mb-6 p-4 border rounded bg-blue-50">
+                        <h3 className="font-bold mb-2">Score 📊</h3>
+                        Total Score: {parseFloat(finalScore.totalScore).toFixed(2)} / {finalScore.maxScore}<br />{finalScore.percent}%
+                    </div>
+                )}
+            </div >
         </>
 
     )

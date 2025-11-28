@@ -1,11 +1,13 @@
 const express = require('express');//load express
 const router = express.Router(); //create a new router object  (mini express app -> for handling routes)
-const {upsertGithubSubmission, 
+const {
+    requestSubmissionRegrade,
+    upsertGithubSubmission, 
     upsertLabSubmission,
     verifyGithubOwnership, 
     getAllSubmissions,
     getSubmission,
-    updateSubmissionGrade,
+    manualUpdateSubmissionGrade,
     deleteSubmissions} = require('../controllers/submissionController'); //call the handleSubmission function from submissionController 
 
 
@@ -32,7 +34,8 @@ router.get('/submissions', getAllSubmissions); //this pathway is relative to the
 router.get('/submissions/:id',getSubmission);
 router.post('/submissions/upsertLab',upsertLabSubmission);
 router.post('/submissions/upsertGithub',upsertGithubSubmission);
-router.post('/submissions/update-grade',updateSubmissionGrade)
+router.post('/submissions/update-late-grade',requestSubmissionRegrade);
+router.post('/submissions/manual-update-grade',manualUpdateSubmissionGrade);
 router.post('/verify-github-ownership',verifyGithubOwnership);
 router.delete('/submissions/delete-submissions/:assignmentId',deleteSubmissions);
 

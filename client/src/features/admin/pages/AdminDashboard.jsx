@@ -14,6 +14,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     //for lab-builder/preview
     const [blocks, setBlocks] = useState([]);
     const [title, setTitle] = useState('');
+    const [aiPrompt, setAiPrompt] = useState();
 
 
     const [assignments, setAssignments] = useState([]);
@@ -54,6 +55,19 @@ const AdminDashboard = ({ user, onLogout }) => {
         axios.get(`${process.env.REACT_APP_API_HOST}/sections`).then(res => setSections(res.data));
     }, []);
 
+    const handleAiPromptChange = async (prompt) => {
+        //update lab with new aiPrompt
+        setAiPrompt(prompt);
+        if (!selectedAssignmentId) return;
+        try {
+            await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/lab/update-lab-prompt`, {
+                assignmentId:selectedAssignmentId,
+                aiPrompt: prompt
+            });
+        } catch (err) {
+            console.error('Failed to save AI prompt', err.message);
+        }
+    }
 
     const onAssignmentUpdate = (updatedAssignment) => {
         //gt previous assignments->map it and compare each assignment id to updatedAssignment Id. change that assignment when found
@@ -158,10 +172,14 @@ const AdminDashboard = ({ user, onLogout }) => {
                                         labId={selectedAssignmentObj.labId}
                                         showExplanations={selectedAssignmentObj.showExplanations}
                                         readOnly={true}
+                                        handleAiPromptChange={handleAiPromptChange}
+                                        aiPrompt={aiPrompt}
+                                        setAiPrompt={setAiPrompt}
+
                                     />
                                 </div>
                             )}
-                        {/* IF ASSIGNMENT IS GITHUB THEN OPEN REPOSITORY LINK */}
+                            {/* IF ASSIGNMENT IS GITHUB THEN OPEN REPOSITORY LINK */}
                             {selectedSubmission && selectedAssignmentObj?.type === 'github' && (
                                 <div style={{
                                     maxWidth: '900px',
@@ -235,13 +253,16 @@ const AdminDashboard = ({ user, onLogout }) => {
                                 title={title}
                                 setTitle={setTitle}
                                 assignmentId={selectedAssignmentId}
+                                handleAiPromptChange={handleAiPromptChange}
+                                aiPrompt={aiPrompt}
+                                setAiPrompt={setAiPrompt}
                             />)
                         }
                     </div>
                 )}
 
                 {currentTab === 'manage' && (
-                
+
                     <LabPreview
                         blocks={blocks}
                         setBlocks={setBlocks}
@@ -252,8 +273,10 @@ const AdminDashboard = ({ user, onLogout }) => {
                         userId={user.id}
                         username={user.username}
                         labId={selectedAssignmentObj.labId}
-                        showExpla
-                        nations={selectedAssignmentObj.showExplanations}
+                        showExplanations={selectedAssignmentObj.showExplanations}
+                        handleAiPromptChange={handleAiPromptChange}
+                        aiPrompt={aiPrompt}
+                        setAiPrompt={setAiPrompt}          
                     />
                 )}
             </div>

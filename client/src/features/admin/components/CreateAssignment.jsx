@@ -26,7 +26,6 @@ const CreateAssignment = ({ onAssignmentCreate }) => {
                 dueDate,
                 type
             });
-
             let lab;
 
             try {

@@ -113,6 +113,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                         assignmentId={selectedAssignmentId}
                         userId={user.id}
                         username={user.username}
+                        mode={user.role}
                         labId={selectedAssignmentObj?.labId ?? null}
                         selectedAssignmentDueDate={selectedAssignmentObj?.dueDate}
                         onUpdateSubmission={updateSubmissions}

@@ -7,14 +7,12 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
     const [hasChanges, setHasChanges] = useState(false);
     const [title, setTitle] = useState(selectedAssignmentObj.title);
     const [dueDate, setDueDate] = useState(selectedAssignmentObj.dueDate);
-    const [type, setType] = useState(selectedAssignmentObj.type);
     const [showExplanations, setShowExplanations] = useState(selectedAssignmentObj.showExplanations);
     const [isDraft, setIsDraft] = useState(selectedAssignmentObj.isDraft);
 
     useEffect(() => {
         setTitle(selectedAssignmentObj.title);
         setDueDate(selectedAssignmentObj.dueDate);
-        setType(selectedAssignmentObj.type);
         setShowExplanations(selectedAssignmentObj.showExplanations);
         setIsDraft(selectedAssignmentObj.isDraft);
         setHasChanges(false);
@@ -43,6 +41,11 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
                 setHasChanges(false);
             }
             if(onAssignmentUpdate) onAssignmentUpdate(response.data);
+        
+            //REGRADE SUBMISSION WITH WORKER
+            const regrade = await axios.post(`${process.env.REACT_APP_API_HOST}/submissions/update-late-grade`,{
+                assignmentId:selectedAssignmentObj.id
+            });
         } catch (err) {
             console.error('error in AssignmentDetails handleUpdate->', err);
         }
@@ -123,7 +126,7 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
                     <input
                         type="checkbox"
                         checked={!isDraft}
-                        onChange={(e) => { setIsDraft(e.target.checked); setHasChanges(true); }}
+                        onChange={(e) => {setIsDraft(!e.target.checked); setHasChanges(true);}}
                     />
                     <span style={{ fontSize: '14px' }}>{isDraft ? 'Click to publish' : 'Published'}</span>
                 </label>

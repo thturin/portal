@@ -37,6 +37,7 @@ model Submission {
   url           String?
   language      String?
   score         Float?
+  rawScore      Float?
   feedback      String? 
   submittedAt   DateTime  @default(now())
   assignment    Assignment @relation(fields: [assignmentId], references: [id])
@@ -53,9 +54,8 @@ model Assignment {
   dueDate             DateTime
   type                String
   labId               Int?
-  aiPrompt            String?
   showExplanations    Boolean @default(false)
-  isDraft             Boolean @default(false)
+  isDraft             Boolean @default(true)
   submissions         Submission[]
 }
 

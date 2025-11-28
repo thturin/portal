@@ -89,6 +89,7 @@ const deleteAssignment = async (req, res) => {
         });
         if (!assignment) return res.status(404).json({ error: 'assignment not found' });
 
+        //CALL THE QUEUE FOR DELETING ASSIGNMENTS ASYNCHRONOUSLY
         await assignmentDeletionQueue.add('delete-assignment', {
             assignmentId: assignment.id,
             labId: assignment.labId

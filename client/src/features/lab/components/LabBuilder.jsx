@@ -1,17 +1,23 @@
-import {useEffect, useCallback} from "react";
+import { useEffect, useCallback,useState } from "react";
 import { createQuestion, createMaterial } from "../models/block";
 import QuestionEditor from "./QuestionEditor";
 import MaterialEditor from "./MaterialEditor";
+import AIPrompt from './AIPrompt';
 import "react-quill/dist/quill.snow.css";
 import "../styles/Lab.css";
 import axios from "axios";
 
- 
-function LabBuilder({ blocks, setBlocks, title, setTitle, assignmentId }) {
+
+function LabBuilder({ blocks, setBlocks, 
+    title, setTitle, 
+    assignmentId, 
+    setAiPrompt,aiPrompt, handleAiPromptChange }) {
+
 
     useEffect(() => {
         loadLab();
     }, [assignmentId]);
+
 
     const deleteBlock = (id) => {
         setBlocks(blocks.filter(b => b.id !== id)); //remove block with id
@@ -57,15 +63,15 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, assignmentId }) {
         } catch (err) {
             console.error('Error trying to upsert (save) lab to api', err);
         }
-    },[title,blocks,assignmentId]);
+    }, [title, blocks, assignmentId]);
 
-    useEffect(()=>{
-        const id = setInterval(()=>{
+    useEffect(() => {
+        const id = setInterval(() => {
             saveLab(); //witout useCallBack would always use the initial empty blocks
             console.log('autosaved!');
-        },60000); //autosave every 60 sec
-        return ()=> clearInterval(id);
-    },[saveLab]);
+        }, 60000); //autosave every 60 sec
+        return () => clearInterval(id);
+    }, [saveLab]);
 
     const loadLab = async () => {
 
@@ -77,6 +83,7 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, assignmentId }) {
             console.log('lab loaded! ', response.data);
             setTitle(response.data.title);
             setBlocks(response.data.blocks);
+            setAiPrompt(response.data.aiPrompt);
         } catch (err) {
             console.error('Lab did not load from labController successfully', err.message);
         }
@@ -175,6 +182,8 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, assignmentId }) {
                 </div>
             ))}
 
+            <AIPrompt value={aiPrompt} onChange={handleAiPromptChange} />
+
             {/* BUTTONS */}
             <button
                 onClick={addMaterialBlock}
@@ -190,11 +199,11 @@ function LabBuilder({ blocks, setBlocks, title, setTitle, assignmentId }) {
             </button>
             <button
                 // onClick={saveLab}
-                onClick={(e)=>{
+                onClick={(e) => {
                     saveLab();
                     const originalText = e.target.textContent;
                     e.target.textContent = '✅ Saved!';
-                    setTimeout(()=>e.target.textContent = originalText,1500);
+                    setTimeout(() => e.target.textContent = originalText, 1500);
                 }}
                 className="bg-blue-600 text-white px-4 py-2 rounded"
             >
