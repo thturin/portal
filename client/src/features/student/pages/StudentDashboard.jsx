@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import StudentSubmitGithub from '../components/StudentSubmitGithub.jsx';
 import StudentSubmissionList from '../components/StudentSubmissionList.jsx';
 import LatePolicyInfo from '../components/LatePolicyInfo.jsx';
@@ -16,7 +16,6 @@ const StudentDashboard = ({ user, onLogout }) => {
     const [assignments, setAssignments] = useState([]);
     const [selection, setSelection] = useState(); //work, submit, late or create, a, create l , test
     const [selectedAssignmentId, setSelectedAssignmentId] = useState(-1);
-    const [assignmentType, setAssignmentType] = useState('');
 
 
 //GET ALL ASSIGNMENTS and  SUBMISSIONS
@@ -26,8 +25,8 @@ const StudentDashboard = ({ user, onLogout }) => {
                 const subRes = await axios.get(`${process.env.REACT_APP_API_HOST}/submissions`);
                 const userSubs = subRes.data.filter(sub => sub.userId === user.id);
                 setSubmissions(userSubs);
-                const assignments = await axios.get(`${process.env.REACT_APP_API_HOST}/assignments`,{
-                    role:user?.role
+                const assignments = await axios.get(`${process.env.REACT_APP_API_HOST}/assignments`, {
+                    role: user?.role
                 });
                 setAssignments(assignments.data);
 
@@ -37,7 +36,7 @@ const StudentDashboard = ({ user, onLogout }) => {
 
         };
         fetchData();
-    }, [user.id]);
+    }, [user?.id, user?.role]);
 
     //FIND SELECTED ASSIGNMENT OBJECT 
     const selectedAssignmentObj = assignments.find(a => a.id === Number(selectedAssignmentId));
@@ -134,7 +133,6 @@ const StudentDashboard = ({ user, onLogout }) => {
                                 setSelectedAssignmentId={setSelectedAssignmentId}
                                 selectedAssignmentId={selectedAssignmentId}
                                 assignments={assignments}
-                                setAssignmentType={setAssignmentType}
                             />
 
                             <StudentSubmissionList

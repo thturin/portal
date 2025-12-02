@@ -1,4 +1,4 @@
-import { useEffect, useCallback,useState } from "react";
+import { useEffect, useCallback } from "react";
 import { createQuestion, createMaterial } from "../models/block";
 import QuestionEditor from "./QuestionEditor";
 import MaterialEditor from "./MaterialEditor";
@@ -13,10 +13,27 @@ function LabBuilder({ blocks, setBlocks,
     assignmentId, 
     setAiPrompt,aiPrompt, handleAiPromptChange }) {
 
+        //memoized, oinly rerun if props change
+    const loadLab = useCallback(async () => {
 
+        try {
+            //search for the lab by the assignment Id
+            const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/lab/load-lab`, {
+                params: { assignmentId, title: title || 'Untitled' }
+            });
+            console.log('lab loaded! ', response.data);
+            setTitle(response.data.title);
+            setBlocks(response.data.blocks);
+            setAiPrompt(response.data.aiPrompt);
+        } catch (err) {
+            console.error('Lab did not load from labController successfully', err.message);
+        }
+    }, [assignmentId, title, setTitle, setBlocks, setAiPrompt]);
+
+    //loadlab   
     useEffect(() => {
         loadLab();
-    }, [assignmentId]);
+    }, [loadLab]);
 
 
     const deleteBlock = (id) => {
@@ -72,22 +89,6 @@ function LabBuilder({ blocks, setBlocks,
         }, 60000); //autosave every 60 sec
         return () => clearInterval(id);
     }, [saveLab]);
-
-    const loadLab = async () => {
-
-        try {
-            //search for the lab by the assignment Id
-            const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/lab/load-lab`, {
-                params: { assignmentId, title: title || 'Untitled' }
-            });
-            console.log('lab loaded! ', response.data);
-            setTitle(response.data.title);
-            setBlocks(response.data.blocks);
-            setAiPrompt(response.data.aiPrompt);
-        } catch (err) {
-            console.error('Lab did not load from labController successfully', err.message);
-        }
-    }
 
     const loadLabFromFile = async () => {
         try {

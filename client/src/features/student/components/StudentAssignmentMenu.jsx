@@ -1,21 +1,11 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
 import { formatDate, isPastDue } from '../../../utils/dateUtils';
 
 const StudentAssignmentMenu = ({
     setSelectedAssignmentId,
     selectedAssignmentId,
-    assignments,
-    setAssignmentType
+    assignments
 }) => {
-
-//PASS THE ASSIGNMENT TYPE BACK
-    useEffect(()=>{
-        if(selectedAssignmentId){
-            const type = assignments.find(a=>a.id === selectedAssignmentId)?.type;
-            setAssignmentType(type);
-        }
-    },[selectedAssignmentId])
 
     return (<>
         <div style={{

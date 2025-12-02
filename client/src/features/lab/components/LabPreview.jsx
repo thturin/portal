@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createSession } from '../models/session';
 import MaterialBlock from './MaterialBlock';
 import QuestionBlock from './QuestionBlock';
@@ -57,20 +57,20 @@ function LabPreview({
 
     //AT SOME POINT YOU NEED TO REPLACE THIS WITH THE LOADLAB.JS FUNCTION
 
-    const loadLab = async () => {
+    const loadLab = useCallback(async () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/lab/load-lab`, {
                 params: { assignmentId, title }
             });
             setBlocks(response.data.blocks);
             setTitle(response.data.title);
-            if(mode==='admin') setAiPrompt(response.data.aiPrompt);
+            if (mode === 'admin') setAiPrompt(response.data.aiPrompt);
         } catch (err) {
             console.error('Lab did not load from labController successfully', err.message);
         }
-    };
+    }, [assignmentId, title, mode, setBlocks, setTitle, setAiPrompt]);
 
-    const loadSession = async () => {
+    const loadSession = useCallback(async () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_LAB_HOST}/session/load-session/${labId}`, {
                 params: { userId, username, title }
@@ -81,37 +81,36 @@ function LabPreview({
             console.log('Session Loaded!');
         } catch (err) {
             console.error('Error in getResponse()', err);
-        };
-    }
+        }
+    }, [labId, userId, username, title]);
 
-    const saveSession = async () => {
-        if (!session) return
-        if (!title || !userId || !labId || !sessionLoaded) return; //if not title was created or studentId is not found, don't update
+    const saveSession = useCallback(async () => {
+        if (!session || !title || !userId || !labId || !sessionLoaded) return;
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/session/save-session`, { session });
+            await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/session/save-session`, { session });
         } catch (err) {
             console.error('Error saving session. Check backend', err);
         }
-    };
+    }, [session, title, userId, labId, sessionLoaded]);
 
     //LOAD SESSION and LAB
         useEffect(() => {
             if (!assignmentId) return;
             loadLab();
-        }, [assignmentId, labId, reloadKey]);
+        }, [assignmentId, reloadKey, loadLab]);
 
         useEffect(() => {
             if (!labId || (!userId && !username)) return;
             setSessionLoaded(false);
             loadSession();
-        }, [labId, userId, username, reloadKey]);
+        }, [labId, userId, username, reloadKey, loadSession]);
 
     // AUTO SAVE SESSION - save 
     useEffect(() => { //useeffect cannot be async
         saveSession();
         const timeoutId = setTimeout(saveSession, 1000); //add 1 second delay 
         return () => clearTimeout(timeoutId);
-    }, [session, sessionLoaded]);
+    }, [saveSession]);
 
 
     const submitResponses = async () => {

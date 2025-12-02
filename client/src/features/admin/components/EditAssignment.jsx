@@ -43,8 +43,8 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
             if(onAssignmentUpdate) onAssignmentUpdate(response.data);
         
             //REGRADE SUBMISSION WITH WORKER
-            const regrade = await axios.post(`${process.env.REACT_APP_API_HOST}/submissions/update-late-grade`,{
-                assignmentId:selectedAssignmentObj.id
+            await axios.post(`${process.env.REACT_APP_API_HOST}/submissions/update-late-grade`, {
+                assignmentId: selectedAssignmentObj.id
             });
         } catch (err) {
             console.error('error in AssignmentDetails handleUpdate->', err);

@@ -1,5 +1,4 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
 import CreateAssignment from './CreateAssignment';
 import EditAssignment from './EditAssignment';
 
@@ -45,7 +44,7 @@ const AdminAssignmentMenu = ({
                         const val = Number(e.target.value);
                         setSelectedAssignmentId(val || -1);
                         //setTitle to the assignment list selection
-                        if(e.target.value!=="-2") setTitle(assignments.find(a=>a.id==val)?.title ?? '');
+                        if (e.target.value !== "-2") setTitle(assignments.find((a) => a.id === val)?.title ?? '');
                     }}
                     style={{
                         width: '100%',

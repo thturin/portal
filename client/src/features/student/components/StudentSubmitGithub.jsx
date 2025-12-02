@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Spinner from '../../../shared/Spinner';
 import Button from '../../../shared/Button';
-import StudentAssignmentMenu from './StudentAssignmentMenu';
 
 const apiUrl = process.env.REACT_APP_API_HOST;
 //set global axios defaults
@@ -14,7 +13,6 @@ const StudentSubmitGithub = ({ onUpdateSubmission, githubUsername, userId, submi
 
     const [url, setUrl] = useState('');
     const [assignments, setAssignments] = useState([]); //assignment list 
-    const [assignmentType, setAssignmentType] = useState('');
     const [score, setScore] = useState(null);
     const [error, setError] = useState('');
     const [submissionExists, setSubmissionExists] = useState(false);
@@ -23,7 +21,7 @@ const StudentSubmitGithub = ({ onUpdateSubmission, githubUsername, userId, submi
     const [isSubmitting, setIsSubmitting] = useState(false);
 
 
-    //FETCH ASSIGNMENTES and setAssignmentType to 'github'
+    //FETCH ASSIGNMENTS and log the github username for debugging
     useEffect(() => { //useEffect() code to run after the component renders
         //useEffect let your perform actions (side effects) in your componenet, such as fetching api data
         async function fetchAssignments() {
@@ -36,10 +34,9 @@ const StudentSubmitGithub = ({ onUpdateSubmission, githubUsername, userId, submi
             }
         }
         fetchAssignments();
-        setAssignmentType('github');
         console.log('githubUsernaem',githubUsername);
 
-    }, []); //happens on the mount [] are the dependencies which means the function will run only when those dependencies change
+    }, [githubUsername]); //re-run when the username used for verification changes
 
     const verifyGithubOwnership = async (url) => {
         const res = await axios.post(`${apiUrl}/verify-github-ownership`, {
