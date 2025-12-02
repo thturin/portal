@@ -23,9 +23,6 @@ app.use(cors({
     'http://0.0.0.0:13000',
     process.env.CLIENT_URL,
     "https://turninterminal.netlify.app"
-
-
-  
   ],
   credentials:true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],

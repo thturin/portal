@@ -4,6 +4,10 @@ import './index.css';
 import App from './App';
 // import reportWebVitals from './reportWebVitals';
 
+
+//you need to pass the cookies from frontend to backend since they live on different origins in production
+axios.defaults.withCredentials = true;
+
 if (process.env.NODE_ENV === 'production') {
   console.log = () => {};
   console.debug = () => {};
