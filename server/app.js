@@ -20,7 +20,8 @@ app.use(cors({
   origin: [
      process.env.CLIENT_URL, // e.g., http://localhost:13000 for local dev
     'http://localhost:13000', // Docker Compose service name for frontend
-    'http://0.0.0.0:13000'
+    'http://0.0.0.0:13000',
+    process.env.CLIENT_URL
   
   ],
   credentials:true,
