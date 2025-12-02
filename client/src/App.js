@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import './App.css';
 import AdminDashboard from './features/admin/pages/AdminDashboard.jsx';
@@ -8,8 +7,6 @@ import StudentDashboard from './features/student/pages/StudentDashboard.jsx';
 function App() {
   //set the current user in Parent compontnet (this app.js)
   const [user, setUser] = useState(null);
-  const [assignmentId, setAssignmentId] = useState(null);
-  const [title, setTitle] = useState(null);
   
   const handleLogin=(userData)=>{
     setUser(userData); 
