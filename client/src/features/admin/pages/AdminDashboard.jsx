@@ -7,7 +7,7 @@ import JupiterExportButton from '../components/JupiterExportButton';
 import SectionSelection from '../components/SectionSelection';
 import LabBuilder from '../../lab/components/LabBuilder';
 import LabPreview from '../../lab/components/LabPreview';
-
+import SubmissionRegrade from '../components/SubmissionRegrade';
 
 
 const AdminDashboard = ({ user, onLogout }) => {
@@ -26,7 +26,11 @@ const AdminDashboard = ({ user, onLogout }) => {
     const [hasChanges, setHasChanges] = useState(false);  //for submissionLIst when updating scores. 
     const [currentTab, setCurrentTab] = useState('');
     const [selectedSubmissionId, setSelectedSubmissionId] = useState(null);
+    const [labRefreshKey, setLabRefreshKey] = useState(0);
 
+    useEffect(()=>{
+        console.log('hello labrefresh key');
+    },[labRefreshKey,setLabRefreshKey]);
 
     const selectedSubmission = submissions.find(
         sub => sub.id === Number(selectedSubmissionId)
@@ -53,7 +57,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         axios.get(`${process.env.REACT_APP_API_HOST}/assignments`).then(res => setAssignments(res.data));
         axios.get(`${process.env.REACT_APP_API_HOST}/submissions`).then(res => setSubmissions(res.data));
         axios.get(`${process.env.REACT_APP_API_HOST}/sections`).then(res => setSections(res.data));
-    }, []);
+    }, [labRefreshKey]);
 
     const handleAiPromptChange = async (prompt) => {
         //update lab with new aiPrompt
@@ -102,6 +106,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 assignmentTitle={selectedAssignmentObj?.title}
                 assignmentType={selectedAssignmentObj?.type}
                 assignmentId={selectedAssignmentId}
+                currentTab={currentTab}
             />
             <div style={{ marginTop: '80px' }}>  {/* Add space below navbar */}
 
@@ -131,6 +136,11 @@ const AdminDashboard = ({ user, onLogout }) => {
                                 sections={sections}
                             />
 
+                            <SubmissionRegrade
+                                assignmentId={selectedAssignmentId}
+                                onRegradeApplied={() => setLabRefreshKey(key => key + 1)}
+                            />
+
                             <SubmissionList
                                 filteredSubs={filteredSubs}
                                 selectedAssignmentObj={selectedAssignmentObj}
@@ -141,7 +151,10 @@ const AdminDashboard = ({ user, onLogout }) => {
                                 setSubmissions={setSubmissions}
                                 setSelectedSubmissionId={setSelectedSubmissionId}
                                 selectedSubmissionId={selectedSubmissionId}
+                                reloadKey={labRefreshKey}
                             />
+
+
                             {/* SHOW LAB PREVIEW OF SELECTED SUBMISSION */}
                             {selectedSubmission && selectedAssignmentObj?.type === 'lab' && (
                                 <div style={{
@@ -175,11 +188,12 @@ const AdminDashboard = ({ user, onLogout }) => {
                                         handleAiPromptChange={handleAiPromptChange}
                                         aiPrompt={aiPrompt}
                                         setAiPrompt={setAiPrompt}
+                                        reloadKey={labRefreshKey}
 
                                     />
                                 </div>
                             )}
-                            {/* IF ASSIGNMENT IS GITHUB THEN OPEN REPOSITORY LINK */}
+                        {/* IF ASSIGNMENT IS GITHUB THEN OPEN REPOSITORY LINK */}
                             {selectedSubmission && selectedAssignmentObj?.type === 'github' && (
                                 <div style={{
                                     maxWidth: '900px',
@@ -262,7 +276,6 @@ const AdminDashboard = ({ user, onLogout }) => {
                 )}
 
                 {currentTab === 'manage' && (
-
                     <LabPreview
                         blocks={blocks}
                         setBlocks={setBlocks}
@@ -276,7 +289,8 @@ const AdminDashboard = ({ user, onLogout }) => {
                         showExplanations={selectedAssignmentObj.showExplanations}
                         handleAiPromptChange={handleAiPromptChange}
                         aiPrompt={aiPrompt}
-                        setAiPrompt={setAiPrompt}          
+                        setAiPrompt={setAiPrompt}
+                        reloadKey={labRefreshKey}
                     />
                 )}
             </div>

@@ -1,7 +1,12 @@
 import React from 'react';
 import Button from '../../../shared/Button';
 
-const StudentNavButtons = ({ onSelect, assignmentTitle, assignmentType, assignmentId }) => {
+const activeStyle = {
+    borderBottom: '3px solid #34f516ff',
+    color: '#16e927ff'
+};
+
+const StudentNavButtons = ({ onSelect, assignmentTitle, assignmentType, assignmentId, currentTab }) => {
     let githubDisabled;
     let labDisabled;
 
@@ -19,7 +24,10 @@ const StudentNavButtons = ({ onSelect, assignmentTitle, assignmentType, assignme
               color="secondary"
               onClick={() => onSelect('github')}
               disabled={githubDisabled}
-              style={githubDisabled ? { opacity: 0.5 } : undefined}
+              style={{
+                opacity: githubDisabled ? 0.5 : 1,
+                ...(currentTab === 'github' ? activeStyle : {})
+              }}
             >
               😸 Github
             </Button>
@@ -28,16 +36,27 @@ const StudentNavButtons = ({ onSelect, assignmentTitle, assignmentType, assignme
               color="secondary"
               onClick={() => onSelect('lab')}
               disabled={labDisabled}
-              style={labDisabled ? { opacity: 0.5 } : undefined}
+              style={{
+                opacity: labDisabled ? 0.5 : 1,
+                ...(currentTab === 'lab' ? activeStyle : {})
+              }}
             >
               🧪 Lab
             </Button>
 
-            <Button color="primary" onClick={() => onSelect('view')}>
+            <Button
+              color="primary"
+              onClick={() => onSelect('view')}
+              style={currentTab === 'view' ? activeStyle : undefined}
+            >
               👀 Select/View
             </Button>
 
-            <Button color="secondary" onClick={() => onSelect('late')}>
+            <Button
+              color="secondary"
+              onClick={() => onSelect('late')}
+              style={currentTab === 'late' ? activeStyle : undefined}
+            >
               ⏰ Late Policy
             </Button>
 

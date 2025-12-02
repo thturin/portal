@@ -1,6 +1,8 @@
 const express = require('express');//load express
 const router = express.Router(); //create a new router object  (mini express app -> for handling routes)
 const {
+    getSubmissionRegradeStatus,
+    requestSubmissionRegradeDueDate,
     requestSubmissionRegrade,
     upsertGithubSubmission, 
     upsertLabSubmission,
@@ -34,10 +36,13 @@ router.get('/submissions', getAllSubmissions); //this pathway is relative to the
 router.get('/submissions/:id',getSubmission);
 router.post('/submissions/upsertLab',upsertLabSubmission);
 router.post('/submissions/upsertGithub',upsertGithubSubmission);
-router.post('/submissions/update-late-grade',requestSubmissionRegrade);
-router.post('/submissions/manual-update-grade',manualUpdateSubmissionGrade);
+router.post('/submissions/update-late-grade',requestSubmissionRegradeDueDate);
+router.post('/submissions/manual-regrade',manualUpdateSubmissionGrade);
+router.post('/submissions/regrade',requestSubmissionRegrade);
+router.get('/submissions/regrade/:jobId',getSubmissionRegradeStatus);
 router.post('/verify-github-ownership',verifyGithubOwnership);
 router.delete('/submissions/delete-submissions/:assignmentId',deleteSubmissions);
+
 
 
 module.exports = router; //export router object so your main server file can use it

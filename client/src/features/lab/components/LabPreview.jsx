@@ -6,15 +6,25 @@ import QuestionBlock from './QuestionBlock';
 import AIPrompt from './AIPrompt';
 import "../styles/Lab.css";
 
-function LabPreview({ blocks, setBlocks, 
-    title, setTitle,
-    assignmentId, selectedAssignmentDueDate,
-    mode = 'student', userId, username, readOnly,
+function LabPreview({
+    blocks,
+    setBlocks,
+    title,
+    setTitle,
+    assignmentId,
+    selectedAssignmentDueDate,
+    mode = 'student',
+    userId,
+    username,
+    readOnly,
     labId,
-    aiPrompt, setAiPrompt, //for updating the ai prompt in lab
-    handleAiPromptChange,//admin
-    onUpdateSubmission, //student
-    showExplanations }) {
+    aiPrompt,
+    setAiPrompt,
+    handleAiPromptChange,
+    onUpdateSubmission,
+    showExplanations,
+    reloadKey = 0
+}) {
 
     const isAdmin = mode === 'admin';
 
@@ -85,12 +95,16 @@ function LabPreview({ blocks, setBlocks,
     };
 
     //LOAD SESSION and LAB
-    useEffect(() => { //on  mount, load json 
-        //extract responses, graded results and final score
-        //ENSURE THIS HAPPENS BEFORE AUTOSAVE USE EFFECT
-        loadLab();
-        loadSession();
-    }, []);
+        useEffect(() => {
+            if (!assignmentId) return;
+            loadLab();
+        }, [assignmentId, labId, reloadKey]);
+
+        useEffect(() => {
+            if (!labId || (!userId && !username)) return;
+            setSessionLoaded(false);
+            loadSession();
+        }, [labId, userId, username, reloadKey]);
 
     // AUTO SAVE SESSION - save 
     useEffect(() => { //useeffect cannot be async

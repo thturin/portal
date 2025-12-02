@@ -11,7 +11,8 @@ const SubmissionList = ({
     hasChanges,
     setSubmissions, //when you update the score
     selectedSubmissionId,//for the lab preview in adminDashboard
-    setSelectedSubmissionId 
+    setSelectedSubmissionId,
+    reloadKey
 }) => {
 
     // Sorting state
@@ -70,12 +71,19 @@ const SubmissionList = ({
         return arr;
     }, [filteredSubs, sortBy, sortDir, editedScores]);
 
-    //i am not sure if this is even working.....
+    // Clear any locally edited scores whenever a reload is requested so we display fresh server data.
     useEffect(() => {
-        if (!selectedSubmissionId && sortedSubs.length) {
+        setEditedScores({});
+        setHasChanges(false);
+    }, [reloadKey, setEditedScores, setHasChanges]);
+
+    // Ensure something is selected (or re-select the first row if the previous selection disappeared).
+    useEffect(() => {
+        const hasSelection = sortedSubs.some(sub => sub.id === Number(selectedSubmissionId));
+        if (!hasSelection && sortedSubs.length) {
             setSelectedSubmissionId(sortedSubs[0].id);
         }
-    }, []);
+    }, [sortedSubs, selectedSubmissionId, setSelectedSubmissionId]);
 
     const sortIndicator = (col) => (sortBy === col ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '');
 
@@ -239,7 +247,7 @@ const SubmissionList = ({
                                 //create a promise for each submission that is in the edited list
                                 await Promise.all(
                                     Object.entries(editedScores).map(([submissionId, score]) =>
-                                        axios.post(`${process.env.REACT_APP_API_HOST}/submissions/manual-update-grade`, {
+                                        axios.post(`${process.env.REACT_APP_API_HOST}/submissions/manual-regrade`, {
                                             submissionId: Number(submissionId),
                                             score: Number(score)
                                         })

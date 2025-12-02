@@ -2,7 +2,7 @@ const { parseISO } = require('date-fns');
 const { cloneRepo } = require('../services/gitService');
 const { gradeJavaSubmission } = require('../services/gradingService');
 const { PrismaClient } = require('@prisma/client');
-const {submissionRegradeDueDateQueue} = require('../queues/submissionRegradeQueue');
+const {submissionRegradeDueDateQueue, submissionRegradeQueue} = require('../queues/submissionRegradeQueue');
 const prisma = new PrismaClient();
 require('dotenv').config();
 
@@ -58,10 +58,15 @@ const verifyGithubOwnership = async (req, res) => {
     }
 };
 
-const calculateLateScore = (submissionDate, dueDateString, score) => {
-    //const submissionDate = parseISO(submissionDateString);
-    const dueDate = parseISO(dueDateString);
-    const diffTime = submissionDate - dueDate;
+const calculateLateScore = (submissionDate, dueDateInput, score) => { //dueDate accepts ISO strings or actual date object
+    if (!dueDateInput) return score;
+    const dueDate = dueDateInput instanceof Date
+        ? dueDateInput
+        : parseISO(typeof dueDateInput === 'string' ? dueDateInput : String(dueDateInput));
+    const submittedAt = submissionDate instanceof Date
+        ? submissionDate
+        : parseISO(typeof submissionDate === 'string' ? submissionDate : String(submissionDate));
+    const diffTime = submittedAt - dueDate;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     if (diffDays > 0 && score !== 0) { //if submission is late and not a 0 
         //1 day late 
@@ -170,7 +175,6 @@ const upsertGithubSubmission = async (req, res) => {
     }
 };
 
-
 //UPDATE OR CREATE LAB SUBMISSION WHEN SUBMITTING
 const upsertLabSubmission = async (req, res) => {
     const { assignmentId, userId, dueDate, score } = req.body;
@@ -209,12 +213,53 @@ const upsertLabSubmission = async (req, res) => {
 
 };
 
-const requestSubmissionRegrade = async (req,res) =>{
-    const {assignmentId} = req.body; if (!assignmentId) return res.status(400).json({ error: 'assignmentId is required' });
+const requestSubmissionRegradeDueDate = async (req,res) =>{
+    const {assignmentId} = req.body; 
+    if (!assignmentId) return res.status(400).json({ error: 'assignmentId is required' });
 
   await submissionRegradeDueDateQueue .add('submission-regrade-duedate', { assignmentId: Number(assignmentId) });
   return res.json({ status: 'queued' });
 
+};
+
+const requestSubmissionRegrade = async(req,res) =>{
+    const {assignmentId,dryRun} = req.body;
+    if(!assignmentId) return res.status(400).json({error:'assignmentId is required'});
+    const job = await submissionRegradeQueue.add('submission-regrade',{
+        assignmentId:Number(assignmentId),
+        dryRun
+    },{
+        removeOnComplete:false, removeOnFail:false
+    });
+    console.log('here is the job id ', job.id);
+    return res.json({jobId:job.id});
+};
+
+const getSubmissionRegradeStatus = async (req, res) => {
+    try {
+        const jobId = req.params.jobId;
+        const job = await submissionRegradeQueue.getJob(jobId);
+        if (!job) return res.status(404).json({ error: 'Job not found' });
+
+        const state = await job.getState(); // waiting | active | completed | failed
+
+        let logs = [];
+        if (typeof submissionRegradeQueue.getJobLogs === 'function') {
+            const logsResponse = await submissionRegradeQueue.getJobLogs(jobId).catch(() => ({ logs: [] }));
+            logs = logsResponse?.logs || [];
+        }
+
+        const result = job.returnvalue ?? null;
+
+        return res.json({
+            state,
+            logs,
+            result
+        });
+    } catch (err) {
+        console.error('Error getting submission regrade status', err);
+        return res.status(500).json({ error: err.message || 'Failed to fetch regrade status' });
+    }
 };
 
 //admin manual override will ignore the late penalty. it changes the score late penalty is applied to
@@ -272,7 +317,6 @@ const getAllSubmissions = async (req, res) => {
     }
 };
 
-
 //will only delete submissions by assignmentId
 const deleteSubmissions = async (req, res) => {
     const { assignmentId } = req.params;
@@ -290,7 +334,6 @@ const deleteSubmissions = async (req, res) => {
     }
 }
 
-
 module.exports = {
     verifyGithubOwnership,
     getAllSubmissions,
@@ -300,9 +343,7 @@ module.exports = {
     upsertGithubSubmission,
     deleteSubmissions,
     calculateLateScore,
-    requestSubmissionRegrade
+    requestSubmissionRegradeDueDate,
+    requestSubmissionRegrade,
+    getSubmissionRegradeStatus
 };
-
-
-
-

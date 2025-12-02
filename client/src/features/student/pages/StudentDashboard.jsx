@@ -77,6 +77,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 assignmentTitle={selectedAssignmentObj?.title}
                 assignmentType={selectedAssignmentObj?.type ?? ''}
                 assignmentId={selectedAssignmentId}
+                currentTab={selection}
             />
 
             {/* ✨ Main Content Layout */}

@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { getImageUrlsFromHtml } from './fetchImages';
 
 
 function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
@@ -10,23 +11,9 @@ function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
         //only update if value actually changed
         if (block[field] !== value) {
             let updatedBlock = { ...block, [field]: value };
-            //extract images from content when it changes
-            // if (field === 'content') {
-            //     const images = extractImagesFromHTML(value);
-            //     updatedBlock.images = images;
-            // }
             onMaterialChange(updatedBlock);
             //text image block properties blockType, type, content, images
         }
-
-
-    };
-
-    const extractImagesFromHTML = (html) => { //extracts image url from html
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        const imgs = div.querySelectorAll('img');
-        return Array.from(imgs).map(img => img.src);
     };
 
     const modules = {
@@ -35,7 +22,6 @@ function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
             ['image'],//default quill image handler
             ['clean']
         ]
-
     };
 
 
@@ -45,7 +31,7 @@ function MaterialEditor({ block, onMaterialChange, onMaterialDelete }) {
                 ref={quillRef}
                 placeholder="Paste image or write here"
                 className="w-full border p-2 mb-2"
-                value={block.content}
+                value={getImageUrlsFromHtml(block.content)}
                 // onChange handler doesn't receive a DOM event object, gives you content value directly
                 //in other words, you dont need to use e=>e.target.value
                 onChange={value => {

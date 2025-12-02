@@ -1,8 +1,12 @@
 import React from 'react';
 import Button from '../../../shared/Button';
-import {useEffect } from 'react';
 
-const AdminNavButtons = ({ onSelect, assignmentTitle, assignmentId, assignmentType}) => {
+const activeStyle = {
+    borderBottom: '5px solid #33ff00ff',
+    color: '#22a904ff'
+};
+
+const AdminNavButtons = ({ onSelect, assignmentTitle, assignmentId, assignmentType, currentTab }) => {
     let viewDisabled = false;
     let submissionsDisabled = false;
     if(assignmentId === -1){
@@ -22,7 +26,10 @@ const AdminNavButtons = ({ onSelect, assignmentTitle, assignmentId, assignmentTy
             <Button 
                 color="secondary" 
                 onClick={() => onSelect('review')}
-                style={submissionsDisabled ? { opacity: 0.5 } : undefined}
+                style={{
+                    opacity: submissionsDisabled ? 0.5 : 1,
+                    ...(currentTab === 'review' ? activeStyle : {})
+                }}
                 disabled={submissionsDisabled}
             >
             👁️ Submissions 
@@ -30,7 +37,10 @@ const AdminNavButtons = ({ onSelect, assignmentTitle, assignmentId, assignmentTy
             <Button 
                 color="secondary" 
                 onClick={() => onSelect('manage')}
-                style={viewDisabled ? { opacity: 0.5 } : undefined} 
+                style={{
+                    opacity: viewDisabled ? 0.5 : 1,
+                    ...(currentTab === 'manage' ? activeStyle : {})
+                }} 
                 disabled={viewDisabled}       
             >
             ✅ Manage/Preview 
@@ -38,6 +48,7 @@ const AdminNavButtons = ({ onSelect, assignmentTitle, assignmentId, assignmentTy
             <Button 
                 color="primary" 
                 onClick={() => onSelect('create')}
+                style={currentTab === 'create' ? activeStyle : undefined}
             >
             🔨 Select/Build
             </Button>

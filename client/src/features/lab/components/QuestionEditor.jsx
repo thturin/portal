@@ -2,6 +2,8 @@
 import { createQuestion } from "../models/block";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { getImageUrlsFromHtml } from './fetchImages';
+
 
 function QuestionEditor({ q, onQuestionChange, onQuestionDelete, level = 0 }) {
     //onChange passed down from the parent so everything stays in sync
@@ -32,7 +34,7 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete, level = 0 }) {
                         type="text"
                         placeholder="Prompt"
                         className="w-full border p-2 mb-2"
-                        value={q.prompt}
+                        value={getImageUrlsFromHtml(q.prompt)}
                         rows={3}
                         onChange={(value) => {
                             if (value !== q.prompt) { //do not update if value hasn't changed
@@ -50,7 +52,7 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete, level = 0 }) {
                         <ReactQuill
                             placeholder="Admin Key"
                             className="w-full border mb-2"
-                            value={q.key || ""}
+                            value={q.key || ""} //will never have pictures
                             onChange={value => update("key", value)}
                             modules={modules}
                             theme="snow"
@@ -59,7 +61,7 @@ function QuestionEditor({ q, onQuestionChange, onQuestionDelete, level = 0 }) {
                         <ReactQuill
                             placeholder="Explanation for Student"
                             className="w-full border mb-2"
-                            value={q.explanation || ""}
+                            value={getImageUrlsFromHtml(q.explanation) || ""}
                             onChange={value => update("explanation", value)}
                             modules={modules}
                             theme="snow"

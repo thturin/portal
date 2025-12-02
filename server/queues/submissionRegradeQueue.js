@@ -5,4 +5,9 @@ const submissionRegradeDueDateQueue = new Queue('submission-regrade-duedate', {
   connection: redisOptions
 });
 
-module.exports = { submissionRegradeDueDateQueue };
+const submissionRegradeQueue = new Queue('submission-regrade', {
+  connection: redisOptions
+});
+
+
+module.exports = { submissionRegradeDueDateQueue,submissionRegradeQueue };
