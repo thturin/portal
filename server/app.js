@@ -22,7 +22,8 @@ app.use(cors({
     'http://localhost:13000', // Docker Compose service name for frontend
     'http://0.0.0.0:13000',
     process.env.CLIENT_URL,
-    "https://turninterminal.netlify.app/"
+    "https://turninterminal.netlify.app"
+
 
   
   ],
