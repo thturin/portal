@@ -48,12 +48,14 @@ function LabPreview({
     }
 
     //all questions that are being scored. questions that are not being scored are ignored
-    const allQuestions = [
-        //filter questions without subquestions
-        ...blocks.filter(b => b.blockType === "question" && b.isScored && (!b.subQuestions || b.subQuestions.length === 0))
-        //filter questions with subquestions
-        , ...blocks.filter(b => b.blockType === "question" && b.isScored && b.subQuestions.length > 0).flatMap(b => b.subQuestions)
-    ];
+    const scoredNoSubQuestions = blocks.filter(
+        b => b.blockType === "question" && b.isScored && (!b.subQuestions || b.subQuestions.length === 0)
+    );
+    const scoredSubQuestions = blocks
+        .filter(b => b.blockType === "question" && b.subQuestions && b.subQuestions.length > 0)
+        .flatMap(b => b.subQuestions.filter(sq => sq.isScored));
+
+    const allQuestions = [...scoredNoSubQuestions, ...scoredSubQuestions];
 
     //AT SOME POINT YOU NEED TO REPLACE THIS WITH THE LOADLAB.JS FUNCTION
 
@@ -125,18 +127,21 @@ function LabPreview({
             //THIS ASSUMES SUB QUESTIONS DO NOT HAVE SUB QUESTIONS
             //LOOP THROUGH BLOCKS AND ASSIGN ANSWERKEY, QUESTIOHN, TYPE
             for (const block of blocks) { //FIND BLOCK 
+                //find a question with no sub questions
                 if (block.blockType === 'question' && block.isScored &&
-                    block.subQuestions.length === 0 &&
+                    (!block.subQuestions || block.subQuestions.length === 0) &&
                     block.id === questionId) {
                     answerKey = block.key;
                     question = block.prompt;
                     type = block.type;
                     break;
                 }
-                if (block.blockType === 'question' && block.isScored && //FIND SUBQUESTION BLOCK
-                    block.subQuestions.length > 0) {
+
+                //find a question with subquestions
+                if (block.blockType === 'question' && block.subQuestions && block.subQuestions.length > 0) {
                     for (const sq of block.subQuestions) {
-                        if (sq.id === questionId) {
+                        if (sq.id === questionId && sq.isScored) {
+                    
                             answerKey = sq.key;
                             question = sq.prompt;
                             type = sq.type;
@@ -145,6 +150,11 @@ function LabPreview({
                     }
                 }
             }
+            // If this response does not map to a scored question (if the isScored is false) skip grading
+            if (!answerKey && !question && !type) {
+                continue;
+            }
+  
             //DEEPSEEK API REQUEST
             try {
                 const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade`, {
@@ -170,7 +180,7 @@ function LabPreview({
         //WITH SCORE 0 AND NO RESPONSE
         allQuestions.forEach(q => {
             //if new gradedResults does not contain this id,
-            if (!newGradedResults[q.id]) {
+            if (!newGradedResults[q.id] &&  q.isScored) {
                 newGradedResults[q.id] = {
                     score: 0,
                     feedback: "left blank"

@@ -127,7 +127,7 @@ app.use('/api/assignments', assignmentRoutes); //call the router object in assig
 app.use('/api/',userRoutes);//two different endpoints /users and /login
 app.use('/api/sections',sectionRoutes);
 app.use('/api/admin',adminRoutes);
-app.use('api/auth',authRoutes);
+app.use('/api/auth',authRoutes);
 
 const PORT = process.env.PORT || 5000;
 
