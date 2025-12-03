@@ -30,6 +30,7 @@ const createAssignment = async (req, res) => {
 
 const getAllAssignments = async (req, res) => {
     const includeDrafts = req.session.user?.role === 'admin';
+    console.log('look here',req.session);
 
     try {
         const assignments = await prisma.assignment.findMany({

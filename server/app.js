@@ -1,6 +1,5 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
-
 const express = require('express');
 const cors = require('cors');
 const submissionRoutes = require('./routes/submissionRoutes');
@@ -15,18 +14,19 @@ const {PrismaClient} = require('@prisma/client');
 
 const app = express();
 
+const allowedOrigins = [
+    process.env.CLIENT_URL,
+    'http://localhost:13000',
+    'http://0.0.0.0:13000',
+    'https://turninterminal.netlify.app'
+].filter(Boolean);
+
 //you are already using an authentication method so you ca * origin accept any 
 app.use(cors({
-  origin: [
-     process.env.CLIENT_URL, // e.g., http://localhost:13000 for local dev
-    'http://localhost:13000', // Docker Compose service name for frontend
-    'http://0.0.0.0:13000',
-    process.env.CLIENT_URL,
-    "https://turninterminal.netlify.app"
-  ],
-  credentials:true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+    origin: allowedOrigins,
+    credentials:true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -37,6 +37,8 @@ console.log('--------------------BEGIN----------------------');
 const session = require('express-session');//ceaet a session
 app.set('trust proxy',1); // trust 
 
+const primaryClient = process.env.CLIENT_URL || '';
+const isLocalClient = /localhost|127\.0\.0\.1/.test(primaryClient);
 const sessionOptions = {
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -45,8 +47,8 @@ const sessionOptions = {
     name: 'studentPortalSession',
     cookie: {
         maxAge: 60*60*1000,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none': 'lax',
-        secure: process.env.NODE_ENV === 'production',
+                sameSite: isLocalClient ? 'lax': 'none',
+                secure: isLocalClient ? false : true,
         httpOnly: true,
         domain: undefined
   }
