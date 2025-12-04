@@ -82,12 +82,14 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
             </div>
 
             <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Due Date:</label>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Due Date & Time:</label>
                 <input
-                    type="date"
-                    value={new Date(dueDate).toISOString().split('T')[0]}
+                    type="datetime-local"
+                    value={dueDate ? new Date(dueDate).toISOString().slice(0, 16) : ''}
                     onChange={(e) => {
-                        setDueDate(e.target.value)
+                        if (!e.target.value) return;
+                        const isoString = new Date(e.target.value).toISOString();
+                        setDueDate(isoString);
                         setHasChanges(true);
                     }}
                     style={{

@@ -17,9 +17,9 @@ const worker = new Worker('assignment-deletion', async job => {
                 throw new Error('LAB_CREATOR_API_URL is not configured');
             }
             let labCreatorBase;
-            try {
+            try { //test to make sure it is a url 
                 labCreatorBase = new URL(process.env.LAB_CREATOR_API_URL).toString().replace(/\/$/, '');
-            } catch (err) {
+            } catch (err) {//invalid, throw 
                 throw new Error(`Invalid LAB_CREATOR_API_URL (${process.env.LAB_CREATOR_API_URL}): ${err.message}`);
             }
             try {
