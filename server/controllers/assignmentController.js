@@ -7,19 +7,26 @@ require('dotenv').config();  // Add this to load .env variables
 const createAssignment = async (req, res) => {
     try {
         //WHWEN ASSIGNMENT IS CREATED CRREATE A LAB TOO IF IT IS A LAB
-        const { title, dueDate, submissions, type } = req.body;
+        const { title, dueDate, submissions, type, sectionIds = [] } = req.body;
 
         if (!title) return res.status(400).json({ error: 'Missing title field' });
 
-        const data = {
-            title,
-            dueDate: dueDate ? new Date(dueDate) : null,
-            type: type || null
-        };
-        if (submissions) {
-            data.submissions = submissions
-        }
-        const assignment = await prisma.assignment.create({ data });
+        const assignment = await prisma.assignment.create({
+            data: {
+                title,
+                dueDate: dueDate ? new Date(dueDate) : null,
+                type: type || null,
+                submissions: submissions || null,
+                sections: {
+                    create: sectionIds.map((sectionId) => ({
+                        section: { connect: { id: Number(sectionId) } }
+                    }))
+                }
+            },
+            include: {
+                sections: { select: { sectionId: true } }
+            }
+        });
         return res.json(assignment);
     } catch (err) {
         console.error('Error creating assignment: ', err.message);
@@ -30,11 +37,11 @@ const createAssignment = async (req, res) => {
 
 const getAllAssignments = async (req, res) => {
     const includeDrafts = req.session.user?.role === 'admin';
-  
+
 
     try {
         const assignments = await prisma.assignment.findMany({
-            where: includeDrafts ? {} : {isDraft:false}
+            where: includeDrafts ? {} : { isDraft: false }
         });
         return res.json(assignments);
     } catch (err) {
@@ -59,17 +66,17 @@ const getAssignment = async (req, res) => {
 
 const updateAssignment = async (req, res) => {
     const { id } = req.params;
-    const { title, dueDate, showExplanations, labId,isDraft } = req.body;
+    const { title, dueDate, showExplanations, labId, isDraft } = req.body;
     const data = {};
     try {
         if (title !== undefined) data.title = title;
         if (dueDate !== undefined) data.dueDate = new Date(dueDate);
         if (showExplanations !== undefined) data.showExplanations = showExplanations;
         if (labId !== undefined) data.labId = labId;
-        if (isDraft!== undefined) data.isDraft = isDraft;
-        const updatedAssignment = await prisma.assignment.update({ 
-            where: { id: Number(id) }, 
-            data 
+        if (isDraft !== undefined) data.isDraft = isDraft;
+        const updatedAssignment = await prisma.assignment.update({
+            where: { id: Number(id) },
+            data
         });
         return res.json(updatedAssignment);
     } catch (err) {

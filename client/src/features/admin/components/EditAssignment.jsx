@@ -80,7 +80,7 @@ const EditAssignment = ({setSelectedAssignmentId, selectedAssignmentObj, onAssig
                     }}
                 />
             </div>
-
++
             <div style={{ marginBottom: '10px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Due Date & Time:</label>
                 <input
