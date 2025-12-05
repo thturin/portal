@@ -11,20 +11,17 @@ const worker = new Worker('assignment-deletion', async job => {
         //DELETE ALL SUBMISSIONS
         await tx.submission.deleteMany({ where: { assignmentId } });
 
+        //DELETE ASSIGNMENT-SECTION LINKS
+        await tx.assignmentSection.deleteMany({ where: { assignmentId } });
+
         //DELETE LAB AND ALL SESSIONS
         if (labId) {
             if (!process.env.LAB_CREATOR_API_URL) {
                 throw new Error('LAB_CREATOR_API_URL is not configured');
             }
-            let labCreatorBase;
-            try { //test to make sure it is a url 
-                labCreatorBase = new URL(process.env.LAB_CREATOR_API_URL).toString().replace(/\/$/, '');
-            } catch (err) {//invalid, throw 
-                throw new Error(`Invalid LAB_CREATOR_API_URL (${process.env.LAB_CREATOR_API_URL}): ${err.message}`);
-            }
             try {
-                await axios.delete(`${labCreatorBase}/session/delete-session/${labId}`);
-                await axios.delete(`${labCreatorBase}/lab/delete-lab/${labId}`);
+                await axios.delete(`${process.env.LAB_CREATOR_API_URL}/session/delete-session/${labId}`);
+                await axios.delete(`${process.env.LAB_CREATOR_API_URL}/lab/delete-lab/${labId}`);
             } catch (err) {
                 if (err.response?.status === 404) {
                     console.warn(`Lab ${labId} already removed in lab-creator`);

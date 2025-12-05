@@ -7,7 +7,7 @@ require('dotenv').config();  // Add this to load .env variables
 const createAssignment = async (req, res) => {
     try {
         //WHWEN ASSIGNMENT IS CREATED CRREATE A LAB TOO IF IT IS A LAB
-        const { title, dueDate, submissions, type, sectionIds = [] } = req.body;
+        const { title, dueDate,  type, sectionIds = [] } = req.body;
 
         if (!title) return res.status(400).json({ error: 'Missing title field' });
 
@@ -16,7 +16,6 @@ const createAssignment = async (req, res) => {
                 title,
                 dueDate: dueDate ? new Date(dueDate) : null,
                 type: type || null,
-                submissions: submissions || null,
                 sections: {
                     create: sectionIds.map((sectionId) => ({
                         section: { connect: { id: Number(sectionId) } }
@@ -24,7 +23,8 @@ const createAssignment = async (req, res) => {
                 }
             },
             include: {
-                sections: { select: { sectionId: true } }
+                sections: { select: { sectionId: true } },//only need section id
+                submissions: { select: { id: true } } //only need the submission id
             }
         });
         return res.json(assignment);
@@ -37,11 +37,13 @@ const createAssignment = async (req, res) => {
 
 const getAllAssignments = async (req, res) => {
     const includeDrafts = req.session.user?.role === 'admin';
-
-
     try {
         const assignments = await prisma.assignment.findMany({
-            where: includeDrafts ? {} : { isDraft: false }
+            where: includeDrafts ? {} : { isDraft: false },
+            include: {
+                sections: { select: { sectionId: true } },
+                submissions: { select: { id: true } }
+            }
         });
         return res.json(assignments);
     } catch (err) {
@@ -54,7 +56,11 @@ const getAssignment = async (req, res) => {
     const { id } = req.params;
     try {
         const assignment = await prisma.assignment.findUnique({
-            where: { id: Number(id) }
+            where: { id: Number(id) },
+            include: {
+                sections: { select: { sectionId: true } },
+                submissions: { select: { id: true } }
+            }
         });
         return res.json(assignment);
 
@@ -66,17 +72,40 @@ const getAssignment = async (req, res) => {
 
 const updateAssignment = async (req, res) => {
     const { id } = req.params;
-    const { title, dueDate, showExplanations, labId, isDraft } = req.body;
+    const { title, dueDate, showExplanations, labId, isDraft, sectionIds } = req.body;
     const data = {};
     try {
         if (title !== undefined) data.title = title;
-        if (dueDate !== undefined) data.dueDate = new Date(dueDate);
+        if (dueDate !== undefined) data.dueDate = dueDate ? new Date(dueDate) : null;
         if (showExplanations !== undefined) data.showExplanations = showExplanations;
         if (labId !== undefined) data.labId = labId;
         if (isDraft !== undefined) data.isDraft = isDraft;
+
+        //if you update the secions, if a person subvmits an assignment but is no longer assigned 
+        //due to this section change, you should delete their submission! 
+        //NOT DONE YET
+        const sectionWrites = Array.isArray(sectionIds) //check is sectionId is not null or not an array
+            ? {
+                sections: {
+                    deleteMany: {}, //clear every existing row in the 
+                    // //assignment section join table for thisassignment
+                    create: sectionIds.map((sectionId) => ({ //create new connections 
+                        section: { connect: { id: Number(sectionId) } }
+                    }))
+                }
+            }
+            : {};
+
         const updatedAssignment = await prisma.assignment.update({
             where: { id: Number(id) },
-            data
+            data: {
+                ...data,
+                ...sectionWrites
+            },
+            include: {
+                sections: { select: { sectionId: true } },
+                submissions: { select: { id: true } }
+            }
         });
         return res.json(updatedAssignment);
     } catch (err) {
