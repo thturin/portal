@@ -23,13 +23,24 @@ const StudentDashboard = ({ user, onLogout }) => {
         const fetchData = async () => {
             try {
                 const subRes = await axios.get(`${process.env.REACT_APP_API_HOST}/submissions`);
-                const userSubs = subRes.data.filter(sub => sub.userId === user.id);
-                setSubmissions(userSubs);
-                const assignments = await axios.get(`${process.env.REACT_APP_API_HOST}/assignments`, {
+                //filter the subs by the user id and is the assignment of the submission is published
+                const subs = subRes.data.filter(sub => (sub.userId === user.id && !sub.assignment?.isDraft));
+                setSubmissions(subs);
+
+
+                const assignmentRes = await axios.get(`${process.env.REACT_APP_API_HOST}/assignments`, {
                     role: user?.role
                 });
-                setAssignments(assignments.data);
-
+                const filterAssignments = assignmentRes.data.filter(assignment => {
+                    const sectionList = assignment.sections || []; //example [13,14,18] 
+                    //user does not have sectionId or sectionList from assignment is empty
+                    if (!user.sectionId || sectionList.length === 0) return true; //will return true for every, item
+                    //which means all assignments will be set in allowedAssignments
+                    
+                    //find at least one sectionId in sectionList that equals the user's sectionId
+                    return sectionList.some(sec => Number(sec.sectionId) === Number(user.sectionId));
+                });
+                setAssignments(filterAssignments);
             } catch (err) {
                 console.error('Error fetching data:', err);
             }

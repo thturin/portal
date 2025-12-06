@@ -134,6 +134,7 @@ function LabPreview({
                     answerKey = block.key;
                     question = block.prompt;
                     type = block.type;
+                    console.log('HELLO HELLO');
                     break;
                 }
 
@@ -141,10 +142,10 @@ function LabPreview({
                 if (block.blockType === 'question' && block.subQuestions && block.subQuestions.length > 0) {
                     for (const sq of block.subQuestions) {
                         if (sq.id === questionId && sq.isScored) {
-                    
                             answerKey = sq.key;
                             question = sq.prompt;
                             type = sq.type;
+                            console.log('HELLO HELLO');
                             break;
                         }
                     }
@@ -164,7 +165,7 @@ function LabPreview({
                     questionType: type,
                     AIPrompt: aiPrompt
                 });
-                //UPDATED GRADEDRESULTS 
+                //UPDATED GRADEDRESULTS for session 
                 newGradedResults = {
                     ...newGradedResults,
                     [questionId]: { //add or update current gradedResult with questionId
@@ -172,10 +173,12 @@ function LabPreview({
                         feedback: response.data.feedback
                     }
                 }
+                console.log('updating graded results',newGradedResults);
             } catch (err) {
                 console.error("Error grading in LabPreview [LabPreview.jsx]",err.message);
             }
         } //END OF FOR LOOP
+
         //FOR QUESTIONS THAT WERE LEFT BLANK, CREATE A NEW OBJECT IN GRADEDRESULTS 
         //WITH SCORE 0 AND NO RESPONSE
         allQuestions.forEach(q => {
@@ -189,6 +192,7 @@ function LabPreview({
         });
         //CALCULATE FINAL SCORE
         let newFinalScorePercent;
+        //console.log(newGradedResults);
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade/calculate-score`, {
                 gradedResults: newGradedResults, //use variable instead

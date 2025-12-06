@@ -307,7 +307,11 @@ const getAllSubmissions = async (req, res) => {
                         section: true, //include section
                     },
                 },
-                // ...other includes if needed
+                assignment:{
+                    select:{
+                        isDraft: true
+                    }
+                }
             },
         });
         res.json(submissions);
