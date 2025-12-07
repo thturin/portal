@@ -6,6 +6,7 @@ import AIPrompt from './AIPrompt';
 import "react-quill/dist/quill.snow.css";
 import "../styles/Lab.css";
 import axios from "axios";
+import { inlineImagesAsDataUrls } from "./fetchImages";
 
 
 function LabBuilder({ blocks, setBlocks, 
@@ -90,16 +91,16 @@ function LabBuilder({ blocks, setBlocks,
         return () => clearInterval(id);
     }, [saveLab]);
 
-    const loadLabFromFile = async () => {
-        try {
-            const lab = await import('./U1T6.json');
-            //setTitle(lab.default.title || "");
-            setBlocks(lab.default.blocks || []);
-            console.log('Lab loaded from lab.json');
-        } catch (err) {
-            console.error('Lab did not load from file successfully', err.message);
-        }
-    }
+    // const loadLabFromFile = async () => {
+    //     try {
+    //         const lab = await import('./U1T6.json');
+    //         //setTitle(lab.default.title || "");
+    //         setBlocks(lab.default.blocks || []);
+    //         console.log('Lab loaded from lab.json');
+    //     } catch (err) {
+    //         console.error('Lab did not load from file successfully', err.message);
+    //     }
+    // }
 
     const loadLabFromUserFile = (event) => {
         const file = event.target.files[0];
@@ -120,9 +121,39 @@ function LabBuilder({ blocks, setBlocks,
         }
     };
 
-    const exportLabToFolder = () => {
-        const lab = { title, blocks };
-        const filename = 'lab.json';
+    //process blocks with the image url for exporting to json file
+    const embedImagesForBlock = async (block) => {
+        if (block.blockType === "material") {
+            return {
+                ...block,
+                content: await inlineImagesAsDataUrls(block.content)
+            };
+        }
+
+        if (block.blockType === "question") {
+            const updatedSubQuestions = await Promise.all(
+                (block.subQuestions || []).map(async (sq) => ({
+                    ...sq,
+                    prompt: await inlineImagesAsDataUrls(sq.prompt),
+                    explanation: await inlineImagesAsDataUrls(sq.explanation)
+                }))
+            );
+
+            return {
+                ...block,
+                prompt: await inlineImagesAsDataUrls(block.prompt),
+                explanation: await inlineImagesAsDataUrls(block.explanation),
+                subQuestions: updatedSubQuestions
+            };
+        }
+
+        return block;
+    };
+
+    const exportLabToFolder = async () => {
+        const processedBlocks = await Promise.all(blocks.map(embedImagesForBlock));
+        const lab = { title, blocks: processedBlocks };
+        const filename = title ? `${title}.json` :'lab.json' ;
         const blob = new Blob([JSON.stringify(lab, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -210,12 +241,12 @@ function LabBuilder({ blocks, setBlocks,
             >
                 💾 Save
             </button>
-            <button
+            {/* <button
                 onClick={loadLabFromFile}
                 className="bg-yellow-600 text-white px-4 py-2 rounded mr-2"
             >
                 📂 Load From File
-            </button>
+            </button> */}
             <input
                 type="file"
                 accept=".json"
