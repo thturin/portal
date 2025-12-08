@@ -27,7 +27,6 @@ const StudentDashboard = ({ user, onLogout }) => {
                 const subs = subRes.data.filter(sub => (sub.userId === user.id && !sub.assignment?.isDraft));
                 setSubmissions(subs);
 
-
                 const assignmentRes = await axios.get(`${process.env.REACT_APP_API_HOST}/assignments`, {
                     role: user?.role
                 });
@@ -47,7 +46,7 @@ const StudentDashboard = ({ user, onLogout }) => {
 
         };
         fetchData();
-    }, [user?.id, user?.role]);
+    }, [user?.id, user?.role, user?.sectionId]);
 
     //FIND SELECTED ASSIGNMENT OBJECT 
     const selectedAssignmentObj = assignments.find(a => a.id === Number(selectedAssignmentId));
