@@ -10,7 +10,6 @@ const prisma = new PrismaClient();
     const rows = parse(csv, { columns: true, skip_empty_lines: true });
 
 
-
     for (const row of rows) {
         //int to insert in
         //find the sectionId (89,82, etc) string in the section list
