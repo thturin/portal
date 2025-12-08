@@ -54,9 +54,22 @@ const AdminDashboard = ({ user, onLogout }) => {
 
     //fetch assignmenbts, submissions, and sections
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_HOST}/assignments`).then(res => setAssignments(res.data));
-        axios.get(`${process.env.REACT_APP_API_HOST}/submissions`).then(res => setSubmissions(res.data));
-        axios.get(`${process.env.REACT_APP_API_HOST}/sections`).then(res => setSections(res.data));
+        const fetchData = async () => {
+            try {
+                const [assignmentsRes, submissionsRes, sectionsRes] = await Promise.all([
+                    axios.get(`${process.env.REACT_APP_API_HOST}/assignments`),
+                    axios.get(`${process.env.REACT_APP_API_HOST}/submissions`),
+                    axios.get(`${process.env.REACT_APP_API_HOST}/sections`)
+                ]);
+                setAssignments(assignmentsRes.data);
+                setSubmissions(submissionsRes.data);
+                setSections(sectionsRes.data);
+            } catch (err) {
+                console.error('Error fetching admin dashboard data:', err);
+            }
+        };
+
+        fetchData();
     }, [labRefreshKey]);
 
     const handleAiPromptChange = async (prompt) => {

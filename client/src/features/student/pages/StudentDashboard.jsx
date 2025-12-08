@@ -17,7 +17,6 @@ const StudentDashboard = ({ user, onLogout }) => {
     const [selection, setSelection] = useState(); //work, submit, late or create, a, create l , test
     const [selectedAssignmentId, setSelectedAssignmentId] = useState(-1);
 
-
 //GET ALL ASSIGNMENTS and  SUBMISSIONS
     useEffect(() => {
         const fetchData = async () => {
@@ -127,6 +126,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                         labId={selectedAssignmentObj?.labId ?? null}
                         selectedAssignmentDueDate={selectedAssignmentObj?.dueDate}
                         onUpdateSubmission={updateSubmissions}
+                        showExplanations={selectedAssignmentObj?.showExplanations}
                     />
                 )}
 

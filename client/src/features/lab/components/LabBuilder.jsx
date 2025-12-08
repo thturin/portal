@@ -83,6 +83,7 @@ function LabBuilder({ blocks, setBlocks,
         }
     }, [title, blocks, assignmentId]);
 
+ //AUTO SAVE
     useEffect(() => {
         const id = setInterval(() => {
             saveLab(); //witout useCallBack would always use the initial empty blocks
@@ -121,7 +122,7 @@ function LabBuilder({ blocks, setBlocks,
         }
     };
 
-    //process blocks with the image url for exporting to json file
+    //process blocks with the image url for EXPORT BUTTON 
     const embedImagesForBlock = async (block) => {
         if (block.blockType === "material") {
             return {

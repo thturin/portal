@@ -134,7 +134,6 @@ function LabPreview({
                     answerKey = block.key;
                     question = block.prompt;
                     type = block.type;
-                    console.log('HELLO HELLO');
                     break;
                 }
 
@@ -145,7 +144,7 @@ function LabPreview({
                             answerKey = sq.key;
                             question = sq.prompt;
                             type = sq.type;
-                            console.log('HELLO HELLO');
+            
                             break;
                         }
                     }
