@@ -222,6 +222,8 @@ const requestSubmissionRegradeDueDate = async (req,res) =>{
 
 };
 
+
+//WHEN USER CLICKS APPLY CHANGES, queue is called to regrade submissions
 const requestSubmissionRegrade = async(req,res) =>{
     const {assignmentId,dryRun} = req.body;
     if(!assignmentId) return res.status(400).json({error:'assignmentId is required'});
@@ -235,6 +237,7 @@ const requestSubmissionRegrade = async(req,res) =>{
     return res.json({jobId:job.id});
 };
 
+//this is used to print dry regrade LOGS
 const getSubmissionRegradeStatus = async (req, res) => {
     try {
         const jobId = req.params.jobId;

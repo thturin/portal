@@ -51,6 +51,7 @@ function LabPreview({
     const scoredNoSubQuestions = blocks.filter(
         b => b.blockType === "question" && b.isScored && (!b.subQuestions || b.subQuestions.length === 0)
     );
+
     const scoredSubQuestions = blocks
         .filter(b => b.blockType === "question" && b.subQuestions && b.subQuestions.length > 0)
         .flatMap(b => b.subQuestions.filter(sq => sq.isScored));
@@ -157,13 +158,15 @@ function LabPreview({
   
             //DEEPSEEK API REQUEST
             try {
-                const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade`, {
+                const response = await axios.post(`${process.env.REACT_APP_API_LAB_HOST}/grade/deepseek`, {
                     userAnswer,
                     answerKey,
                     question,
                     questionType: type,
                     AIPrompt: aiPrompt
                 });
+
+
                 //UPDATED GRADEDRESULTS for session 
                 newGradedResults = {
                     ...newGradedResults,

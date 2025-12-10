@@ -32,7 +32,7 @@ const SingleQuestionEditor = ({ blockId, responses, setResponses, gradedResults,
             />
     }
         
-    {showExplanations  &&(<Explanation content={block.explanation} />)}
+    {showExplanations && (<Explanation content={block.explanation} />)}
         
     </>
     );
@@ -65,7 +65,7 @@ const SubQuestionEditor = ({ question, responses, setResponses, gradedResults, f
                 />
             }
             
-            {showExplanations &&(<Explanation content={question.explanation} />)}
+            {showExplanations && (<Explanation content={question.explanation} />)}
         </div>
     );
 };
