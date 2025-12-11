@@ -11,7 +11,7 @@ const SubmissionRegrade = ({ assignmentId, selectedSection = null, onRegradeAppl
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   const pollJobStatus = async (jobId) => {
-    const maxAttempts = 30; // wait up to ~30s
+    const maxAttempts = 120; // wait up to ~2 minutes
     let lastState = null;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
