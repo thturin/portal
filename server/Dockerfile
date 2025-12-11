@@ -30,5 +30,6 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["npx", "nodemon", "app.js"]
+# Production run: plain node (nodemon is provided via docker-compose.override.yml for local dev)
+CMD ["node", "app.js"]
 
