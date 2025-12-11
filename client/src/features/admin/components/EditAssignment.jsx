@@ -1,11 +1,12 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css"; // Import the CSS file
 
-
-const EditAssignment = ({setSelectedAssignmentId, 
-    selectedAssignmentObj, 
-    onAssignmentDelete, 
+const EditAssignment = ({ setSelectedAssignmentId,
+    selectedAssignmentObj,
+    onAssignmentDelete,
     onAssignmentUpdate }) => {
     const [hasChanges, setHasChanges] = useState(false);
     const [title, setTitle] = useState(selectedAssignmentObj.title);
@@ -13,10 +14,12 @@ const EditAssignment = ({setSelectedAssignmentId,
     const [showExplanations, setShowExplanations] = useState(selectedAssignmentObj.showExplanations);
     const [isDraft, setIsDraft] = useState(selectedAssignmentObj.isDraft);
     const [sections, setSections] = useState([]);
+    const [pickerDate, setPickerDate] = useState(dueDate ? new Date(dueDate) : null);
     const [selectedSectionIds, setSelectedSectionIds] = useState(
         (selectedAssignmentObj.sections || []).map(sec => Number(sec.sectionId))
     );
 
+    //FETCH THE SECTIONS 
     useEffect(() => {
         const fetchSections = async () => {
             try {
@@ -29,6 +32,7 @@ const EditAssignment = ({setSelectedAssignmentId,
         fetchSections();
     }, []);
 
+    //SET EVERYTHING 
     useEffect(() => {
         setTitle(selectedAssignmentObj.title);
         setDueDate(selectedAssignmentObj.dueDate);
@@ -54,14 +58,14 @@ const EditAssignment = ({setSelectedAssignmentId,
         setHasChanges(true);
     };
 
-    const handleDelete = async()=>{
-        try{
+    const handleDelete = async () => {
+        try {
             const response = await axios.delete(`${process.env.REACT_APP_API_HOST}/assignments/delete-assignment/${selectedAssignmentObj.id}`);
             console.log('Assignment Deleted!');
             setSelectedAssignmentId(-1);
-            if(onAssignmentDelete) onAssignmentDelete(response.data);
-        }catch(err){
-            console.error('Error in deleteAssignment',err.message);
+            if (onAssignmentDelete) onAssignmentDelete(response.data);
+        } catch (err) {
+            console.error('Error in deleteAssignment', err.message);
         }
     }
 
@@ -82,8 +86,8 @@ const EditAssignment = ({setSelectedAssignmentId,
                 setHasChanges(false);
                 setSelectedSectionIds((response.data.sections || []).map(sec => Number(sec.sectionId)));
             }
-            if(onAssignmentUpdate) onAssignmentUpdate(response.data);
-        
+            if (onAssignmentUpdate) onAssignmentUpdate(response.data);
+
             //REGRADE SUBMISSION WITH WORKER
             await axios.post(`${process.env.REACT_APP_API_HOST}/submissions/update-late-grade`, {
                 assignmentId: selectedAssignmentObj.id
@@ -91,6 +95,12 @@ const EditAssignment = ({setSelectedAssignmentId,
         } catch (err) {
             console.error('error in AssignmentDetails handleUpdate->', err);
         }
+    };
+
+    const handlePickerChange = (date) => {
+        setPickerDate(date);
+        setDueDate(date ? date.toISOString() : null);
+        setHasChanges(true);
     };
 
     return (
@@ -122,29 +132,21 @@ const EditAssignment = ({setSelectedAssignmentId,
                     }}
                 />
             </div>
-+
             <div style={{ marginBottom: '10px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Due Date & Time:</label>
-                <input
-                    type="datetime-local"
-                    value={dueDate ? new Date(dueDate).toISOString().slice(0, 16) : ''}
-                    onChange={(e) => {
-                        if (!e.target.value) return;
-                        const isoString = new Date(e.target.value).toISOString();
-                        setDueDate(isoString);
-                        setHasChanges(true);
-                    }}
-                    style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        fontSize: '14px'
-                    }}
+            
+                <DatePicker
+                    selected={pickerDate}
+                    onChange={handlePickerChange}
+                    showTimeSelect
+                    timeIntervals={15}
+                    dateFormat="yyyy-MM-dd h:mm aa"
+                    placeholderText="Select due date and time"
+                    className="your-input-styles"
                 />
             </div>
 
-        {/* SHOW ASSIGNMENT TYPE  */}
+            {/* SHOW ASSIGNMENT TYPE  */}
             <div style={{ marginBottom: '10px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Assignment Type: </label>
                 <p>{selectedAssignmentObj.type}</p>
@@ -204,7 +206,7 @@ const EditAssignment = ({setSelectedAssignmentId,
                 </small>
             </div>
 
-        {/* SHOW EXPLANATIONS CHECK BOX */}
+            {/* SHOW EXPLANATIONS CHECK BOX */}
             <div style={{ marginBottom: '10px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Show Explanations to students:</label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -224,7 +226,7 @@ const EditAssignment = ({setSelectedAssignmentId,
                     <input
                         type="checkbox"
                         checked={!isDraft}
-                        onChange={(e) => {setIsDraft(!e.target.checked); setHasChanges(true);}}
+                        onChange={(e) => { setIsDraft(!e.target.checked); setHasChanges(true); }}
                     />
                     <span style={{ fontSize: '14px' }}>{isDraft ? 'Click to publish' : 'Published'}</span>
                 </label>
@@ -253,7 +255,7 @@ const EditAssignment = ({setSelectedAssignmentId,
                     </button>
                 </div>
             )}
-                       <br></br>
+            <br></br>
 
             {/* 
             DELETE BUTTON  */}
