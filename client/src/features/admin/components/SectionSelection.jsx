@@ -22,7 +22,7 @@ const SectionSelection = ({selectedSection, setSelectedSection, sections})=>(
                         fontSize: '14px'
                     }}
                 >
-                    <option value="">All Sections</option>
+                    <option value="-1">All Sections</option>
                     {sections.map(sec => (
                         <option key={sec.id} value={sec.id}>
                             {sec.name}

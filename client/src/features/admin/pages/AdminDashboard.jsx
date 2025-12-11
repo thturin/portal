@@ -152,6 +152,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                             <SubmissionRegrade
                                 assignmentId={selectedAssignmentId}
                                 onRegradeApplied={() => setLabRefreshKey(key => key + 1)}
+                                selectedSection={selectedSection}
                             />
 
                             <SubmissionList

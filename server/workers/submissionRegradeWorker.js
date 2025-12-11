@@ -42,6 +42,7 @@ const worker = new Worker('submission-regrade', async job => {
     const submissions = await prisma.submission.findMany({
         where: {
             assignmentId:Number(assignmentId),
+            //if sectionId is null, no section filter is applied. query will fetch all submissions for hte given assignmentId
             ...(sectionId ? { user: { sectionId: Number(sectionId) } } : {})
         },
         include: { assignment: true, user: true } //include the actual assignment 

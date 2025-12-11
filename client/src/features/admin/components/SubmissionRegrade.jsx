@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const SubmissionRegrade = ({ assignmentId, onRegradeApplied = () => {} }) => {
+const SubmissionRegrade = ({ assignmentId, selectedSection = null, onRegradeApplied = () => {} }) => {
   const [status, setStatus] = useState(null);
   const [dryRunLoading, setDryRunLoading] = useState(false);
   const [applyLoading, setApplyLoading] = useState(false);
@@ -46,9 +46,12 @@ const SubmissionRegrade = ({ assignmentId, onRegradeApplied = () => {} }) => {
     setLoadingState(true);
     try {
       if (dryRun) setDryRunSummaries([]);
+      const resolvedSectionId = (!selectedSection || selectedSection === '-1') ? null : selectedSection;
+
       const res = await axios.post(`${process.env.REACT_APP_API_HOST}/submissions/regrade`, {
         assignmentId,
-        dryRun
+        dryRun,
+        sectionId: resolvedSectionId
       });
       const statusData = await pollJobStatus(res.data.jobId);
       if (!statusData) {
