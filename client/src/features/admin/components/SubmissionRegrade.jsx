@@ -11,15 +11,29 @@ const SubmissionRegrade = ({ assignmentId, onRegradeApplied = () => {} }) => {
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   const pollJobStatus = async (jobId) => {
-    const maxAttempts = 15;
-    for (let attempt = 0; attempt < maxAttempts; attempt++) { //get status of job in submissionController
-      const statusRes = await axios.get(`${process.env.REACT_APP_API_HOST}/submissions/regrade/${jobId}`);
-      const { state } = statusRes.data;
-      if (state === 'completed' || state === 'failed') {
-        return statusRes.data;
+    const maxAttempts = 30; // wait up to ~30s
+    let lastState = null;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const statusRes = await axios.get(
+          `${process.env.REACT_APP_API_HOST}/submissions/regrade/${jobId}`,
+          {
+            headers: { 'Cache-Control': 'no-cache' },
+            params: { t: Date.now() } // cache bust to avoid 304 with empty body
+          }
+        );
+        const { state } = statusRes.data || {};
+        lastState = state;
+        if (state === 'completed' || state === 'failed') {
+          return statusRes.data;
+        }
+      } catch (err) {
+        console.error('pollJobStatus error', err.response?.data || err.message);
+        return null;
       }
       await sleep(1000);
     }
+    console.warn('pollJobStatus timed out', { jobId, lastState });
     return null;
   };
 
