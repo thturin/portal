@@ -37,10 +37,13 @@ workerDueDate.on('failed', (job, err) => console.error('Submission regrade faile
 // Removed unused buildFinalScore helper
 
 const worker = new Worker('submission-regrade', async job => {
-    const { assignmentId, dryRun } = job.data;
+    const { assignmentId, dryRun, sectionId } = job.data;
     const dryRunSummaries = [];
     const submissions = await prisma.submission.findMany({
-        where: {assignmentId:Number(assignmentId)},
+        where: {
+            assignmentId:Number(assignmentId),
+            ...(sectionId ? { user: { sectionId: Number(sectionId) } } : {})
+        },
         include: { assignment: true, user: true } //include the actual assignment 
     });
    
@@ -128,7 +131,6 @@ const worker = new Worker('submission-regrade', async job => {
                 });
 
                 const regradeResult = regradeResponse.data || {};
-                console.log('hello hello',regradeResult);
              
              
                 if (dryRun) {
