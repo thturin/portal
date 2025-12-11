@@ -3,6 +3,10 @@ sessions/
 *.session
 
 
+#templates
+templates/
+
+
 # Node modules (all locations)
 node_modules/
 **/node_modules/
