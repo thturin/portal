@@ -16,6 +16,7 @@ const SubmissionRegrade = ({ assignmentId, selectedSection = null, onRegradeAppl
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
         const statusRes = await axios.get(
+          //print logs 
           `${process.env.REACT_APP_API_HOST}/submissions/regrade/${jobId}`,
           {
             headers: { 'Cache-Control': 'no-cache' },

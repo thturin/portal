@@ -26,7 +26,8 @@ app.use(cors({
     origin: allowedOrigins,
     credentials:true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control']
+    //cache-control is used in subsmissions/regrade so the browswer won't re-use old responses 
 }));
 
 app.use(express.json());

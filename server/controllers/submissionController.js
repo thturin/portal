@@ -11,7 +11,6 @@ let assignmentPrefix;
 const verifyGithubOwnership = async (req, res) => {
     try {
         const { url, githubUsername } = req.body;
-        console.log('HELLO WORLDDD');
         if (!url) {
             return res.status(400).json({
                 error: 'GitHub URL is required'
