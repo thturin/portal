@@ -59,6 +59,8 @@ const worker = new Worker('submission-regrade', async job => {
                 submission.submittedAt,
                 assignment.dueDate
             );
+
+            //IF A DRY RUN, DO NOT UPDATE SUBMISSIONS
             if (dryRun) {
                 const summary = {
                     submissionId: submission.id,
@@ -68,7 +70,7 @@ const worker = new Worker('submission-regrade', async job => {
                 };
                 dryRunSummaries.push(summary);
                 await job.log(JSON.stringify(summary));
-                continue;
+                continue;//WILL SKIP SUBMISSION UPDATE BELOW
             }
 
             await prisma.submission.update({

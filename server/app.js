@@ -54,7 +54,7 @@ const sessionOptions = {
         domain: undefined
   }
 };
-
+console.log('proces.env.NODE_ENV',process.env.NODE_ENV);
 if(process.env.NODE_ENV!=='production'){
     const FileStore = require('session-file-store')(session);
     sessionOptions.store = new FileStore({
