@@ -104,12 +104,12 @@ const worker = new Worker('submission-regrade', async job => {
                 console.log('blocks',blocks);
                 //filter all questions and sub questions into a single array
                 const allQuestions = blocks.flatMap(block=>{
-                    console.log(block.subQuestions ? block.subQuestions : 'no subs');
+                    //console.log(block.subQuestions ? block.subQuestions : 'no subs');
                     if(block.blockType!=='question') return []; //[] will produce not output {} will put {} n he output
                     
                     //if subquestions exists, find and filter the isScored
-                    const scoredSubQuestions = (block.subQuestions || [] ).filter(sq=>!sq.isScored);
-                    console.log('scoredSubQuestions--->',scoredSubQuestions);
+                    const scoredSubQuestions = (block.subQuestions || [] ).filter(sq=>sq.isScored);
+                    //console.log('scoredSubQuestions--->',scoredSubQuestions);
                     if(scoredSubQuestions?.length){//return the subquestions of the current block
                         return scoredSubQuestions;
                     }else{
@@ -117,9 +117,7 @@ const worker = new Worker('submission-regrade', async job => {
                     }
                     return [];
                 });
-        
-                console.log('ALL QUESTIONS',allQuestions);
-
+  
                 //create a new array of objects that contain the prompt, key, and type
                 const questionLookup = allQuestions.reduce((acc, question)=>{
                     acc[question.id] = {
