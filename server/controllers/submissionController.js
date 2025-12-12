@@ -222,7 +222,7 @@ const requestSubmissionRegradeDueDate = async (req,res) =>{
 };
 
 
-//WHEN USER CLICKS APPLY CHANGES, queue is called to regrade submissions
+//WHEN USER CLICKS DRY RUN BUTTON, queue is called to regrade submissions
 const requestSubmissionRegrade = async(req,res) =>{
     const {assignmentId,dryRun, sectionId} = req.body;
     if(!assignmentId) return res.status(400).json({error:'assignmentId is required'});
