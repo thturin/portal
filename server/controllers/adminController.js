@@ -6,6 +6,18 @@ const folderPath = path.join(__dirname, '../templates');
 const csvParse = require('csv-parse/sync');
 
 
+const ensureTemplateFileFromEnv = () => {
+    const base64Payload = process.env.JUPITER_TEMPLATE_BASE64;
+    if (!base64Payload) return;
+    if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath, { recursive: true });
+    }
+    const templatePath = path.join(folderPath, 'JUPITER_TEMPLATE_89.csv');
+    if (fs.existsSync(templatePath)) return;
+    fs.writeFileSync(templatePath, Buffer.from(base64Payload, 'base64'), 'utf8');
+};
+
+if(process.env.NODE_ENV==='production') ensureTemplateFileFromEnv();
 
 const exportAssignmentsCsvByName = async (req, res) => {
     try {
@@ -40,6 +52,7 @@ const exportAssignmentsCsvByName = async (req, res) => {
             }
         });
 
+        //if in production, use the environtment variable
         // Find the template file
         const files = fs.readdirSync(folderPath);
         const section = await prisma.section.findUnique({ where: { id: Number(sectionId) } });

@@ -25,8 +25,6 @@ RUN npm ci
 # Generate Prisma client
 RUN npx prisma generate 
 
-# Copy templates directory (needs to exist in build context even if gitignored)
-COPY templates ./templates
 
 # Copy the rest of your server code
 COPY . .
