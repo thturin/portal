@@ -101,7 +101,7 @@ const worker = new Worker('submission-regrade', async job => {
                 } 
                 const {aiPrompt, blocks=[]} = labResponse.data;
                 
-                console.log('blocks',blocks);
+            
                 //filter all questions and sub questions into a single array
                 const allQuestions = blocks.flatMap(block=>{
                     //console.log(block.subQuestions ? block.subQuestions : 'no subs');
