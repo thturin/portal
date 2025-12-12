@@ -7,7 +7,9 @@ const csvParse = require('csv-parse/sync');
 
 
 const ensureTemplateFileFromEnv = () => {
-    const base64Payload = process.env.89_CSV_TEMPLATE;
+    console.log('LOOK HERE',process.env['89_CSV_TEMPLATE']);
+    console.log(process.env.NOCE_ENV);
+    const base64Payload = process.env['89_CSV_TEMPLATE'];
     if (!base64Payload) return;
     if (!fs.existsSync(folderPath)) {
         fs.mkdirSync(folderPath, { recursive: true });
