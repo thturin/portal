@@ -4,7 +4,8 @@ sessions/
 
 
 #templates
-templates/
+server/templates/
+
 
 
 # Node modules (all locations)
