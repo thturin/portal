@@ -5,6 +5,7 @@ const JupiterExportButton = ({selectedAssignmentId,filteredSubsLength,selectedSe
             <Button
                 disabled={!selectedAssignmentId || filteredSubsLength === 0 || !selectedSection}
                 onClick={async () => {
+                
                     window.location.href = `${process.env.REACT_APP_API_HOST}/admin/exportAssignment?assignmentId=${selectedAssignmentId}${selectedSection ? `&sectionId=${selectedSection}` : ''}`;
                 }}
                 style={{
