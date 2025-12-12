@@ -4,8 +4,8 @@ sessions/
 
 
 #templates in server folder
-templates/*
-!templates/.gitkeep
+server/templates/*
+!server/templates/.gitkeep
 
 
 # Node modules (all locations)
