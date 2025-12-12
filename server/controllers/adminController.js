@@ -5,10 +5,10 @@ const path = require('path');
 const folderPath = path.join(__dirname, '../templates');
 const csvParse = require('csv-parse/sync');
 
-
+console.log(process.env.NODE_ENV);
 const ensureTemplateFileFromEnv = () => {
     console.log('LOOK HERE',process.env['89_CSV_TEMPLATE']);
-    console.log(process.env.NOCE_ENV);
+    console.log(process.env.NODE_ENV);
     const base64Payload = process.env['89_CSV_TEMPLATE'];
     if (!base64Payload) return;
     if (!fs.existsSync(folderPath)) {
