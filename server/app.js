@@ -34,6 +34,20 @@ app.use(express.json());
 
 console.log('--------------------BEGIN----------------------');
 
+const b64 = process.env.CSV_TEMPLATE_89;
+if (!b64) {
+  throw new Error('CSV_TEMPLATE_89 is missing');
+}
+
+// Choose where you expect the CSV to live:
+const templatePath = path.join(__dirname, 'templates', 'JUPITER_TEMPLATE_89.csv');
+
+// Ensure directory exists, then write the decoded file
+fs.mkdirSync(path.dirname(templatePath), { recursive: true });
+fs.writeFileSync(templatePath, Buffer.from(b64, 'base64'));
+
+console.log('Jupiter template restored to', templatePath);
+
 //REQUIRED FOR GITHUB Oauth
 const session = require('express-session');//ceaet a session
 app.set('trust proxy',1); // trust 
