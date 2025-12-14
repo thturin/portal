@@ -14,7 +14,6 @@ const {PrismaClient} = require('@prisma/client');
 //use .env in root
 
 const app = express();
-
 const allowedOrigins = [
     process.env.CLIENT_URL,
     'http://localhost:13000',
